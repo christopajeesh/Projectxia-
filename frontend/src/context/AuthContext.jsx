@@ -19,10 +19,16 @@ export const AuthProvider = ({ children }) => {
   const [authModalMode, setAuthModalMode] = useState('login'); // 'login', 'register', 'google', 'forgot'
   const [authPromptReason, setAuthPromptReason] = useState('');
 
-  // Check stored credentials on mount
+  // Check stored credentials on mount (Session-Scoped: destroyed on tab/browser close)
   useEffect(() => {
-    const storedToken = localStorage.getItem('projectxia_token');
-    const storedUser = localStorage.getItem('projectxia_user');
+    // Clear any permanent legacy localStorage tokens
+    try {
+      localStorage.removeItem('projectxia_token');
+      localStorage.removeItem('projectxia_user');
+    } catch (e) {}
+
+    const storedToken = sessionStorage.getItem('projectxia_token');
+    const storedUser = sessionStorage.getItem('projectxia_user');
 
     if (storedToken && storedUser) {
       setToken(storedToken);
@@ -31,8 +37,8 @@ export const AuthProvider = ({ children }) => {
       } catch (e) {
         setUser(null);
         setToken(null);
-        localStorage.removeItem('projectxia_token');
-        localStorage.removeItem('projectxia_user');
+        sessionStorage.removeItem('projectxia_token');
+        sessionStorage.removeItem('projectxia_user');
       }
     } else {
       setUser(null);
@@ -45,12 +51,12 @@ export const AuthProvider = ({ children }) => {
     setToken(newToken);
     setUser(newUser);
     try {
-      localStorage.setItem('projectxia_token', newToken);
-      localStorage.setItem('projectxia_user', JSON.stringify(newUser));
+      sessionStorage.setItem('projectxia_token', newToken);
+      sessionStorage.setItem('projectxia_user', JSON.stringify(newUser));
     } catch (storageErr) {
       try {
         const { avatar, ...safeUser } = newUser || {};
-        localStorage.setItem('projectxia_user', JSON.stringify(safeUser));
+        sessionStorage.setItem('projectxia_user', JSON.stringify(safeUser));
       } catch (e) {}
     }
   };

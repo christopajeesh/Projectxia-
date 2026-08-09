@@ -19,10 +19,12 @@ const api = axios.create({
   timeout: 20000,
 });
 
-// Request interceptor to attach JWT token
+// Request interceptor to attach JWT token (Session-Scoped)
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('projectxia_token');
+    const token = typeof window !== 'undefined'
+      ? sessionStorage.getItem('projectxia_token') || localStorage.getItem('projectxia_token')
+      : null;
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
