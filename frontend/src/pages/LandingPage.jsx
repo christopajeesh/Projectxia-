@@ -27,6 +27,11 @@ import {
   UserCheck,
   KeyRound,
   Mail,
+  PhoneCall,
+  ShoppingCart,
+  UploadCloud,
+  FileCode2,
+  HelpCircle,
 } from 'lucide-react';
 import AuroraBackground from '../components/ui/AuroraBackground';
 import CyberParticles from '../components/ui/CyberParticles';
@@ -36,7 +41,7 @@ import VideoPlayerModal from '../components/ui/VideoPlayerModal';
 import ArchitecturePeekModal from '../components/ui/ArchitecturePeekModal';
 import Interactive3DViewer from '../components/ui/Interactive3DViewer';
 import LiveCyberTerminal from '../components/ui/LiveCyberTerminal';
-import CustomDevModal from '../components/ui/CustomDevModal';
+import CustomSoftwareRequestModal from '../components/ui/CustomSoftwareRequestModal';
 import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -62,6 +67,7 @@ const LandingPage = () => {
   const [activePeekProject, setActivePeekProject] = useState(null);
   const [activeFaq, setActiveFaq] = useState(null);
   const [isDevModalOpen, setIsDevModalOpen] = useState(false);
+  const [devModalTab, setDevModalTab] = useState('idea'); // 'idea' | 'callback'
 
   // Landing Page Inline Fast Auth State
   const [inlineEmail, setInlineEmail] = useState('');
@@ -484,6 +490,234 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* ================================================================= */}
+      {/* NEW USER & CUSTOMER GUIDE: 4 CORE PLATFORM PILLARS EXPLAINED    */}
+      {/* ================================================================= */}
+      <section id="how-it-works" className="py-20 relative z-10 border-b border-cyan-500/20 bg-gradient-to-b from-transparent via-cyan-950/20 to-transparent">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold tracking-wider uppercase shadow-lg shadow-cyan-500/10">
+              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+              <span>New Customer Guide • How ProjectXia Works</span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-display font-black text-white tracking-tight">
+              Simple Ways to Build, Buy & Sell
+            </h2>
+            <p className="text-xs sm:text-sm font-mono text-slate-300 leading-relaxed">
+              New to ProjectXia? Whether you want to <strong className="text-cyan-300">download tested pre-built projects</strong>, hire our <strong className="text-purple-300">in-house team to build your custom software/hardware idea</strong>, or <strong className="text-emerald-300">sell your own code</strong>, here is how each feature works:
+            </p>
+          </div>
+
+          {/* 4 Pillar Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            
+            {/* CARD 1: EXPLORE & BUY MARKETPLACE PROJECTS */}
+            <div className="relative group rounded-3xl p-6 bg-gradient-to-b from-gray-950 via-slate-900/90 to-gray-950 border border-cyan-500/30 hover:border-cyan-400/80 transition-all duration-300 flex flex-col justify-between shadow-2xl hover:shadow-cyan-500/20 hover:-translate-y-1">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="p-3 rounded-2xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
+                    <ShoppingCart className="w-6 h-6" />
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-[10px] font-mono font-bold uppercase">
+                    1. Buy Projects
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-display font-black text-white group-hover:text-cyan-300 transition-colors">
+                    Explore & Buy Marketplace
+                  </h3>
+                  <p className="text-xs font-mono text-slate-300 mt-2 leading-relaxed">
+                    Browse thousands of complete, tested engineering projects across <span className="text-cyan-300 font-bold">CSE, ECE, EEE, Mech, AI/ML, and IoT</span>.
+                  </p>
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-slate-800 text-[11px] font-mono text-slate-300">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
+                    <span>Full source code, circuit diagrams & KiCAD files</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
+                    <span>Working 4K demo video preview for every project</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
+                    <span>Instant download with complete setup runbook</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6">
+                <button
+                  type="button"
+                  onClick={() => handleProtectedNavigation('/marketplace', 'Please log in to browse and download verified engineering projects.')}
+                  className="w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-display font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/25 transition-all cursor-pointer"
+                >
+                  <span>Browse Marketplace</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* CARD 2: CUSTOM BUILD / REQUEST DEVELOPER CALLBACK */}
+            <div className="relative group rounded-3xl p-6 bg-gradient-to-b from-gray-950 via-purple-950/40 to-gray-950 border border-purple-500/40 hover:border-purple-400/80 transition-all duration-300 flex flex-col justify-between shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-1">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="p-3 rounded-2xl bg-purple-500/20 text-purple-400 border border-purple-500/40">
+                    <PhoneCall className="w-6 h-6 animate-pulse" />
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30 text-[10px] font-mono font-bold uppercase">
+                    2. In-House Team
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-display font-black text-white group-hover:text-purple-300 transition-colors">
+                    Build Software / Callback
+                  </h3>
+                  <p className="text-xs font-mono text-slate-300 mt-2 leading-relaxed">
+                    Have a unique idea, thesis, or startup MVP? Our <span className="text-purple-300 font-bold">In-House Engineering Team</span> will build it for you.
+                  </p>
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-slate-800 text-[11px] font-mono text-slate-300">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
+                    <span>Direct Phone / WhatsApp developer callback</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
+                    <span>Custom web apps, mobile apps, hardware & AI</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
+                    <span>100% IP ownership & milestone video updates</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    playSuccess();
+                    setDevModalTab('idea');
+                    setIsDevModalOpen(true);
+                  }}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-display font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30 transition-all cursor-pointer"
+                >
+                  <Lightbulb className="w-3.5 h-3.5 text-amber-300" />
+                  <span>Request Build / Callback</span>
+                </button>
+              </div>
+            </div>
+
+            {/* CARD 3: SELL PROJECTS & MONETIZE */}
+            <div className="relative group rounded-3xl p-6 bg-gradient-to-b from-gray-950 via-emerald-950/30 to-gray-950 border border-emerald-500/30 hover:border-emerald-400/80 transition-all duration-300 flex flex-col justify-between shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-1">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="p-3 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                    <UploadCloud className="w-6 h-6" />
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold uppercase">
+                    3. Sell & Earn
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-display font-black text-white group-hover:text-emerald-300 transition-colors">
+                    Sell Projects & Monetize Code
+                  </h3>
+                  <p className="text-xs font-mono text-slate-300 mt-2 leading-relaxed">
+                    Are you an engineer, developer, or creator? Turn your completed hardware or software projects into recurring income.
+                  </p>
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-slate-800 text-[11px] font-mono text-slate-300">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>Set your own price in INR (₹) per download</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>Direct bank/UPI payouts on verified sales</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    <span>Built-in piracy & tamper protection</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6">
+                <button
+                  type="button"
+                  onClick={() => handleProtectedNavigation('/upload', 'Please log in to upload and monetize your engineering project.')}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-display font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 transition-all cursor-pointer"
+                >
+                  <span>Start Selling Projects</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+            {/* CARD 4: AI PLAGIARISM & ORIGINALITY SHIELD */}
+            <div className="relative group rounded-3xl p-6 bg-gradient-to-b from-gray-950 via-blue-950/30 to-gray-950 border border-blue-500/30 hover:border-blue-400/80 transition-all duration-300 flex flex-col justify-between shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-1">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <div className="p-3 rounded-2xl bg-blue-500/20 text-blue-400 border border-blue-500/40">
+                    <Shield className="w-6 h-6" />
+                  </div>
+                  <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/30 text-[10px] font-mono font-bold uppercase">
+                    4. Anti-Plagiarism
+                  </span>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-display font-black text-white group-hover:text-blue-300 transition-colors">
+                    Plagiarism & Integrity Shield
+                  </h3>
+                  <p className="text-xs font-mono text-slate-300 mt-2 leading-relaxed">
+                    Every project on ProjectXia is verified through our AST code scanner to prevent copy-pasting and cloned GitHub boilerplate.
+                  </p>
+                </div>
+
+                <div className="space-y-2 pt-2 border-t border-slate-800 text-[11px] font-mono text-slate-300">
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
+                    <span>Deep AST syntax & web repository analysis</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
+                    <span>IEEE standard originality certificate</span>
+                  </div>
+                  <div className="flex items-start gap-2">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
+                    <span>Zero-backdoor malware safety scan</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-6">
+                <button
+                  type="button"
+                  onClick={() => handleProtectedNavigation('/ai-shield', 'Please log in to run deep AST plagiarism scans on your code.')}
+                  className="w-full py-3 rounded-xl bg-gray-900 hover:bg-slate-800 border border-blue-500/40 text-blue-300 font-display font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer"
+                >
+                  <span>Scan Plagiarism</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+
       {/* BUILT-IN PLAGIARISM CHECKER & SCAM SHIELD SECTION */}
       <section className="py-16 relative z-10 border-y border-cyan-500/20 bg-gray-950/50 backdrop-blur-md">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -850,10 +1084,11 @@ const LandingPage = () => {
         />
       )}
 
-      {/* Custom Dev Inquiry Modal */}
-      <CustomDevModal
+      {/* Custom Software & Developer Callback Inquiry Modal */}
+      <CustomSoftwareRequestModal
         isOpen={isDevModalOpen}
         onClose={() => setIsDevModalOpen(false)}
+        initialTab={devModalTab}
       />
     </div>
   );
