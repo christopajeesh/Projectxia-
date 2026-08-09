@@ -46,14 +46,14 @@ const Navbar = () => {
   const navLinks = [
     { name: 'Marketplace', path: '/marketplace', icon: Code, protected: false },
     { name: 'Plagiarism Check', path: '/ai-shield', icon: Shield, protected: false },
-    { name: 'Sell Project', path: '/upload', icon: UploadCloud, protected: true, isHighlight: true },
     {
-      name: 'Custom Dev',
+      name: 'Build Software / Request Callback',
       isSpecialAction: true,
       icon: Lightbulb,
-      badge: 'TEAM',
+      badge: 'DEV TEAM',
     },
-    { name: 'Messages', path: '/chat', icon: MessageSquare, protected: true },
+    { name: 'Sell Project', path: '/upload', icon: UploadCloud, protected: true, isHighlight: true },
+    { name: 'Messages & Deals', path: '/chat', icon: MessageSquare, protected: true },
   ];
 
   const handleNavClick = (link, e) => {
@@ -164,6 +164,30 @@ const Navbar = () => {
                 <Shield className="w-3.5 h-3.5 text-purple-400" />
                 <span className="hidden sm:inline">Plagiarism Check</span>
                 <span className="sm:hidden">Shield</span>
+              </button>
+
+              {/* Build Software / Request Callback Hub */}
+              <button
+                type="button"
+                onClick={() => {
+                  playClick();
+                  if (!isAuthenticated) {
+                    openAuthModal(
+                      'login',
+                      'Please log in or register to share your software idea or request an instant developer callback from ProjectXia.'
+                    );
+                  } else {
+                    setIsCustomModalOpen(true);
+                  }
+                }}
+                className="px-2 sm:px-3 py-1.5 rounded-xl font-display font-bold text-xs flex items-center gap-1.5 bg-gradient-to-r from-purple-950/90 via-indigo-950/90 to-blue-950/90 border border-purple-500/50 text-purple-300 hover:text-white hover:border-purple-300 shadow-md transition-all hover:scale-105 cursor-pointer"
+              >
+                <Lightbulb className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+                <span className="hidden md:inline">Build Software / Callback</span>
+                <span className="md:hidden">Build / Callback</span>
+                <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-purple-400 text-black font-extrabold">
+                  TEAM
+                </span>
               </button>
 
               <button
