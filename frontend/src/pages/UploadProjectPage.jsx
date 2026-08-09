@@ -247,7 +247,12 @@ const UploadProjectPage = () => {
       const newId = publishRes.data.project._id || publishRes.data.project.id;
       navigate(`/projects/${newId}`);
     } catch (err) {
-      setErrorMessage(err.response?.data?.message || 'Upload failed. Please ensure original details are provided.');
+      if (err.response?.status === 401) {
+        setErrorMessage('Your session expired. Please log in to complete publishing your project.');
+        openAuthModal('login', 'Your security session has expired. Please log in to publish your project.');
+      } else {
+        setErrorMessage(err.response?.data?.message || 'Upload failed. Please ensure original details are provided.');
+      }
     } finally {
       setAiScanning(false);
       setLoading(false);
