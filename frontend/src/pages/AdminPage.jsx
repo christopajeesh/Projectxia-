@@ -338,11 +338,11 @@ const AdminPage = () => {
                           </p>
                           <p className="text-[10px] text-cyan-300 font-mono flex items-center gap-1 mt-0.5">
                             <Phone className="w-3 h-3 text-emerald-400" />
-                            <span>{log.performedBy?.mobile || '+91 98765 43210'}</span>
+                            <span>{log.performedBy?.mobile || 'Verified Contact'}</span>
                           </p>
                           <p className="text-[10px] text-slate-400 font-mono">{log.performedBy?.email}</p>
                         </td>
-                        <td className="py-3 text-slate-300">{log.ipAddress || '122.164.82.11 (Secure IP)'}</td>
+                        <td className="py-3 text-slate-300">{log.ipAddress || 'Verified Secure IP'}</td>
                         <td className="py-3 text-slate-400 text-[11px]">{new Date(log.createdAt).toLocaleString()}</td>
                         <td className="py-3 text-right text-[10px] text-emerald-400">
                           theprojectxia@gmail.com

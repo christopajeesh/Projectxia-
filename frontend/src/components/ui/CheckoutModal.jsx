@@ -309,7 +309,7 @@ const CheckoutModal = () => {
                         required
                         value={upiId}
                         onChange={(e) => setUpiId(e.target.value)}
-                        placeholder="yourname@oksbi / 9876543210@paytm"
+                        placeholder="Enter UPI ID (e.g. username@upi / phone@paytm)"
                         className="w-full bg-black/70 border border-slate-700 focus:border-cyan-400 rounded-xl px-3 py-2 text-white font-mono focus:outline-none"
                       />
                     </div>
