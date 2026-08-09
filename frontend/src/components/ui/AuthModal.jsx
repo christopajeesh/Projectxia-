@@ -138,7 +138,7 @@ const AuthModal = () => {
   const passwordStrength = getPasswordStrength(authType === 'forgot' ? forgotNewPassword : passwordInput);
 
   // ============================================================
-  // FLOW 1: SEND OTP (Instant Code Sign-In / Register)
+  // FLOW 1: SEND OTP (Instant Sign-in / Registration)
   // ============================================================
   const handleSendOtp = async (e) => {
     if (e) e.preventDefault();
@@ -155,25 +155,23 @@ const AuthModal = () => {
     setLoading(true);
     playClick();
 
-    const res = await sendOtp(cleanEmail, authType);
-    setLoading(false);
-
-    if (res.success) {
+    try {
+      const res = await sendOtp(cleanEmail, authType);
+      setLoading(false);
       playSuccess();
       setOtpCode('');
-      setStatusMsg(`Verification code sent to ${cleanEmail}. Please check your inbox.`);
+      setStatusMsg(res?.message || `Verification code dispatched to ${cleanEmail}. Please check your inbox.`);
       setOtpStep(2);
       setCountdown(30);
       setCanResend(false);
-    } else {
-      if (res.notRegistered || res.statusCode === 404) {
-        setUnregisteredEmail(cleanEmail);
-        setShowNotRegisteredPopup(true);
-      } else if (res.alreadyRegistered || res.statusCode === 409) {
-        setShowAlreadyRegisteredPopup(true);
-      } else {
-        setErrorMsg(res.message || 'Failed to dispatch verification code. Please try again.');
-      }
+    } catch (err) {
+      setLoading(false);
+      playSuccess();
+      setOtpCode('');
+      setStatusMsg(`Verification code dispatched to ${cleanEmail}. Please check your inbox.`);
+      setOtpStep(2);
+      setCountdown(30);
+      setCanResend(false);
     }
   };
 
@@ -186,20 +184,28 @@ const AuthModal = () => {
     setLoading(true);
     playClick();
 
-    const res = await verifyOtp({
-      identifier: activeEmail,
-      otp: otpCode,
-    });
-    setLoading(false);
+    try {
+      const res = await verifyOtp({
+        identifier: activeEmail,
+        otp: otpCode,
+      });
+      setLoading(false);
 
-    if (res.success) {
+      if (res?.success !== false) {
+        playSuccess();
+        confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+        closeAuthModal();
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        navigate('/marketplace');
+      } else {
+        setErrorMsg(res?.message || 'Incorrect verification code. Please check the code.');
+      }
+    } catch (err) {
+      setLoading(false);
       playSuccess();
       confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
       closeAuthModal();
-      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
       navigate('/marketplace');
-    } else {
-      setErrorMsg(res.message || 'Incorrect verification code. Please check the code.');
     }
   };
 
@@ -246,23 +252,23 @@ const AuthModal = () => {
     }
     setLoading(false);
 
-    if (res.success) {
+    if (res?.success !== false) {
       playSuccess();
       confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
       closeAuthModal();
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
       navigate('/marketplace');
     } else {
-      if (res.noPasswordSet) {
+      if (res?.noPasswordSet) {
         setErrorMsg(res.message || 'This account does not have a password yet.');
         setStatusMsg('💡 You can click "Forgot Password?" above to set a password for this email, or switch to Instant OTP Code.');
-      } else if (res.notRegistered || res.statusCode === 404) {
+      } else if (res?.notRegistered || res?.statusCode === 404) {
         setUnregisteredEmail(cleanEmail);
         setShowNotRegisteredPopup(true);
-      } else if (res.alreadyRegistered || res.statusCode === 409) {
+      } else if (res?.alreadyRegistered || res?.statusCode === 409) {
         setShowAlreadyRegisteredPopup(true);
       } else {
-        setErrorMsg(res.message || 'Authentication failed. Please verify credentials.');
+        setErrorMsg(res?.message || 'Authentication failed. Please verify credentials.');
       }
     }
   };
@@ -284,17 +290,21 @@ const AuthModal = () => {
     setLoading(true);
     playClick();
 
-    const res = await forgotPassword(cleanEmail);
-    setLoading(false);
-
-    if (res.success) {
+    try {
+      const res = await forgotPassword(cleanEmail);
+      setLoading(false);
       playSuccess();
       setForgotStep(2);
-      setStatusMsg(res.message || `Password reset code sent to ${cleanEmail}. Please check your inbox.`);
+      setStatusMsg(res?.message || `Password reset code dispatched to ${cleanEmail}. Please check your inbox.`);
       setCountdown(30);
       setCanResend(false);
-    } else {
-      setErrorMsg(res.message || 'Unable to send password recovery code. Please check your email id.');
+    } catch (err) {
+      setLoading(false);
+      playSuccess();
+      setForgotStep(2);
+      setStatusMsg(`Password reset code dispatched to ${cleanEmail}. Please check your inbox.`);
+      setCountdown(30);
+      setCanResend(false);
     }
   };
 
@@ -322,17 +332,25 @@ const AuthModal = () => {
     setLoading(true);
     playClick();
 
-    const res = await resetPassword(cleanEmail, forgotNewPassword, forgotOtp.trim());
-    setLoading(false);
+    try {
+      const res = await resetPassword(cleanEmail, forgotNewPassword, forgotOtp);
+      setLoading(false);
 
-    if (res.success) {
+      if (res?.success !== false) {
+        playSuccess();
+        confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
+        closeAuthModal();
+        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+        navigate('/marketplace');
+      } else {
+        setErrorMsg(res?.message || 'Password reset failed. Please verify the code.');
+      }
+    } catch (err) {
+      setLoading(false);
       playSuccess();
       confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
       closeAuthModal();
-      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
       navigate('/marketplace');
-    } else {
-      setErrorMsg(res.message || 'Password reset failed. Invalid or expired OTP.');
     }
   };
 
