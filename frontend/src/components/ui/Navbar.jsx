@@ -44,23 +44,20 @@ const Navbar = () => {
   const [unreadNotifications, setUnreadNotifications] = useState(2);
 
   const navLinks = [
-    { name: 'Projects', path: '/marketplace', icon: Code, protected: false },
-    { name: 'Plagiarism Check', path: '/ai-shield', icon: Shield, protected: true },
+    { name: 'Marketplace', path: '/marketplace', icon: Code, protected: false },
+    { name: 'Plagiarism Check', path: '/ai-shield', icon: Shield, protected: false },
+    { name: 'Sell Project', path: '/upload', icon: UploadCloud, protected: true, isHighlight: true },
     {
-      name: 'Build Software / Share Idea',
+      name: 'Custom Dev',
       isSpecialAction: true,
       icon: Lightbulb,
-      highlight: true,
-      protected: true,
       badge: 'TEAM',
     },
-    { name: 'Messages & Chats', path: '/chat', icon: MessageSquare, protected: true },
-    { name: 'Sell Project', path: '/upload', icon: UploadCloud, protected: true },
-    { name: 'Profile', path: '/profile', icon: UserCheck, protected: true },
+    { name: 'Messages', path: '/chat', icon: MessageSquare, protected: true },
   ];
 
   const handleNavClick = (link, e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     playClick();
     setMobileMenuOpen(false);
 
@@ -68,7 +65,7 @@ const Navbar = () => {
       if (!isAuthenticated) {
         openAuthModal(
           'login',
-          'Please log in or register to share your software idea or request an instant callback from the ProjectXia Developing Team.'
+          'Please log in or register to share your software idea or request custom development from ProjectXia Team.'
         );
       } else {
         setIsCustomModalOpen(true);
@@ -93,8 +90,8 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-cyan-500/25 bg-black/85 backdrop-blur-2xl shadow-xl shadow-cyan-950/20">
-        {/* Top Minimal Cyber Status Bar */}
+      <header className="sticky top-0 z-40 w-full border-b border-cyan-500/25 bg-black/90 backdrop-blur-2xl shadow-xl shadow-cyan-950/30">
+        {/* Top Cyber Status Bar */}
         <div className="hidden sm:flex items-center justify-between px-4 sm:px-8 py-1 bg-gradient-to-r from-gray-950 via-cyan-950/40 to-gray-950 border-b border-cyan-500/10 text-[10px] font-mono">
           <div className="flex items-center gap-3">
             <span className="flex items-center gap-1 text-cyan-400">
@@ -113,31 +110,49 @@ const Navbar = () => {
           </div>
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-18">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16 sm:h-18 gap-2">
             
             {/* BRAND LOGO */}
             <Link
               to="/"
               onClick={playClick}
-              className="flex items-center gap-2.5 group cursor-pointer"
+              className="flex items-center gap-2 group cursor-pointer shrink-0"
             >
               <div className="relative p-2 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-600 border border-cyan-400 shadow-neon-cyan group-hover:scale-105 transition-all">
                 <Shield className="w-5 h-5 text-black" />
                 <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-cyan-300 animate-spin" />
               </div>
               <div className="flex flex-col">
-                <span className="font-display font-black text-lg sm:text-xl tracking-tight text-white">
+                <span className="font-display font-black text-base sm:text-xl tracking-tight text-white">
                   PROJECT<span className="text-cyan-400">XIA</span>
                 </span>
               </div>
             </Link>
 
-            {/* Desktop Navigation Links */}
-            <nav className="hidden md:flex items-center gap-1 lg:gap-1.5">
+            {/* Desktop Navigation Links - Always Visible from md screens */}
+            <nav className="hidden md:flex items-center gap-1 lg:gap-2">
               {navLinks.map((link) => {
                 const Icon = link.icon;
                 const isActive = link.path && location.pathname === link.path;
+
+                if (link.isHighlight) {
+                  return (
+                    <button
+                      key={link.name}
+                      onClick={(e) => handleNavClick(link, e)}
+                      onMouseEnter={playHover}
+                      className={`px-3 py-1.5 rounded-xl font-display font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
+                        isActive
+                          ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/40 border border-cyan-400'
+                          : 'bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 hover:text-white border border-cyan-500/40 shadow-sm shadow-cyan-500/20'
+                      }`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      <span>{link.name}</span>
+                    </button>
+                  );
+                }
 
                 if (link.isSpecialAction) {
                   return (
@@ -145,11 +160,12 @@ const Navbar = () => {
                       key={link.name}
                       onClick={(e) => handleNavClick(link, e)}
                       onMouseEnter={playHover}
-                      className="relative px-3 py-1.5 rounded-xl font-display font-black text-xs transition-all flex items-center gap-1.5 cursor-pointer bg-gradient-to-r from-cyan-950/90 via-purple-950/90 to-blue-950/90 border border-cyan-400/60 text-cyan-300 hover:text-white hover:border-cyan-300 shadow-lg shadow-cyan-500/20 hover:scale-105 group"
+                      className="px-2.5 lg:px-3 py-1.5 rounded-xl font-display font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer bg-gradient-to-r from-purple-950/80 via-blue-950/80 to-cyan-950/80 border border-purple-500/40 text-purple-300 hover:text-white hover:border-purple-400 shadow-md group"
                     >
-                      <Icon className="w-3.5 h-3.5 text-yellow-300 animate-pulse" />
-                      <span>{link.name}</span>
-                      <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-400 text-black font-extrabold uppercase tracking-wider">
+                      <Icon className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
+                      <span className="hidden lg:inline">{link.name}</span>
+                      <span className="lg:hidden">Custom Dev</span>
+                      <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-purple-400 text-black font-extrabold">
                         {link.badge}
                       </span>
                     </button>
@@ -161,7 +177,7 @@ const Navbar = () => {
                     key={link.name}
                     onClick={(e) => handleNavClick(link, e)}
                     onMouseEnter={playHover}
-                    className={`relative px-2.5 lg:px-3 py-2 rounded-xl font-display font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
+                    className={`px-2.5 lg:px-3 py-1.5 rounded-xl font-display font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
                       isActive
                         ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 shadow-neon-cyan'
                         : 'text-slate-300 hover:text-white hover:bg-white/5 border border-transparent'
@@ -169,25 +185,22 @@ const Navbar = () => {
                   >
                     <Icon className="w-3.5 h-3.5" />
                     <span>{link.name}</span>
-                    {link.protected && !isAuthenticated && (
-                      <Lock className="w-2.5 h-2.5 text-slate-500 ml-0.5" />
-                    )}
                   </button>
                 );
               })}
             </nav>
 
             {/* Right Action Cluster */}
-            <div className="flex items-center gap-2.5">
+            <div className="flex items-center gap-1.5 sm:gap-2.5">
               {/* Deals & Messages Direct Hub */}
               <Link
                 to="/chat"
                 onClick={playClick}
-                title="Live Negotiations & Creator Deals"
-                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/50 hover:bg-emerald-900/80 border border-emerald-500/40 text-emerald-300 hover:text-white transition-all cursor-pointer shadow-md shadow-emerald-950/20 text-xs font-mono font-bold"
+                title="Live Negotiations & Deals"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-950/50 hover:bg-emerald-900/80 border border-emerald-500/40 text-emerald-300 hover:text-white transition-all cursor-pointer shadow-md text-xs font-mono font-bold"
               >
                 <MessageSquare className="w-4 h-4 text-emerald-400" />
-                <span className="hidden sm:inline">Deals & Chat</span>
+                <span className="hidden lg:inline">Deals & Chat</span>
               </Link>
 
               {/* Sound Toggle */}
@@ -201,26 +214,23 @@ const Navbar = () => {
                 {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-cyan-400" />}
               </button>
 
-              {/* AUTH STATE: LOGIN/REGISTER (WHEN GUEST) vs PROFILE & DIRECT LOGOUT (WHEN LOGGED IN) */}
+              {/* AUTH STATE: LOGIN/REGISTER vs PROFILE & LOGOUT */}
               {!isAuthenticated ? (
-                /* Unauthenticated: Premium Login / Register Trigger */
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => openAuthModal('login', 'Please log in or register to access verified projects.')}
-                    className="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-black font-display font-black text-xs shadow-lg shadow-cyan-500/25 flex items-center gap-1.5 transition-all hover:scale-105 cursor-pointer"
-                  >
-                    <LogIn className="w-3.5 h-3.5" />
-                    <span>Login / Register</span>
-                  </button>
-                </div>
+                /* Unauthenticated: Login / Register Trigger */
+                <button
+                  onClick={() => openAuthModal('login', 'Please log in or register to access verified projects.')}
+                  className="px-3.5 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-black font-display font-black text-xs shadow-lg shadow-cyan-500/25 flex items-center gap-1.5 transition-all hover:scale-105 cursor-pointer shrink-0"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  <span>Login / Register</span>
+                </button>
               ) : (
                 /* Authenticated User: Profile Dropdown AND Direct Logout Button */
-                <div className="flex items-center gap-2">
-                  {/* Direct 1-Click Navbar Logout Button */}
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <button
                     onClick={handleLogout}
-                    title="Sign Out & Lock Session"
-                    className="px-3 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/40 text-rose-300 font-display font-bold text-xs flex items-center gap-1.5 transition-all hover:scale-105 shadow-md shadow-rose-950/30 cursor-pointer"
+                    title="Sign Out"
+                    className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/40 text-rose-300 font-display font-bold text-xs flex items-center gap-1 transition-all hover:scale-105 shadow-md cursor-pointer"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Logout</span>
@@ -233,19 +243,13 @@ const Navbar = () => {
                         playClick();
                         setUserDropdownOpen(!userDropdownOpen);
                       }}
-                      className="flex items-center gap-2 p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-cyan-500/30 transition-all cursor-pointer"
+                      className="flex items-center gap-1.5 p-1 rounded-xl bg-white/5 hover:bg-white/10 border border-cyan-500/30 transition-all cursor-pointer"
                     >
                       <img
                         src={user?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user?.name || user?.email || 'User')}&backgroundColor=080e1e,101f4e&textColor=00f0ff`}
                         alt=""
                         className="w-7 h-7 rounded-lg object-cover border border-cyan-400/40 bg-gray-900"
                       />
-                      <div className="hidden lg:flex flex-col text-left pr-1">
-                        <span className="text-xs font-semibold text-white leading-tight">
-                          {user?.name?.split(' ')?.[0] || user?.name || user?.email?.split('@')?.[0] || 'Innovator'}
-                        </span>
-                        <span className="text-[9px] font-mono text-cyan-400 uppercase">{user?.role || 'user'}</span>
-                      </div>
                       <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
                     </button>
 
