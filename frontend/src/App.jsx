@@ -74,10 +74,26 @@ function App() {
                 {/* Main Content Viewport */}
                 <main className="flex-1 relative z-10">
                   <Routes>
-                    {/* Public Marketplace, Projects & Landing Pages */}
+                    {/* Public Landing Page (Homepage & Custom Build) */}
                     <Route path="/" element={<LandingPage />} />
-                    <Route path="/marketplace" element={<MarketplacePage />} />
-                    <Route path="/projects/:id" element={<ProjectDetailPage />} />
+
+                    {/* Strictly Protected Routes Requiring Login / Registration */}
+                    <Route
+                      path="/marketplace"
+                      element={
+                        <ProtectedRoute reason="Please log in or register to access verified projects in ProjectXia Marketplace.">
+                          <MarketplacePage />
+                        </ProtectedRoute>
+                      }
+                    />
+                    <Route
+                      path="/projects/:id"
+                      element={
+                        <ProtectedRoute reason="Please log in or register to view project details, circuit schematics, and source code.">
+                          <ProjectDetailPage />
+                        </ProtectedRoute>
+                      }
+                    />
 
                     {/* Strictly Protected Routes Requiring Login / Registration */}
                     <Route

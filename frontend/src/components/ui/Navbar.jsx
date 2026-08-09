@@ -44,13 +44,14 @@ const Navbar = () => {
   const [unreadNotifications, setUnreadNotifications] = useState(2);
 
   const navLinks = [
-    { name: 'Marketplace', path: '/marketplace', icon: Code, protected: false },
-    { name: 'Plagiarism Check', path: '/ai-shield', icon: Shield, protected: false },
+    { name: 'Marketplace', path: '/marketplace', icon: Code, protected: true },
+    { name: 'Plagiarism Check', path: '/ai-shield', icon: Shield, protected: true },
     {
       name: 'Build Software / Request Callback',
       isSpecialAction: true,
       icon: Lightbulb,
       badge: 'DEV TEAM',
+      protected: false,
     },
     { name: 'Sell Project', path: '/upload', icon: UploadCloud, protected: true, isHighlight: true },
     { name: 'Messages & Deals', path: '/chat', icon: MessageSquare, protected: true },
@@ -62,14 +63,7 @@ const Navbar = () => {
     setMobileMenuOpen(false);
 
     if (link.isSpecialAction) {
-      if (!isAuthenticated) {
-        openAuthModal(
-          'login',
-          'Please log in or register to share your software idea or request custom development from ProjectXia Team.'
-        );
-      } else {
-        setIsCustomModalOpen(true);
-      }
+      setIsCustomModalOpen(true);
       return;
     }
 
@@ -136,7 +130,11 @@ const Navbar = () => {
                 type="button"
                 onClick={() => {
                   playClick();
-                  navigate('/marketplace');
+                  if (!isAuthenticated) {
+                    openAuthModal('login', 'Please log in or register to explore and access verified engineering projects.');
+                  } else {
+                    navigate('/marketplace');
+                  }
                 }}
                 className={`px-2 sm:px-3 py-1.5 rounded-xl font-display font-bold text-xs flex items-center gap-1 transition-all cursor-pointer ${
                   location.pathname === '/marketplace'
@@ -153,7 +151,11 @@ const Navbar = () => {
                 type="button"
                 onClick={() => {
                   playClick();
-                  navigate('/ai-shield');
+                  if (!isAuthenticated) {
+                    openAuthModal('login', 'Please log in or register to run AI Plagiarism & Code Integrity scans.');
+                  } else {
+                    navigate('/ai-shield');
+                  }
                 }}
                 className={`px-2 sm:px-3 py-1.5 rounded-xl font-display font-bold text-xs flex items-center gap-1 transition-all cursor-pointer ${
                   location.pathname === '/ai-shield'
@@ -166,19 +168,12 @@ const Navbar = () => {
                 <span className="sm:hidden">Shield</span>
               </button>
 
-              {/* Build Software / Request Callback Hub */}
+              {/* Build Software / Request Callback Hub - Freely Accessible Without Gating */}
               <button
                 type="button"
                 onClick={() => {
                   playClick();
-                  if (!isAuthenticated) {
-                    openAuthModal(
-                      'login',
-                      'Please log in or register to share your software idea or request an instant developer callback from ProjectXia.'
-                    );
-                  } else {
-                    setIsCustomModalOpen(true);
-                  }
+                  setIsCustomModalOpen(true);
                 }}
                 className="px-2 sm:px-3 py-1.5 rounded-xl font-display font-bold text-xs flex items-center gap-1.5 bg-gradient-to-r from-purple-950/90 via-indigo-950/90 to-blue-950/90 border border-purple-500/50 text-purple-300 hover:text-white hover:border-purple-300 shadow-md transition-all hover:scale-105 cursor-pointer"
               >
@@ -195,7 +190,7 @@ const Navbar = () => {
                 onClick={() => {
                   playClick();
                   if (!isAuthenticated) {
-                    openAuthModal('login', 'Please log in or register to publish and sell your project.');
+                    openAuthModal('login', 'Please log in or register to publish and sell your engineering project.');
                   } else {
                     navigate('/upload');
                   }
@@ -211,15 +206,22 @@ const Navbar = () => {
             {/* Right Action Cluster */}
             <div className="flex items-center gap-1.5 sm:gap-2">
               {/* Deals & Messages Direct Hub */}
-              <Link
-                to="/chat"
-                onClick={playClick}
+              <button
+                type="button"
+                onClick={() => {
+                  playClick();
+                  if (!isAuthenticated) {
+                    openAuthModal('login', 'Please log in or register to access Creator Deals & Chat.');
+                  } else {
+                    navigate('/chat');
+                  }
+                }}
                 title="Live Negotiations & Deals"
                 className="hidden md:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-950/50 hover:bg-emerald-900/80 border border-emerald-500/40 text-emerald-300 hover:text-white transition-all cursor-pointer shadow-md text-xs font-mono font-bold"
               >
                 <MessageSquare className="w-4 h-4 text-emerald-400" />
                 <span className="hidden lg:inline">Deals & Chat</span>
-              </Link>
+              </button>
 
               {/* Sound Toggle */}
               <button
