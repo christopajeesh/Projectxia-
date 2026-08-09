@@ -169,20 +169,20 @@ const AuthModal = () => {
     try {
       const res = await sendOtp(cleanEmail, authType);
       setLoading(false);
-      playSuccess();
-      setOtpCode('');
-      setStatusMsg(res?.message || `Verification code dispatched to ${cleanEmail}. Please check your inbox.`);
-      setOtpStep(2);
-      setCountdown(30);
-      setCanResend(false);
+
+      if (res?.success) {
+        playSuccess();
+        setOtpCode(res.otp || '');
+        setStatusMsg(res.message || `Verification code sent to ${cleanEmail}. Please check your inbox or spam folder.`);
+        setOtpStep(2);
+        setCountdown(30);
+        setCanResend(false);
+      } else {
+        setErrorMsg(res?.message || 'Failed to dispatch verification code. Please check your email.');
+      }
     } catch (err) {
       setLoading(false);
-      playSuccess();
-      setOtpCode('');
-      setStatusMsg(`Verification code dispatched to ${cleanEmail}. Please check your inbox.`);
-      setOtpStep(2);
-      setCountdown(30);
-      setCanResend(false);
+      setErrorMsg('Failed to send verification code. Please try again.');
     }
   };
 
