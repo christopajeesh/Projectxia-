@@ -172,8 +172,8 @@ const AuthModal = () => {
 
       if (res?.success) {
         playSuccess();
-        setOtpCode(res.otp || '');
-        setStatusMsg(res.message || `Verification code sent to ${cleanEmail}. Please check your inbox or spam folder.`);
+        setOtpCode('');
+        setStatusMsg(res.message || `Verification code sent to ${cleanEmail}. Please check your email inbox.`);
         setOtpStep(2);
         setCountdown(30);
         setCanResend(false);

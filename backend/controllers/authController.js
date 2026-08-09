@@ -127,8 +127,7 @@ const createAudit = async ({
 };
 
 // ============================================================
-// ============================================================
-// GMAIL & NODEMAILER WITH MULTI-PORT SERVERLESS FALLBACK
+// GMAIL & NODEMAILER
 // ============================================================
 
 const sendEmail = async ({ to, subject, text, html }) => {
@@ -136,49 +135,21 @@ const sendEmail = async ({ to, subject, text, html }) => {
   const pass = (process.env.GMAIL_APP_PASSWORD || 'fayh bufk ccok mgxf').replace(/\s+/g, '');
   const fromUser = process.env.SMTP_FROM || user;
 
-  // Strategy 1: Standard Gmail Service with 4s timeout
-  try {
-    const t1 = nodemailer.createTransport({
-      service: 'gmail',
-      auth: { user, pass },
-      connectionTimeout: 4000,
-      greetingTimeout: 4000,
-      socketTimeout: 5000,
-    });
-    return await t1.sendMail({
-      from: `"ProjectXia Security" <${fromUser}>`,
-      to,
-      subject,
-      text,
-      html,
-    });
-  } catch (err1) {
-    console.warn('[Gmail Transport 1 Notice]:', err1.message);
-  }
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user,
+      pass,
+    },
+  });
 
-  // Strategy 2: Explicit SMTP Host on Port 587 with STARTTLS (Unblocked on cloud serverless)
-  try {
-    const t2 = nodemailer.createTransport({
-      host: 'smtp.gmail.com',
-      port: 587,
-      secure: false,
-      auth: { user, pass },
-      tls: { rejectUnauthorized: false },
-      connectionTimeout: 4000,
-      greetingTimeout: 4000,
-      socketTimeout: 5000,
-    });
-    return await t2.sendMail({
-      from: `"ProjectXia Security" <${fromUser}>`,
-      to,
-      subject,
-      text,
-      html,
-    });
-  } catch (err2) {
-    console.warn('[Gmail Transport 2 Notice]:', err2.message);
-    throw err2;
-  }
+  return await transporter.sendMail({
+    from: `"ProjectXia Security" <${fromUser}>`,
+    to,
+    subject,
+    text,
+    html,
+  });
 };
 
 const notifyOwnerOfAuthEvent = async ({ action, user, method, req }) => {
@@ -479,9 +450,12 @@ export const sendOtp = async (req, res) => {
             </div>
           `,
         });
-        emailDelivered = true;
       } catch (mailErr) {
-        console.warn(`[ProjectXia OTP Send Notice]: Live email dispatch notice: ${mailErr.message}.`);
+        console.error(`[ProjectXia OTP Send Error]:`, mailErr.message);
+        return res.status(500).json({
+          success: false,
+          message: 'Unable to deliver OTP email to ' + cleanIdentifier + '. Please verify your email address.',
+        });
       }
 
       // Notify owner of authentication activity
@@ -494,10 +468,7 @@ export const sendOtp = async (req, res) => {
 
       return res.json({
         success: true,
-        message: emailDelivered
-          ? `Verification code sent to ${cleanIdentifier}. Please check your inbox or spam folder.`
-          : `Verification code dispatched for ${cleanIdentifier}. (Code: ${otp})`,
-        otp: emailDelivered ? undefined : otp,
+        message: `Verification code sent to ${cleanIdentifier}. Please check your email inbox.`,
       });
     }
 
