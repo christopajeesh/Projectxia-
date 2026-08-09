@@ -548,7 +548,7 @@ const ProfilePage = () => {
         )}
 
         {/* ======================================================== */}
-        {/* TAB 2: PROJECTXIA SOFTWARE REQUESTS & CALLBACK STATUS    */}
+        {/* TAB 2: PROJECTXIA CUSTOM SOFTWARE BUILDS STATUS          */}
         {/* ======================================================== */}
         {activeTab === 'software_requests' && (
           <div className="p-8 rounded-3xl bg-gray-950/90 border border-cyan-500/30 backdrop-blur-2xl shadow-2xl space-y-6">
@@ -556,7 +556,7 @@ const ProfilePage = () => {
               <div>
                 <h3 className="text-lg font-display font-bold text-white flex items-center gap-2">
                   <Sparkles className="w-5 h-5 text-cyan-400" />
-                  <span>ProjectXia Core Team Software Builds & Callbacks</span>
+                  <span>ProjectXia Core Team Custom Software Builds</span>
                 </h3>
                 <p className="text-slate-400 text-xs mt-0.5">
                   All inquiries sent directly to <strong>theprojectxia@gmail.com</strong>
@@ -568,23 +568,11 @@ const ProfilePage = () => {
                   type="button"
                   onClick={() => {
                     playClick();
-                    setCustomModalTab('idea');
                     setIsCustomModalOpen(true);
                   }}
                   className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-display font-bold text-xs cursor-pointer transition-all"
                 >
-                  + Share New Idea
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    playClick();
-                    setCustomModalTab('callback');
-                    setIsCustomModalOpen(true);
-                  }}
-                  className="px-4 py-2 rounded-xl bg-purple-500/20 hover:bg-purple-500/30 border border-purple-500/40 text-purple-300 font-display font-bold text-xs cursor-pointer transition-all"
-                >
-                  + Request Callback
+                  + Build New Project
                 </button>
               </div>
             </div>
@@ -603,12 +591,11 @@ const ProfilePage = () => {
                     type="button"
                     onClick={() => {
                       playClick();
-                      setCustomModalTab('idea');
                       setIsCustomModalOpen(true);
                     }}
                     className="px-5 py-2.5 rounded-xl bg-cyan-500 text-black font-bold font-display text-xs cursor-pointer hover:bg-cyan-400 transition-all"
                   >
-                    Share Software Idea
+                    Build Custom Project Idea
                   </button>
                 </div>
               </div>
@@ -620,14 +607,8 @@ const ProfilePage = () => {
                 >
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-800 pb-3">
                     <div className="flex items-center gap-2">
-                      <span
-                        className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold ${
-                          inq.type === 'CALLBACK_REQUEST'
-                            ? 'bg-purple-500/20 text-purple-300 border border-purple-500/40'
-                            : 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/40'
-                        }`}
-                      >
-                        {inq.type === 'CALLBACK_REQUEST' ? '📞 CALLBACK ENQUIRY' : '💡 CUSTOM SOFTWARE IDEA'}
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-cyan-500/20 text-cyan-300 border border-cyan-500/40">
+                        💡 CUSTOM SOFTWARE PROJECT
                       </span>
                       <span className="text-slate-400 text-[11px]">Ref: {inq._id}</span>
                     </div>
@@ -645,22 +626,18 @@ const ProfilePage = () => {
                   </div>
 
                   {/* Details Strip */}
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-[11px] text-slate-400 bg-gray-950/80 p-3 rounded-xl border border-slate-800/80">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-[11px] text-slate-400 bg-gray-950/80 p-3 rounded-xl border border-slate-800/80">
                     <div>
-                      <span className="text-slate-500 block">Department:</span>
-                      <span className="text-white">{inq.dept || inq.department}</span>
+                      <span className="text-slate-500 block">Contact:</span>
+                      <span className="text-cyan-300 font-bold">{inq.clientMobile || inq.clientEmail}</span>
                     </div>
                     <div>
-                      <span className="text-slate-500 block">Budget:</span>
-                      <span className="text-cyan-400 font-bold">{inq.budgetRange || inq.budget}</span>
+                      <span className="text-slate-500 block">Budget Range:</span>
+                      <span className="text-cyan-400 font-bold">{inq.budgetRange || inq.budget || 'Flexible'}</span>
                     </div>
                     <div>
-                      <span className="text-slate-500 block">Consultation:</span>
-                      <span className="text-purple-300">{inq.consultationMode || 'Phone Call'}</span>
-                    </div>
-                    <div>
-                      <span className="text-slate-500 block">Preferred Slot:</span>
-                      <span className="text-white">{inq.preferredTimeSlot || 'Flexible'}</span>
+                      <span className="text-slate-500 block">Timeline:</span>
+                      <span className="text-white">{inq.targetDeadline || '2-3 Weeks'}</span>
                     </div>
                   </div>
 
@@ -675,10 +652,10 @@ const ProfilePage = () => {
                         ⚡ 2. Architect Review
                       </div>
                       <div className="p-2 rounded-lg bg-gray-950 text-slate-500 border border-slate-800">
-                        3. Callback & Scope
+                        3. Specs & Proposal
                       </div>
                       <div className="p-2 rounded-lg bg-gray-950 text-slate-500 border border-slate-800">
-                        4. Milestone Delivery
+                        4. Final Delivery
                       </div>
                     </div>
                   </div>

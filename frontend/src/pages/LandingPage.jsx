@@ -67,7 +67,6 @@ const LandingPage = () => {
   const [activePeekProject, setActivePeekProject] = useState(null);
   const [activeFaq, setActiveFaq] = useState(null);
   const [isDevModalOpen, setIsDevModalOpen] = useState(false);
-  const [devModalTab, setDevModalTab] = useState('idea'); // 'idea' | 'callback'
 
   // Landing Page Inline Fast Auth State
   const [inlineEmail, setInlineEmail] = useState('');
@@ -562,12 +561,12 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* CARD 2: CUSTOM BUILD / REQUEST DEVELOPER CALLBACK */}
+            {/* CARD 2: CUSTOM SOFTWARE BUILD */}
             <div className="relative group rounded-3xl p-6 bg-gradient-to-b from-gray-950 via-purple-950/40 to-gray-950 border border-purple-500/40 hover:border-purple-400/80 transition-all duration-300 flex flex-col justify-between shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-1">
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="p-3 rounded-2xl bg-purple-500/20 text-purple-400 border border-purple-500/40">
-                    <PhoneCall className="w-6 h-6 animate-pulse" />
+                    <Lightbulb className="w-6 h-6 text-amber-300" />
                   </div>
                   <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30 text-[10px] font-mono font-bold uppercase">
                     2. In-House Team
@@ -576,17 +575,17 @@ const LandingPage = () => {
 
                 <div>
                   <h3 className="text-lg font-display font-black text-white group-hover:text-purple-300 transition-colors">
-                    Build Software / Callback
+                    Build Custom Software
                   </h3>
                   <p className="text-xs font-mono text-slate-300 mt-2 leading-relaxed">
-                    Have a unique idea, thesis, or startup MVP? Our <span className="text-purple-300 font-bold">In-House Engineering Team</span> will build it for you.
+                    Have a unique idea, thesis, or startup MVP? Our <span className="text-purple-300 font-bold">In-House Engineering Team</span> will build and deliver it for you.
                   </p>
                 </div>
 
                 <div className="space-y-2 pt-2 border-t border-slate-800 text-[11px] font-mono text-slate-300">
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
-                    <span>Direct Phone / WhatsApp developer callback</span>
+                    <span>Direct engineering consultation with ProjectXia developers</span>
                   </div>
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
@@ -604,13 +603,12 @@ const LandingPage = () => {
                   type="button"
                   onClick={() => {
                     playSuccess();
-                    setDevModalTab('idea');
                     setIsDevModalOpen(true);
                   }}
                   className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-display font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30 transition-all cursor-pointer"
                 >
                   <Lightbulb className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Request Build / Callback</span>
+                  <span>Build My Project Idea →</span>
                 </button>
               </div>
             </div>
@@ -1084,11 +1082,10 @@ const LandingPage = () => {
         />
       )}
 
-      {/* Custom Software & Developer Callback Inquiry Modal */}
+      {/* Custom Software Inquiry Modal */}
       <CustomSoftwareRequestModal
         isOpen={isDevModalOpen}
         onClose={() => setIsDevModalOpen(false)}
-        initialTab={devModalTab}
       />
     </div>
   );

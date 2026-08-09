@@ -47,7 +47,7 @@ const Navbar = () => {
     { name: 'Marketplace', path: '/marketplace', icon: Code, protected: true },
     { name: 'Plagiarism Check', path: '/ai-shield', icon: Shield, protected: true },
     {
-      name: 'Build Software / Request Callback',
+      name: 'Build Software',
       isSpecialAction: true,
       icon: Lightbulb,
       badge: 'DEV TEAM',
@@ -168,7 +168,7 @@ const Navbar = () => {
                 <span className="sm:hidden">Shield</span>
               </button>
 
-              {/* Build Software / Request Callback Hub - Freely Accessible Without Gating */}
+              {/* Build Software Hub - Freely Accessible Without Gating */}
               <button
                 type="button"
                 onClick={() => {
@@ -178,8 +178,8 @@ const Navbar = () => {
                 className="px-2 sm:px-3 py-1.5 rounded-xl font-display font-bold text-xs flex items-center gap-1.5 bg-gradient-to-r from-purple-950/90 via-indigo-950/90 to-blue-950/90 border border-purple-500/50 text-purple-300 hover:text-white hover:border-purple-300 shadow-md transition-all hover:scale-105 cursor-pointer"
               >
                 <Lightbulb className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
-                <span className="hidden md:inline">Build Software / Callback</span>
-                <span className="md:hidden">Build / Callback</span>
+                <span className="hidden sm:inline">Build Software</span>
+                <span className="sm:hidden">Build</span>
                 <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-purple-400 text-black font-extrabold">
                   TEAM
                 </span>
