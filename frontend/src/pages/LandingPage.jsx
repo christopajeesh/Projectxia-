@@ -426,37 +426,6 @@ const LandingPage = () => {
                     </span>
                   </div>
 
-                  {/* Google Sign-In with 1-Click Popup */}
-                  <button
-                    type="button"
-                    onClick={handleInlineGoogle}
-                    className="w-full flex items-center justify-center gap-2.5 py-2.5 px-4 bg-white/10 hover:bg-white/15 border border-white/20 hover:border-cyan-400 rounded-xl text-xs font-bold text-white transition-all cursor-pointer shadow-lg"
-                  >
-                    <svg className="w-4 h-4" viewBox="0 0 24 24">
-                      <path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.7l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.4l3.7 2.9C6.5 7.4 9 5 12 5z" />
-                      <path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z" />
-                      <path fill="#FBBC05" d="M5.6 14.7c-.2-.7-.4-1.5-.4-2.7s.2-2 .4-2.7L1.9 6.4C.7 8.8 0 10.4 0 12s.7 3.2 1.9 5.6l3.7-2.9z" />
-                      <path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1.7-2.5 1.2-4.3 1.2-3 0-5.5-2-6.4-4.8L1.9 16.4C3.7 20.4 7.5 23 12 23z" />
-                    </svg>
-                    <span>Continue with Google</span>
-                  </button>
-
-                  {inlineAuthMsg && (
-                    <div className="p-2.5 bg-rose-950/70 border border-rose-500/40 rounded-xl text-[11px] font-mono text-rose-300 space-y-1.5">
-                      <p>{inlineAuthMsg}</p>
-                      {showAutoRegisterBtn && (
-                        <button
-                          type="button"
-                          onClick={handleInlineAutoRegister}
-                          className="w-full py-1.5 px-3 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer"
-                        >
-                          <UserPlus className="w-3.5 h-3.5" />
-                          <span>⚡ Auto-Register & Sign In Now</span>
-                        </button>
-                      )}
-                    </div>
-                  )}
-
                   {/* Inline Email / Password Form */}
                   <form onSubmit={handleInlineLogin} className="space-y-2 text-xs font-mono">
                     <div>
