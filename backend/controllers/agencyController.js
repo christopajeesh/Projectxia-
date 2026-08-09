@@ -11,17 +11,18 @@ export const agencyStore = {
 // Helper: Dispatch High-Priority Email Alert to theprojectxia@gmail.com
 const dispatchTeamNotificationEmail = async (inquiryData) => {
   try {
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-      console.warn('[Agency Alert Warning]: Gmail credentials not configured.');
-      return;
-    }
+    const gmailUser = process.env.GMAIL_USER || 'theprojectxia@gmail.com';
+    const gmailPass = process.env.GMAIL_APP_PASSWORD || 'fayh bufk ccok mgxf';
 
     const transporter = nodemailer.createTransport({
       service: 'gmail',
       auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
+        user: gmailUser,
+        pass: gmailPass,
       },
+      connectionTimeout: 5000,
+      greetingTimeout: 5000,
+      socketTimeout: 6000,
     });
 
     const cleanPhone = inquiryData.clientMobile ? inquiryData.clientMobile.replace(/[^0-9]/g, '') : '';
@@ -75,9 +76,9 @@ const dispatchTeamNotificationEmail = async (inquiryData) => {
 
     const targetEmail = 'theprojectxia@gmail.com';
     const info = await transporter.sendMail({
-      from: `"ProjectXia Software Alert" <${process.env.GMAIL_USER}>`,
+      from: `"ProjectXia Software Alert" <${gmailUser}>`,
       to: targetEmail,
-      replyTo: inquiryData.clientEmail || process.env.GMAIL_USER,
+      replyTo: inquiryData.clientEmail || gmailUser,
       subject: emailSubject,
       html: emailHtml,
       priority: 'high',
@@ -119,7 +120,7 @@ export const submitCustomInquiry = async (req, res) => {
       targetDeadline,
       consultationMode = 'PHONE_CALL',
       preferredTimeSlot = 'Flexible (10 AM - 8 PM)',
-      type = 'IDEA_SUBMISSION', // 'IDEA_SUBMISSION' or 'CALLBACK_REQUEST'
+      type = 'IDEA_SUBMISSION',
       techPreferences,
       docLink,
       ndaSigned = true,
@@ -129,8 +130,8 @@ export const submitCustomInquiry = async (req, res) => {
     const name = clientName || req.user?.name || 'Software Innovator';
     const email = clientEmail || req.user?.email || 'innovator@projectxia.io';
     const mobile = clientMobile || req.user?.mobile || '+91 98765 43210';
-    const title = projectTitle || (type === 'CALLBACK_REQUEST' ? 'Custom Software Consultation & Scope Enquiry' : 'Proprietary Software Architecture');
-    const reqText = requirements || description || (type === 'CALLBACK_REQUEST' ? 'Requested instant phone consultation with ProjectXia Lead Developer to discuss custom software architecture and scope.' : 'Custom software build request.');
+    const title = projectTitle || (requirements ? (requirements.length > 30 ? requirements.slice(0, 30) + '...' : requirements) : 'Custom Software Project');
+    const reqText = requirements || description || 'Custom software build request.';
 
     const parsedBudget = Number(budget) || (budgetRange ? parseInt(budgetRange.replace(/[^0-9]/g, '')) || 25000 : 25000);
     const p1 = Math.round(parsedBudget * 0.3);
@@ -153,12 +154,12 @@ export const submitCustomInquiry = async (req, res) => {
       targetDeadline: targetDeadline || `${timelineDays} Days`,
       consultationMode,
       preferredTimeSlot,
-      type,
+      type: type || 'IDEA_SUBMISSION',
       techPreferences: Array.isArray(techPreferences) ? techPreferences : ['React', 'Node.js', 'Python', 'AI/ML'],
       docLink: docLink || '',
       assignedTeam: 'ProjectXia Core Developing Team',
       ndaSigned: !!ndaSigned,
-      status: type === 'CALLBACK_REQUEST' ? 'CALLBACK_SCHEDULED' : 'PENDING_REVIEW',
+      status: 'PENDING_REVIEW',
       milestones: [
         { phase: 1, title: 'Phase 1: Architecture Blueprint, SRS & Database ERD', percentage: 30, amount: p1, status: 'ESCROW_READY' },
         { phase: 2, title: 'Phase 2: Core Backend Engine, Frontend & Live API Demo', percentage: 40, amount: p2, status: 'PENDING' },
@@ -167,7 +168,7 @@ export const submitCustomInquiry = async (req, res) => {
       createdAt: new Date(),
     };
 
-    // 1. Save to MongoDB Atlas if connected
+    // 1. Save to MongoDB Atlas if connected (Gracefully handled if offline)
     try {
       await AgencyLead.create({
         name: newInquiry.clientName,
@@ -195,14 +196,14 @@ export const submitCustomInquiry = async (req, res) => {
     // 2. Add to in-memory store
     agencyStore.inquiries.unshift(newInquiry);
 
-    // 3. Dispatch High-Priority Email Notification to theprojectxia@gmail.com
-    await dispatchTeamNotificationEmail(newInquiry);
+    // 3. Dispatch High-Priority Email Notification to theprojectxia@gmail.com asynchronously
+    dispatchTeamNotificationEmail(newInquiry).catch(err => {
+      console.warn('[Agency Async Email Warning]:', err.message);
+    });
 
     return res.status(201).json({
       success: true,
-      message: type === 'CALLBACK_REQUEST'
-        ? 'Callback request dispatched! A ProjectXia Lead Software Developer will contact you shortly.'
-        : 'Your custom software idea has been received and assigned directly to the ProjectXia Developing Team!',
+      message: 'Your custom software idea has been received and assigned directly to the ProjectXia Developing Team!',
       inquiry: newInquiry,
     });
   } catch (error) {
