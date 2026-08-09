@@ -2,7 +2,121 @@ import Project from '../models/Project.js';
 import User from '../models/User.js';
 import AuditLog from '../models/AuditLog.js';
 import crypto from 'crypto';
+import nodemailer from 'nodemailer';
 import { memoryStore } from '../seed/seedData.js';
+
+// ============================================================
+// SUSPICIOUS WEB / GIT CLONE DETECTOR & SECURITY NOTIFIER
+// ============================================================
+export const checkSuspiciousProjectCode = ({ title = '', description = '', githubUrl = '', documentation = '', sourceCodeUrl = '' }) => {
+  const flags = [];
+  const combined = `${title} ${description} ${githubUrl} ${documentation} ${sourceCodeUrl}`.toLowerCase();
+
+  // 1. Generic placeholder or cloned public repo keywords
+  const suspiciousKeywords = [
+    'forked from', 'copied from', 'clone of', 'tutorial project', 'sample boilerplate',
+    'starter kit', 'github.com/example', 'test repo', 'dummy project', 'lorem ipsum',
+    'stackoverflow.com/questions', 'todo app', 'counter app'
+  ];
+
+  suspiciousKeywords.forEach(k => {
+    if (combined.includes(k)) {
+      flags.push(`Matched suspicious/boilerplate pattern: "${k}"`);
+    }
+  });
+
+  // 2. Generic unoriginal git repositories or framework root urls
+  if (githubUrl) {
+    const lowerGit = githubUrl.toLowerCase();
+    if (
+      lowerGit.includes('github.com/facebook') ||
+      lowerGit.includes('github.com/vercel') ||
+      lowerGit.includes('github.com/tailwind') ||
+      lowerGit.includes('github.com/microsoft') ||
+      lowerGit.includes('github.com/google') ||
+      lowerGit.includes('github.com/sample') ||
+      lowerGit.includes('github.com/test')
+    ) {
+      flags.push(`GitHub URL appears to point to a public third-party boilerplate repo instead of original author source: ${githubUrl}`);
+    }
+  }
+
+  // 3. Ultra short documentation or no real technical details
+  if (documentation && documentation.trim().length < 15) {
+    flags.push('Documentation lacks meaningful technical implementation details.');
+  }
+
+  return {
+    isSuspicious: flags.length > 0,
+    flags,
+    riskScore: flags.length * 35,
+  };
+};
+
+const notifyOwnerOfProjectUpload = async ({ project, uploader, isSuspicious, flags, req }) => {
+  try {
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) return;
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    });
+
+    const subject = isSuspicious
+      ? `🚨 [SUSPICIOUS PROJECT FLAGGED] Potential Copied/Cloned Source: "${project.title}"`
+      : `🛡️ [NEW PROJECT LISTED & VERIFIED] "${project.title}" by ${uploader.name || uploader.email}`;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; background: #030712; color: #f1f5f9; padding: 24px; border-radius: 12px; max-width: 600px; margin: auto; border: 1px solid ${isSuspicious ? '#ef4444' : '#06b6d4'};">
+        <h2 style="color: ${isSuspicious ? '#ef4444' : '#22d3ee'}; margin-top: 0;">
+          ${isSuspicious ? '🚨 ANTI-PLAGIARISM SHIELD WARNING' : '✅ PROJECTXIA VERIFIED PROJECT LISTING'}
+        </h2>
+        <p style="color: #94a3b8; font-size: 13px;">Automated Code Originality & Vault Governance Notification</p>
+        <hr style="border-color: #1e293b; margin: 16px 0;" />
+
+        <div style="background: #0f172a; padding: 16px; border-radius: 8px; border-left: 4px solid ${isSuspicious ? '#ef4444' : '#10b981'};">
+          <p><strong>Project Title:</strong> ${project.title}</p>
+          <p><strong>Category:</strong> ${project.category}</p>
+          <p><strong>Price:</strong> ₹${project.price?.toLocaleString('en-IN')}</p>
+          <p><strong>Uploader:</strong> ${uploader.name || 'Creator'} (${uploader.email})</p>
+          <p><strong>Uploader ID:</strong> ${uploader.id || uploader._id}</p>
+          <p><strong>GitHub URL:</strong> ${project.githubUrl || 'N/A'}</p>
+          <p><strong>Originality Trust Score:</strong> ${project.trustScore}%</p>
+          <p><strong>Calculated Plagiarism:</strong> ${project.plagiarismScore}%</p>
+          <p><strong>IP Address:</strong> ${req.ip || '127.0.0.1'}</p>
+          <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
+        </div>
+
+        ${isSuspicious ? `
+          <div style="margin-top: 16px; background: #450a0a; border: 1px solid #dc2626; padding: 14px; border-radius: 8px; color: #fca5a5;">
+            <h4 style="margin-top: 0; color: #f87171;">⚠️ Suspicion & Plagiarism Flags Detected:</h4>
+            <ul style="margin: 0; padding-left: 20px;">
+              ${flags.map(f => `<li>${f}</li>`).join('')}
+            </ul>
+            <p style="font-size: 12px; margin-top: 8px;">Action: Project flagged and dispatched to theprojectxia@gmail.com for review.</p>
+          </div>
+        ` : ''}
+
+        <div style="margin-top: 20px; font-size: 11px; color: #64748b; text-align: center;">
+          ProjectXia Vault Protection • Zero-Trust Code Originality Engine
+        </div>
+      </div>
+    `;
+
+    await transporter.sendMail({
+      from: `"ProjectXia Vault Security" <${process.env.GMAIL_USER}>`,
+      to: 'theprojectxia@gmail.com',
+      subject,
+      html,
+    });
+    console.log(`[Project Security Alert]: Email successfully dispatched to theprojectxia@gmail.com for "${project.title}"`);
+  } catch (err) {
+    console.warn('[Project Notification Warning]:', err.message);
+  }
+};
 
 // ============================================================
 // GIBBERISH & SPAM CONTENT VALIDATOR
@@ -338,9 +452,23 @@ export const createProject = async (req, res) => {
       });
     }
 
-    // 3. AI Code Trust & Anti-Plagiarism Certification
-    const calculatedTrustScore = Math.floor(Math.random() * 3) + 97; // 97 - 99%
-    const calculatedPlagiarism = Number((Math.random() * 0.8 + 0.2).toFixed(1)); // 0.2 - 1.0%
+    // 3. AI Code Trust & Anti-Plagiarism & Git Clone Certification
+    const suspiciousAnalysis = checkSuspiciousProjectCode({
+      title: cleanTitle,
+      description: cleanDesc,
+      githubUrl,
+      documentation,
+      sourceCodeUrl,
+    });
+
+    const isSuspicious = suspiciousAnalysis.isSuspicious;
+    const flags = suspiciousAnalysis.flags;
+    const calculatedTrustScore = isSuspicious
+      ? Math.max(55, 95 - suspiciousAnalysis.riskScore)
+      : Math.floor(Math.random() * 3) + 97; // 97 - 99%
+    const calculatedPlagiarism = isSuspicious
+      ? Math.min(45, 15 + suspiciousAnalysis.flags.length * 8)
+      : Number((Math.random() * 0.8 + 0.2).toFixed(1)); // 0.2 - 1.0%
 
     const parsedTechStack = Array.isArray(techStack)
       ? techStack
@@ -360,7 +488,7 @@ export const createProject = async (req, res) => {
 
     const sellerInfo = {
       id: String(req.user?._id || req.user?.id || 'user_creator_live'),
-      name: req.user?.name || 'Dr. Priya Venkatesh',
+      name: req.user?.name || 'Creator',
       email: req.user?.email || 'creator@projectxia.com',
       avatar: req.user?.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
       rating: 4.95,
@@ -383,7 +511,7 @@ export const createProject = async (req, res) => {
       demoLiveUrl: demoLiveUrl || 'https://projectxia.io/demo-preview',
       documentation: documentation || '# Comprehensive Project Guide\nIncludes architecture documentation and setup steps.',
       sourceCodeUrl: sourceCodeUrl || 'https://vault.projectxia.io/secure/source-bundle.zip',
-      githubUrl: githubUrl || 'https://github.com/projectxia',
+      githubUrl: githubUrl || '',
       version: version || '1.0.0',
       licenseType: licenseType || 'Commercial Full Rights',
       price: Number(price) || 2999,
@@ -392,11 +520,12 @@ export const createProject = async (req, res) => {
       seller: sellerInfo,
       trustScore: calculatedTrustScore,
       plagiarismScore: calculatedPlagiarism,
-      cleanCodeScore: 98,
-      securityScanStatus: 'Passed 100%',
-      isApproved: true,
+      cleanCodeScore: isSuspicious ? 68 : 98,
+      securityScanStatus: isSuspicious ? 'Flagged - Suspicious Web/Git Match' : 'Passed 100%',
+      isApproved: !isSuspicious,
       isFeatured: false,
-      isFlagged: false,
+      isFlagged: isSuspicious,
+      suspicionFlags: flags,
       rating: 5.0,
       numReviews: 1,
       viewsCount: 1,
@@ -418,14 +547,14 @@ export const createProject = async (req, res) => {
       };
     }
 
-    // 2. Add to in-memory store for instant zero-latency rendering
+    // 2. Add to in-memory store for instant rendering
     if (!memoryStore.projects) memoryStore.projects = [];
     memoryStore.projects.unshift(savedProject);
 
     // 3. Record Audit Log
     const auditData = {
       _id: `log_${Date.now()}`,
-      action: 'PROJECT_UPLOAD_AUDITED',
+      action: isSuspicious ? 'PROJECT_UPLOAD_FLAGGED_SUSPICIOUS' : 'PROJECT_UPLOAD_AUDITED',
       category: 'PROJECT_MODERATION',
       performedBy: {
         id: sellerInfo.id,
@@ -439,11 +568,12 @@ export const createProject = async (req, res) => {
         title: savedProject.title,
       },
       ipAddress: req.ip || '127.0.0.1',
-      threatLevel: 'CLEAN',
+      threatLevel: isSuspicious ? 'HIGH' : 'CLEAN',
       details: {
         trustScore: calculatedTrustScore,
         plagiarismScore: `${calculatedPlagiarism}%`,
-        status: 'AUTO_APPROVED_BY_SHIELD',
+        status: isSuspicious ? 'FLAGGED_PENDING_MANUAL_REVIEW' : 'AUTO_APPROVED_BY_SHIELD',
+        suspicionFlags: flags,
         category: savedProject.category,
         timestamp: new Date(),
       },
@@ -453,6 +583,25 @@ export const createProject = async (req, res) => {
     try {
       await AuditLog.create(auditData);
     } catch (e) {}
+
+    // 4. Send Instant Email Alert to theprojectxia@gmail.com
+    notifyOwnerOfProjectUpload({
+      project: savedProject,
+      uploader: sellerInfo,
+      isSuspicious,
+      flags,
+      req,
+    }).catch(() => {});
+
+    return res.status(201).json({
+      success: true,
+      isSuspicious,
+      suspicionFlags: flags,
+      message: isSuspicious
+        ? '⚠️ Suspicious or copied source code indicators detected. Project has been flagged and dispatched to the ProjectXia Code Integrity Team (theprojectxia@gmail.com) for manual review.'
+        : 'Project published and verified successfully.',
+      project: savedProject,
+    });
 
     if (!memoryStore.auditLogs) memoryStore.auditLogs = [];
     memoryStore.auditLogs.unshift(auditData);

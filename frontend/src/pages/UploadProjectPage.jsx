@@ -85,6 +85,7 @@ const UploadProjectPage = () => {
   const [aiScanning, setAiScanning] = useState(false);
   const [aiScanResult, setAiScanResult] = useState(null);
   const [errorMessage, setErrorMessage] = useState('');
+  const [suspiciousModalData, setSuspiciousModalData] = useState(null);
 
   // File input refs
   const screenshotInputRef = useRef(null);
@@ -214,7 +215,7 @@ const UploadProjectPage = () => {
         return;
       }
 
-      // 2. Publish Directly to Live Marketplace & MongoDB Atlas
+      // 2. Publish to Live Marketplace & MongoDB Atlas
       setLoading(true);
       const publishRes = await api.post('/projects', {
         title: formData.title,
@@ -231,6 +232,15 @@ const UploadProjectPage = () => {
         documentation: formData.documentation,
         tags: ['AI-Verified', 'Clean-Architecture', 'Case-Preserved'],
       });
+
+      if (publishRes.data.isSuspicious) {
+        setSuspiciousModalData({
+          project: publishRes.data.project,
+          flags: publishRes.data.suspicionFlags || [],
+          message: publishRes.data.message,
+        });
+        return;
+      }
 
       playSuccess();
       confetti({ particleCount: 120, spread: 90, origin: { y: 0.6 } });
@@ -595,6 +605,67 @@ const UploadProjectPage = () => {
           )}
         </div>
       </div>
+
+      {/* ======================================================= */}
+      {/* SUSPICIOUS CODE & PLAGIARISM FLAGGED MODAL POPUP       */}
+      {/* ======================================================= */}
+      <AnimatePresence>
+        {suspiciousModalData && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-2xl">
+            <motion.div
+              initial={{ scale: 0.92, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.92, opacity: 0, y: 20 }}
+              className="relative w-full max-w-lg bg-gray-950 border border-red-500/60 rounded-3xl p-6 sm:p-8 shadow-2xl shadow-red-950/50 space-y-5"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-3 rounded-2xl bg-red-500/20 border border-red-500/50 text-red-400">
+                  <AlertTriangle className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-display font-black text-white">
+                    Code Plagiarism / Git Clone Flagged
+                  </h3>
+                  <p className="text-xs font-mono text-red-400">
+                    ProjectXia Code Integrity Shield Alert
+                  </p>
+                </div>
+              </div>
+
+              <div className="p-4 rounded-2xl bg-red-950/40 border border-red-500/30 text-xs font-mono text-slate-300 space-y-2">
+                <p className="font-bold text-red-300">Potential Copied / Boilerplate Content Detected:</p>
+                <ul className="list-disc pl-4 space-y-1 text-slate-300 text-[11px]">
+                  {suspiciousModalData.flags?.map((flag, idx) => (
+                    <li key={idx}>{flag}</li>
+                  ))}
+                </ul>
+              </div>
+
+              <div className="p-3.5 rounded-2xl bg-gray-900 border border-slate-800 text-[11px] font-mono text-slate-400">
+                <p>
+                  🛡️ An automated security report has been dispatched to{' '}
+                  <strong className="text-cyan-300">theprojectxia@gmail.com</strong>.
+                  Our verification team will inspect your repository before public release.
+                </p>
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    playClick();
+                    setSuspiciousModalData(null);
+                    navigate('/profile');
+                  }}
+                  className="w-full py-3 rounded-xl bg-gradient-to-r from-red-600 to-rose-700 hover:from-red-500 hover:to-rose-600 text-white font-display font-bold text-xs transition-all cursor-pointer shadow-lg shadow-red-950/40"
+                >
+                  Understood • View in My Dashboard
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
