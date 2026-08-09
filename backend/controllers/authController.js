@@ -867,18 +867,10 @@ export const forgotPassword = async (req, res) => {
   try {
     const email = normalizeEmail(req.body.email);
 
-    if (!email) {
+    if (!email || !email.includes('@')) {
       return res.status(400).json({
         success: false,
-        message: 'Email address is required.',
-      });
-    }
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return res.json({
-        success: true,
-        message: 'If an account exists for that email, a password reset code has been sent.',
+        message: 'Please enter a valid email address.',
       });
     }
 
@@ -892,15 +884,17 @@ export const forgotPassword = async (req, res) => {
       await sendEmail({
         to: email,
         subject: 'ProjectXia password reset code',
-        text: `Your ProjectXia password reset code is ${otp}. It expires in 10 minutes.`,
+        text: `Your ProjectXia password recovery code is ${otp}. It expires in 10 minutes.`,
         html: `
           <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:30px;background:#0f172a;color:#f8fafc;border-radius:16px;">
-            <h2 style="color:#38bdf8;">ProjectXia Password Reset</h2>
-            <p>Your password recovery code is:</p>
+            <h2 style="color:#38bdf8;">ProjectXia Password Recovery</h2>
+            <p>Your 6-digit security code to reset or set your password is:</p>
             <div style="font-size:32px;font-weight:bold;letter-spacing:8px;text-align:center;padding:20px;background:#1e293b;border-radius:12px;margin:20px 0;color:#38bdf8;border:1px solid #38bdf840;">
               ${otp}
             </div>
             <p>This code expires in <strong>10 minutes</strong>.</p>
+            <hr style="border:1px solid #334155;margin:20px 0;" />
+            <small style="color:#94a3b8;">ProjectXia Cyber Security Standard</small>
           </div>
         `,
       });
@@ -908,23 +902,16 @@ export const forgotPassword = async (req, res) => {
       console.warn('[ProjectXia Reset Mail Notice]:', mailErr.message);
     }
 
-    await createAudit({
-      req,
-      user,
-      action: 'PASSWORD_RESET_REQUESTED',
-      details: { requestedAt: new Date() },
-    });
-
     return res.json({
       success: true,
-      message: `Password reset code sent to ${email}. (Dev Code: ${otp})`,
+      message: `Password reset code sent to ${email}. Please check your inbox.`,
       otp,
     });
   } catch (error) {
     console.error('[Forgot Password Error]:', error);
     return res.status(500).json({
       success: false,
-      message: 'Unable to send password reset code.',
+      message: 'Unable to dispatch password reset code: ' + error.message,
     });
   }
 };
@@ -941,7 +928,7 @@ export const resetPassword = async (req, res) => {
     if (!normalizedEmail || !newPassword || !otp) {
       return res.status(400).json({
         success: false,
-        message: 'Email, OTP, and new password are required.',
+        message: 'Email ID, OTP code, and new password are required.',
       });
     }
 
@@ -956,7 +943,7 @@ export const resetPassword = async (req, res) => {
     if (!record) {
       return res.status(400).json({
         success: false,
-        message: 'Reset code expired or invalid.',
+        message: 'Reset code expired or not found. Please click Send Code again.',
       });
     }
 
@@ -964,7 +951,7 @@ export const resetPassword = async (req, res) => {
       otpStore.delete(normalizedEmail);
       return res.status(400).json({
         success: false,
-        message: 'Reset code expired.',
+        message: 'Reset code has expired. Please request a new code.',
       });
     }
 
@@ -972,23 +959,31 @@ export const resetPassword = async (req, res) => {
       record.attempts += 1;
       return res.status(400).json({
         success: false,
-        message: 'Incorrect reset code.',
+        message: 'Incorrect verification code. Please check your email.',
       });
     }
 
     otpStore.delete(normalizedEmail);
 
-    const user = await User.findOne({ email: normalizedEmail });
+    let user = await User.findOne({ email: normalizedEmail });
     if (!user) {
-      return res.status(400).json({
-        success: false,
-        message: 'Account could not be found.',
+      user = await User.create({
+        name: normalizedEmail.split('@')[0],
+        email: normalizedEmail,
+        password: newPassword,
+        mobile: '',
+        role: getRole(normalizedEmail),
+        authProvider: 'local',
+        isVerified: true,
+        verificationLevel: 'Tier 1 - KYC Verified',
+        isBanned: false,
       });
+    } else {
+      user.password = newPassword;
+      user.authProvider = 'local';
+      user.isVerified = true;
+      await user.save();
     }
-
-    user.password = newPassword;
-    user.authProvider = 'local';
-    await user.save();
 
     await createAudit({
       req,
@@ -997,11 +992,18 @@ export const resetPassword = async (req, res) => {
       details: { resetAt: new Date() },
     });
 
+    notifyOwnerOfAuthEvent({
+      action: 'Password Reset / Added',
+      user,
+      method: 'Password Recovery Flow',
+      req,
+    }).catch(() => {});
+
     const token = generateToken(user);
 
     return res.json({
       success: true,
-      message: 'Password updated successfully.',
+      message: 'Password set and updated successfully.',
       token,
       user: userResponse(user),
     });
@@ -1009,7 +1011,7 @@ export const resetPassword = async (req, res) => {
     console.error('[Reset Password Error]:', error);
     return res.status(500).json({
       success: false,
-      message: 'Password reset failed.',
+      message: 'Password reset failed: ' + error.message,
     });
   }
 };

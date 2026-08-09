@@ -215,30 +215,18 @@ export const AuthProvider = ({ children }) => {
     setAuthPromptReason('');
   };
 
-  // Password Recovery via Firebase Cloud Email Service + Backend Verification
+  // Password Recovery via Backend Verification OTP
   const forgotPassword = async (email) => {
     setIsLoading(true);
     try {
-      let firebaseSent = false;
-      try {
-        if (auth) {
-          await sendPasswordResetEmail(auth, email);
-          firebaseSent = true;
-        }
-      } catch (fbErr) {
-        console.warn('[Firebase Cloud Email Notice]:', fbErr.message);
-      }
-
       const res = await api.post('/auth/forgot-password', { email });
       return {
         success: true,
-        message: firebaseSent
-          ? 'Password reset link sent directly to your email inbox by Firebase.'
-          : (res.data.message || 'Password reset code generated.'),
+        message: res.data.message || 'Password reset code sent to your email.',
         otp: res.data.otp,
       };
     } catch (err) {
-      return { success: false, message: err.response?.data?.message || 'Password recovery failed.' };
+      return { success: false, message: err.response?.data?.message || 'Unable to send password recovery code. Please try again.' };
     } finally {
       setIsLoading(false);
     }
