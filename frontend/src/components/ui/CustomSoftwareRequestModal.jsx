@@ -16,14 +16,101 @@ import {
   Cpu,
   ArrowRight,
   MessageSquare,
-  HelpCircle,
   FileText,
   Mail,
+  AlertCircle,
 } from 'lucide-react';
 import { useSound } from '../../context/SoundContext';
 import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import confetti from 'canvas-confetti';
+
+// Strict Validator for Real Phone Number, Email, and Information
+const validateClientInput = (name, phone, email, requirements) => {
+  // 1. Name Check
+  const trimmedName = String(name || '').trim();
+  if (trimmedName.length < 2) {
+    return 'Please enter your genuine full name.';
+  }
+  if (/^[^a-zA-Z]+$/.test(trimmedName) || /^(asdf|qwerty|test|xyz|abc|user|unknown)$/i.test(trimmedName)) {
+    return 'Please enter a genuine name (not random letters).';
+  }
+
+  // 2. Phone / WhatsApp Number Check
+  const rawPhone = String(phone || '').replace(/[^0-9]/g, '');
+  if (!rawPhone || rawPhone.length < 10 || rawPhone.length > 15) {
+    return 'Please enter a valid 10-digit mobile or WhatsApp number.';
+  }
+
+  const isIndian10 = rawPhone.length === 10;
+  const isIndian12 = rawPhone.length === 12 && rawPhone.startsWith('91');
+  const standard10 = isIndian12 ? rawPhone.slice(2) : (isIndian10 ? rawPhone : null);
+
+  if (standard10 && !/^[6-9]\d{9}$/.test(standard10)) {
+    return 'Indian mobile numbers must start with 6, 7, 8, or 9 and have 10 digits.';
+  }
+
+  // Anti-Dummy / Anti-Repeated Number Checks
+  const fakeSequences = [
+    '0000000000', '1111111111', '2222222222', '3333333333', '4444444444',
+    '5555555555', '6666666666', '7777777777', '8888888888', '9999999999',
+    '1234567890', '0987654321', '9876543210', '0123456789', '1212121212',
+    '9898989898', '9090909090', '7878787878', '9999900000', '1234512345'
+  ];
+
+  if (fakeSequences.some(seq => rawPhone.includes(seq))) {
+    return 'Please provide your genuine, active phone number (test numbers like 1234567890 are blocked).';
+  }
+
+  const uniqueDigits = new Set(rawPhone.split('')).size;
+  if (uniqueDigits < 4) {
+    return 'Please enter a real phone number with active digits.';
+  }
+
+  // 3. Email Check
+  const trimmedEmail = String(email || '').trim().toLowerCase();
+  if (!trimmedEmail) {
+    return 'Please enter your active email ID so our engineering team can send project blueprints.';
+  }
+
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  if (!emailRegex.test(trimmedEmail)) {
+    return 'Please enter a valid email address (e.g. name@gmail.com).';
+  }
+
+  const [localPart, domainPart] = trimmedEmail.split('@');
+  if (!localPart || localPart.length < 3) {
+    return 'Email username is too short. Please enter your real email.';
+  }
+
+  const fakeLocalNames = ['test', 'asdf', 'qwerty', 'fake', 'abc', '123', 'temp', 'dummy', 'spam'];
+  if (fakeLocalNames.includes(localPart)) {
+    return 'Please provide a genuine personal or university email ID.';
+  }
+
+  const disposableDomains = [
+    'tempmail.com', 'mailinator.com', '10minutemail.com', 'guerrillamail.com',
+    'throwawaymail.com', 'yopmail.com', 'fakeinbox.com', 'trashmail.com',
+    'temp-mail.org', 'sharklasers.com', 'getairmail.com', 'dispostable.com',
+    'mytemp.email', 'tempinbox.com', 'burnermail.io', 'dropmail.me',
+    'mohmal.com', 'crazymailing.com', 'fakemailgenerator.com'
+  ];
+
+  if (disposableDomains.includes(domainPart)) {
+    return 'Disposable/temp emails are not allowed. Please use your real Gmail, Outlook, or official email.';
+  }
+
+  // 4. Requirements Quality Check
+  const trimmedReq = String(requirements || '').trim();
+  if (trimmedReq.length < 3) {
+    return 'Please describe what you want to build (e.g. project features, tech).';
+  }
+  if (/^(asdf|qwerty|test|aaa|bbb|xxx|1234|abc)$/i.test(trimmedReq)) {
+    return 'Please enter real software requirements.';
+  }
+
+  return null;
+};
 
 const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => {
   const { playClick, playSuccess } = useSound();
@@ -31,6 +118,7 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
 
   const [submitting, setSubmitting] = useState(false);
   const [submittedResult, setSubmittedResult] = useState(null);
+  const [clientError, setClientError] = useState('');
 
   // Clean Single Form State
   const [formData, setFormData] = useState({
@@ -46,14 +134,18 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
   const handleSubmit = async (e) => {
     e.preventDefault();
     playClick();
+    setClientError('');
 
-    if (!formData.mobile) {
-      alert('Please provide your phone or WhatsApp number so our engineering lead can reach you.');
-      return;
-    }
+    // Strict Real Phone & Email Validation
+    const validationErr = validateClientInput(
+      formData.name,
+      formData.mobile,
+      formData.email,
+      formData.requirements || formData.projectTitle
+    );
 
-    if (!formData.requirements && !formData.projectTitle) {
-      alert('Please provide a brief description of what you want to build.');
+    if (validationErr) {
+      setClientError(validationErr);
       return;
     }
 
@@ -61,11 +153,11 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
       setSubmitting(true);
 
       const payload = {
-        clientName: formData.name || user?.name || 'Software Client',
-        clientEmail: formData.email || user?.email || 'client@projectxia.io',
-        clientMobile: formData.mobile || user?.mobile || '',
-        projectTitle: formData.projectTitle || 'Custom Software Project',
-        requirements: formData.requirements || 'Custom Software Build Request',
+        clientName: formData.name.trim(),
+        clientEmail: formData.email.trim().toLowerCase(),
+        clientMobile: formData.mobile.trim(),
+        projectTitle: formData.projectTitle.trim() || formData.requirements.slice(0, 30),
+        requirements: formData.requirements.trim(),
         targetDeadline: formData.targetDeadline,
         budgetRange: formData.budgetRange,
         type: 'IDEA_SUBMISSION',
@@ -82,7 +174,7 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
       }
     } catch (err) {
       console.error('Submission failed:', err);
-      alert(err.response?.data?.message || 'Failed to submit inquiry. Please try again.');
+      setClientError(err.response?.data?.message || 'Failed to submit inquiry. Please check your contact details.');
     } finally {
       setSubmitting(false);
     }
@@ -300,6 +392,14 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
                     </select>
                   </div>
                 </div>
+
+                {/* Error Banner */}
+                {clientError && (
+                  <div className="p-3 rounded-xl bg-red-950/60 border border-red-500/50 text-red-300 flex items-start gap-2 text-[11px] font-mono leading-relaxed shadow-lg shadow-red-950/40">
+                    <AlertCircle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                    <span>{clientError}</span>
+                  </div>
+                )}
 
                 {/* Submit CTA */}
                 <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-800">
