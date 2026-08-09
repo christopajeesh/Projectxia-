@@ -30,6 +30,7 @@ import VideoPlayerModal from '../components/ui/VideoPlayerModal';
 import LicenseModal from '../components/ui/LicenseModal';
 import ShareProjectModal from '../components/ui/ShareProjectModal';
 import DealOfferModal from '../components/ui/DealOfferModal';
+import TermsModal from '../components/ui/TermsModal';
 import AuroraBackground from '../components/ui/AuroraBackground';
 import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
@@ -41,6 +42,7 @@ const ProjectDetailPage = () => {
   const navigate = useNavigate();
   const { playClick, playSuccess, playShield } = useSound();
   const { user, isAuthenticated, openAuthModal } = useAuth();
+  const [showTermsModal, setShowTermsModal] = useState(false);
 
   const [project, setProject] = useState(null);
   const [activeDealModal, setActiveDealModal] = useState(false);
@@ -565,6 +567,30 @@ const ProjectDetailPage = () => {
             </div>
           )}
         </div>
+
+        {/* Bottom Terms & Conditions & Buyer Protection Banner */}
+        <div className="mt-8 p-5 sm:p-6 rounded-3xl bg-gray-950/80 border border-cyan-500/30 backdrop-blur-xl flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-2xl bg-cyan-500/20 border border-cyan-500/40 text-cyan-400">
+              <Shield className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-xs font-display font-bold text-white uppercase tracking-wider">
+                ProjectXia Buyer Protection & Marketplace Terms
+              </h4>
+              <p className="text-[11px] font-mono text-slate-400">
+                All source code releases, hardware schematics, and video walkthroughs are protected under official ProjectXia Terms & Conditions.
+              </p>
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={() => setShowTermsModal(true)}
+            className="px-5 py-2 rounded-xl bg-cyan-500/10 hover:bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 font-mono text-xs font-bold transition-all cursor-pointer whitespace-nowrap"
+          >
+            Terms & Conditions →
+          </button>
+        </div>
       </div>
 
       {/* EDIT PROJECT MODAL (AUTHOR ONLY) */}
@@ -775,6 +801,12 @@ const ProjectDetailPage = () => {
           project={project}
         />
       )}
+
+      {/* Terms & Conditions Modal */}
+      <TermsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
     </div>
   );
 };

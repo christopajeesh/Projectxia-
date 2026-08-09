@@ -18,6 +18,7 @@ import {
   AlertCircle,
   ArrowLeft,
 } from 'lucide-react';
+import TermsModal from './TermsModal';
 import { useAuth } from '../../context/AuthContext';
 import { useSound } from '../../context/SoundContext';
 import AuroraBackground from './AuroraBackground';
@@ -102,6 +103,7 @@ const AuthModal = () => {
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [statusMsg, setStatusMsg] = useState('');
+  const [showTermsInAuth, setShowTermsInAuth] = useState(false);
 
   // Sync mode when opened
   useEffect(() => {
@@ -1015,8 +1017,28 @@ const AuthModal = () => {
                 </form>
               )
             )}
+
+            {/* Terms & Conditions Notice */}
+            <div className="pt-2 text-center border-t border-slate-900/60">
+              <p className="text-[10px] font-mono text-slate-500">
+                By continuing, you agree to ProjectXia{' '}
+                <button
+                  type="button"
+                  onClick={() => setShowTermsInAuth(true)}
+                  className="text-cyan-400 hover:underline cursor-pointer font-bold"
+                >
+                  Terms & Conditions
+                </button>
+              </p>
+            </div>
           </div>
         </motion.div>
+
+        {/* Terms & Conditions Modal */}
+        <TermsModal
+          isOpen={showTermsInAuth}
+          onClose={() => setShowTermsInAuth(false)}
+        />
 
         {/* ======================================================= */}
         {/* POPUP 1: Account Not Registered Alert Modal             */}

@@ -1,8 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Shield, Lock, Terminal, Cpu, CheckCircle2, Heart, Award } from 'lucide-react';
+import TermsModal from './TermsModal';
 
 const Footer = () => {
+  const [showTerms, setShowTerms] = useState(false);
+
   return (
     <footer className="relative border-t border-cyan-500/20 bg-gray-950/95 overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -82,10 +85,19 @@ const Footer = () => {
           <div className="flex items-center gap-4">
             <Link to="/marketplace" className="hover:text-slate-300">Projects</Link>
             <Link to="/ai-shield" className="hover:text-slate-300">Plagiarism Checker</Link>
-            <span className="text-cyan-400">Node: Cloud Secured</span>
+            <button
+              type="button"
+              onClick={() => setShowTerms(true)}
+              className="text-cyan-400 hover:text-cyan-300 underline underline-offset-4 cursor-pointer"
+            >
+              Terms & Conditions
+            </button>
+            <span className="text-emerald-400">Node: Cloud Secured</span>
           </div>
         </div>
       </div>
+
+      <TermsModal isOpen={showTerms} onClose={() => setShowTerms(false)} />
     </footer>
   );
 };
