@@ -26,79 +26,37 @@ import api from '../../services/api';
 import confetti from 'canvas-confetti';
 
 const CustomSoftwareRequestModal = ({ isOpen, onClose, initialTab = 'idea', onInquirySubmitted }) => {
-  const { playClick, playSuccess, playShield } = useSound();
+  const { playClick, playSuccess } = useSound();
   const { user } = useAuth();
 
   const [activeTab, setActiveTab] = useState(initialTab); // 'idea' | 'callback'
   const [submitting, setSubmitting] = useState(false);
   const [submittedResult, setSubmittedResult] = useState(null);
 
-  // Form State
+  // Simplified Form State
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
     mobile: user?.mobile || '',
-    department: 'Computer Science (CSE / IT)',
     projectTitle: '',
     requirements: '',
-    techPreferences: ['React', 'Node.js', 'Python', 'AI/ML'],
+    targetDeadline: '2-3 Weeks (Standard)',
     budgetRange: '₹15,000 - ₹30,000',
-    targetDeadline: '2-3 Weeks',
-    consultationMode: 'PHONE_CALL', // 'PHONE_CALL' | 'WHATSAPP' | 'GOOGLE_MEET'
-    preferredTimeSlot: 'Morning (10:00 AM - 01:00 PM)',
-    docLink: '',
+    preferredTimeSlot: 'Immediate (Next 30 Minutes)',
+    consultationMode: 'PHONE_CALL',
   });
-
-  const departmentOptions = [
-    'Computer Science (CSE / IT)',
-    'AI & Data Science (AI / ML)',
-    'Cyber Security & WAF',
-    'Electronics & Comm (ECE / IoT)',
-    'Full-Stack Web & SaaS',
-    'Mobile Application (iOS / Android)',
-    'Blockchain, Smart Contracts & Web3',
-    'Enterprise Cloud & Microservices',
-  ];
-
-  const techChoices = [
-    'React',
-    'Next.js',
-    'Node.js / Express',
-    'Python / Django',
-    'FastAPI',
-    'PyTorch / TensorFlow',
-    'Flutter / React Native',
-    'PostgreSQL / MongoDB',
-    'TailwindCSS',
-    'Docker / Kubernetes',
-    'Solidity / Web3',
-    'ESP32 / MicroPython',
-  ];
-
-  const handleTechToggle = (tech) => {
-    playClick();
-    setFormData((prev) => {
-      const exists = prev.techPreferences.includes(tech);
-      return {
-        ...prev,
-        techPreferences: exists
-          ? prev.techPreferences.filter((t) => t !== tech)
-          : [...prev.techPreferences, tech],
-      };
-    });
-  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     playClick();
 
-    if (activeTab === 'callback' && !formData.mobile) {
-      alert('Please provide your mobile/WhatsApp number so our lead developer can reach you.');
+    if (!formData.mobile) {
+      alert('Please provide your phone or WhatsApp number so our engineering lead can reach you.');
       return;
     }
 
-    if (activeTab === 'idea' && (!formData.projectTitle || !formData.requirements)) {
-      alert('Please provide a project title and brief description of your software idea.');
+    if (activeTab === 'idea' && !formData.requirements && !formData.projectTitle) {
+      alert('Please provide a brief description of what you want to build.');
       return;
     }
 
@@ -106,18 +64,15 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, initialTab = 'idea', onIn
       setSubmitting(true);
 
       const payload = {
-        clientName: formData.name || user?.name || 'Software Innovator',
+        clientName: formData.name || user?.name || 'Software Client',
         clientEmail: formData.email || user?.email || 'client@projectxia.io',
-        clientMobile: formData.mobile || user?.mobile || '+91 99999 00000',
-        department: formData.department,
-        projectTitle: formData.projectTitle || (activeTab === 'callback' ? 'Custom Software Consultation & Architecture Enquiry' : 'Custom Software System'),
-        requirements: formData.requirements || (activeTab === 'callback' ? 'Requested phone/WhatsApp consultation for custom software project by ProjectXia Developing Team.' : 'Custom Software Build Request'),
-        techPreferences: formData.techPreferences,
-        budgetRange: formData.budgetRange,
+        clientMobile: formData.mobile || user?.mobile || '',
+        projectTitle: formData.projectTitle || (activeTab === 'callback' ? 'Developer Callback Request' : 'Custom Software Project'),
+        requirements: formData.requirements || (activeTab === 'callback' ? 'Requested phone/WhatsApp developer callback for project consultation.' : 'Custom Software Build Request'),
         targetDeadline: formData.targetDeadline,
+        budgetRange: formData.budgetRange,
         consultationMode: formData.consultationMode,
         preferredTimeSlot: formData.preferredTimeSlot,
-        docLink: formData.docLink,
         type: activeTab === 'callback' ? 'CALLBACK_REQUEST' : 'IDEA_SUBMISSION',
       };
 
@@ -157,31 +112,31 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, initialTab = 'idea', onIn
           className="fixed inset-0 bg-black/85 backdrop-blur-2xl"
         />
 
-        {/* Modal Window with Luxury Cyber Border */}
+        {/* Modal Window */}
         <motion.div
           initial={{ scale: 0.94, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.94, opacity: 0, y: 20 }}
-          className="relative w-full max-w-3xl bg-gray-950/95 border border-cyan-500/40 rounded-3xl overflow-hidden shadow-2xl shadow-cyan-500/25 z-10 my-8 max-h-[92vh] flex flex-col backdrop-blur-3xl"
+          className="relative w-full max-w-2xl bg-gray-950/95 border border-cyan-500/40 rounded-3xl overflow-hidden shadow-2xl shadow-cyan-500/25 z-10 my-6 max-h-[92vh] flex flex-col backdrop-blur-3xl"
         >
-          {/* Cyber Header */}
-          <div className="flex items-center justify-between px-5 sm:px-7 py-4 sm:py-5 bg-gradient-to-r from-gray-950 via-slate-900 to-gray-950 border-b border-cyan-500/25">
+          {/* Header */}
+          <div className="flex items-center justify-between px-5 sm:px-6 py-4 bg-gradient-to-r from-gray-950 via-slate-900 to-gray-950 border-b border-cyan-500/25">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-2xl bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 shadow-neon-cyan shrink-0">
+              <div className="p-2 rounded-2xl bg-cyan-500/20 border border-cyan-400/50 text-cyan-300 shadow-neon-cyan shrink-0">
                 <Sparkles className="w-5 h-5 animate-spin-slow" />
               </div>
               <div>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex items-center gap-2">
                   <h2 className="text-base sm:text-lg font-display font-black text-white">
-                    Custom Software Development
+                    {activeTab === 'callback' ? 'Request Developer Callback' : 'Build Custom Software'}
                   </h2>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-400/50 font-bold uppercase tracking-wider">
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-400/50 font-bold uppercase">
                     In-House Team
                   </span>
                 </div>
-                <p className="text-[11px] font-mono text-slate-400 flex items-center gap-1.5 mt-0.5">
+                <p className="text-[11px] font-mono text-slate-400 flex items-center gap-1 mt-0.5">
                   <Mail className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                  <span>Direct Notification to <strong className="text-cyan-300 font-bold">theprojectxia@gmail.com</strong> • Full IP Handover</span>
+                  <span>Direct copy to <strong className="text-cyan-300 font-bold">theprojectxia@gmail.com</strong></span>
                 </p>
               </div>
             </div>
@@ -192,79 +147,70 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, initialTab = 'idea', onIn
                 playClick();
                 handleResetAndClose();
               }}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer shrink-0 ml-2"
+              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
           {/* Body Content */}
-          <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-5 font-sans">
+          <div className="p-4 sm:p-6 overflow-y-auto flex-1 space-y-4 font-sans">
             {submittedResult ? (
-              /* Success Confirmation View */
-              <div className="py-8 text-center space-y-6">
-                <div className="w-16 h-16 rounded-3xl bg-emerald-500/20 border border-emerald-400/50 text-emerald-400 mx-auto flex items-center justify-center shadow-lg shadow-emerald-500/30 animate-pulse">
-                  <CheckCircle2 className="w-8 h-8" />
+              /* Success View */
+              <div className="py-6 text-center space-y-5">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-400/50 text-emerald-400 mx-auto flex items-center justify-center shadow-lg shadow-emerald-500/30">
+                  <CheckCircle2 className="w-7 h-7" />
                 </div>
 
-                <div className="space-y-2">
-                  <h3 className="text-2xl font-display font-black text-white">
-                    {activeTab === 'callback' ? 'Callback Request Dispatched!' : 'Software Project Idea Received!'}
+                <div className="space-y-1.5">
+                  <h3 className="text-xl font-display font-black text-white">
+                    {activeTab === 'callback' ? 'Callback Scheduled!' : 'Project Idea Received!'}
                   </h3>
-                  <p className="text-xs font-mono text-slate-300 max-w-lg mx-auto leading-relaxed">
+                  <p className="text-xs font-mono text-slate-300 max-w-md mx-auto leading-relaxed">
                     {activeTab === 'callback'
-                      ? `Your callback request has been sent directly to the ProjectXia developing team leadership (theprojectxia@gmail.com). Our Senior Architect will reach out via ${formData.consultationMode} at ${formData.preferredTimeSlot}.`
-                      : 'Your software architecture specs have been delivered to the ProjectXia Core Engineering Team (theprojectxia@gmail.com). We will analyze your requirements and reach out with a detailed timeline & milestone breakdown.'}
+                      ? `Our Lead Developer has received your details at theprojectxia@gmail.com and will reach you via ${formData.consultationMode === 'WHATSAPP' ? 'WhatsApp' : 'Phone Call'} shortly.`
+                      : 'Our Core Engineering Team has received your project idea at theprojectxia@gmail.com. We will analyze your requirements and connect with you on WhatsApp/Phone.'}
                   </p>
                 </div>
 
-                {/* Reference Card */}
-                <div className="max-w-md mx-auto p-5 rounded-2xl bg-gray-900/90 border border-slate-800 text-left font-mono text-xs space-y-2.5 text-slate-300 shadow-xl">
-                  <div className="flex justify-between border-b border-slate-800 pb-2">
-                    <span className="text-slate-500">Tracking Reference:</span>
-                    <span className="text-cyan-400 font-bold">{submittedResult._id}</span>
+                <div className="max-w-sm mx-auto p-4 rounded-2xl bg-gray-900/90 border border-slate-800 text-left font-mono text-xs space-y-2 text-slate-300">
+                  <div className="flex justify-between border-b border-slate-800 pb-1.5">
+                    <span className="text-slate-500">Contact:</span>
+                    <span className="text-cyan-300 font-bold">{formData.mobile || formData.email}</span>
                   </div>
-                  <div className="flex justify-between border-b border-slate-800 pb-2">
-                    <span className="text-slate-500">Direct Recipient:</span>
-                    <span className="text-cyan-300 font-bold">theprojectxia@gmail.com</span>
-                  </div>
-                  <div className="flex justify-between border-b border-slate-800 pb-2">
+                  <div className="flex justify-between border-b border-slate-800 pb-1.5">
                     <span className="text-slate-500">Assigned Team:</span>
-                    <span className="text-emerald-400">ProjectXia Core Developing Team</span>
-                  </div>
-                  <div className="flex justify-between border-b border-slate-800 pb-2">
-                    <span className="text-slate-500">Target Deadline:</span>
-                    <span className="text-white">{submittedResult.targetDeadline}</span>
+                    <span className="text-emerald-400">ProjectXia Developing Team</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-500">Status:</span>
                     <span className="text-yellow-400 font-bold">
-                      {submittedResult.status === 'CALLBACK_SCHEDULED' ? '📞 Callback Scheduled' : '🔍 Under Lead Review'}
+                      {activeTab === 'callback' ? '📞 Scheduled' : '🔍 In Review'}
                     </span>
                   </div>
                 </div>
 
-                <div className="pt-4 flex justify-center gap-3">
+                <div className="pt-2 flex justify-center">
                   <button
                     type="button"
                     onClick={handleResetAndClose}
                     className="px-6 py-2.5 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-display font-bold text-xs shadow-lg shadow-cyan-500/25 transition-all cursor-pointer"
                   >
-                    View in My Profile & Projects →
+                    Done • Back to Website
                   </button>
                 </div>
               </div>
             ) : (
               <>
-                {/* Mode Selector Tabs (Clean Aligned Grid) */}
-                <div className="grid grid-cols-2 gap-2 p-1.5 rounded-2xl bg-gray-900/90 border border-slate-800">
+                {/* Clean Tab Switcher */}
+                <div className="grid grid-cols-2 gap-2 p-1 rounded-2xl bg-gray-900 border border-slate-800 text-xs font-display font-bold">
                   <button
                     type="button"
                     onClick={() => {
                       playClick();
                       setActiveTab('idea');
                     }}
-                    className={`py-3 px-3 rounded-xl font-display font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer text-center ${
+                    className={`py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
                       activeTab === 'idea'
                         ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/25'
                         : 'text-slate-400 hover:text-white'
@@ -280,33 +226,22 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, initialTab = 'idea', onIn
                       playClick();
                       setActiveTab('callback');
                     }}
-                    className={`py-3 px-3 rounded-xl font-display font-bold text-xs flex items-center justify-center gap-2 transition-all cursor-pointer text-center ${
+                    className={`py-2.5 px-3 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
                       activeTab === 'callback'
                         ? 'bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white shadow-lg shadow-purple-500/25'
                         : 'text-slate-400 hover:text-white'
                     }`}
                   >
                     <PhoneCall className="w-4 h-4 shrink-0" />
-                    <span>Request Call Back / Enquiry</span>
+                    <span>Request Callback</span>
                   </button>
                 </div>
 
-                {/* Direct Dispatch & In-House Guarantee Banner */}
-                <div className="p-3 sm:p-3.5 rounded-2xl bg-gradient-to-r from-cyan-950/50 via-slate-900/60 to-purple-950/50 border border-cyan-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 font-mono text-[11px]">
-                  <div className="flex items-center gap-2 text-cyan-300">
-                    <ShieldCheck className="w-4 h-4 text-cyan-400 shrink-0" />
-                    <span>Inquiries sent directly to <strong className="text-cyan-200">theprojectxia@gmail.com</strong> (Official Developing Team)</span>
-                  </div>
-                  <span className="px-2.5 py-0.5 rounded bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 text-[10px] whitespace-nowrap">
-                    100% In-House Code & NDA
-                  </span>
-                </div>
-
-                <form onSubmit={handleSubmit} className="space-y-4 font-mono text-xs">
-                  {/* Basic Contact Info */}
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <form onSubmit={handleSubmit} className="space-y-3.5 font-mono text-xs pt-1">
+                  {/* Basic Contact Info (2 Fields) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-slate-300 block mb-1 text-[11px] font-bold">Your Name</label>
+                      <label className="text-slate-300 block mb-1 font-bold text-[11px]">Your Name</label>
                       <input
                         type="text"
                         value={formData.name}
@@ -317,225 +252,165 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, initialTab = 'idea', onIn
                     </div>
 
                     <div>
-                      <label className="text-slate-300 block mb-1 text-[11px] font-bold">Email Address</label>
-                      <input
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                        placeholder="Enter your email address"
-                        className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3.5 py-2.5 text-white placeholder:text-slate-500 focus:outline-none"
-                      />
-                    </div>
-
-                    <div>
-                      <label className="text-slate-300 block mb-1 text-[11px] font-bold">WhatsApp / Mobile *</label>
+                      <label className="text-slate-300 block mb-1 font-bold text-[11px]">Phone / WhatsApp Number *</label>
                       <input
                         type="tel"
+                        required
                         value={formData.mobile}
                         onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
                         placeholder="Enter phone or WhatsApp number"
-                        required
                         className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3.5 py-2.5 text-white placeholder:text-slate-500 focus:outline-none"
                       />
                     </div>
                   </div>
 
-                  {/* TAB 1: SHARE IDEA SPECIFICS */}
+                  <div>
+                    <label className="text-slate-300 block mb-1 font-bold text-[11px]">Email Address</label>
+                    <input
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      placeholder="Enter your email address"
+                      className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3.5 py-2.5 text-white placeholder:text-slate-500 focus:outline-none"
+                    />
+                  </div>
+
+                  {/* TAB 1: SIMPLE SOFTWARE IDEA FORM */}
                   {activeTab === 'idea' ? (
-                    <div className="space-y-4">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div>
-                          <label className="text-slate-300 block mb-1 text-[11px] font-bold">Department / Domain</label>
-                          <select
-                            value={formData.department}
-                            onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                            className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3.5 py-2.5 text-white focus:outline-none cursor-pointer"
-                          >
-                            {departmentOptions.map((opt) => (
-                              <option key={opt} value={opt}>
-                                {opt}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="text-slate-300 block mb-1 text-[11px] font-bold">Software Title / Concept *</label>
-                          <input
-                            type="text"
-                            value={formData.projectTitle}
-                            onChange={(e) => setFormData({ ...formData, projectTitle: e.target.value })}
-                            placeholder="Enter project title or software concept"
-                            required
-                            className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3.5 py-2.5 text-white placeholder:text-slate-500 focus:outline-none"
-                          />
-                        </div>
-                      </div>
-
-                      {/* Tech Stack Preferences */}
+                    <div className="space-y-3 pt-1">
                       <div>
-                        <label className="text-slate-300 block mb-1.5 text-[11px] font-bold">
-                          Preferred Tech Stack (Select all that apply)
+                        <label className="text-slate-300 block mb-1 font-bold text-[11px]">
+                          Software Title or Project Concept
                         </label>
-                        <div className="flex flex-wrap gap-1.5">
-                          {techChoices.map((tech) => {
-                            const isSelected = formData.techPreferences.includes(tech);
-                            return (
-                              <button
-                                type="button"
-                                key={tech}
-                                onClick={() => handleTechToggle(tech)}
-                                className={`px-2.5 py-1 rounded-lg text-[11px] font-mono transition-all cursor-pointer ${
-                                  isSelected
-                                    ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-400'
-                                    : 'bg-gray-900 border border-slate-800 text-slate-400 hover:text-white'
-                                }`}
-                              >
-                                {isSelected ? '✓ ' : '+ '}
-                                {tech}
-                              </button>
-                            );
-                          })}
-                        </div>
+                        <input
+                          type="text"
+                          value={formData.projectTitle}
+                          onChange={(e) => setFormData({ ...formData, projectTitle: e.target.value })}
+                          placeholder="e.g. AI Medical Diagnosis App, IoT Smart Grid, E-Commerce SaaS"
+                          className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3.5 py-2.5 text-white placeholder:text-slate-500 focus:outline-none"
+                        />
                       </div>
 
-                      {/* Description / Requirements */}
                       <div>
-                        <label className="text-slate-300 block mb-1 text-[11px] font-bold">
-                          Project Requirements & Core Feature Scope *
+                        <label className="text-slate-300 block mb-1 font-bold text-[11px]">
+                          What do you want us to build? (Features, tech, or guidelines) *
                         </label>
                         <textarea
-                          rows={4}
+                          rows={3}
+                          required
                           value={formData.requirements}
                           onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                          placeholder="Describe your software requirement, key features, target users, and any specific preferences..."
-                          required
+                          placeholder="Briefly describe what the project should do, any specific technology you want (React, Python, Node, Flutter, etc.), and university or startup goals..."
                           className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl p-3 text-white placeholder:text-slate-500 focus:outline-none"
                         />
                       </div>
 
-                      {/* Budget & Timeline */}
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="text-slate-300 block mb-1 text-[11px] font-bold">Budget Range</label>
-                          <select
-                            value={formData.budgetRange}
-                            onChange={(e) => setFormData({ ...formData, budgetRange: e.target.value })}
-                            className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3 py-2 text-white focus:outline-none cursor-pointer"
-                          >
-                            <option value="₹10,000 - ₹20,000">₹10,000 - ₹20,000 (Standard Capstone)</option>
-                            <option value="₹20,000 - ₹40,000">₹20,000 - ₹40,000 (Advanced AI / SaaS)</option>
-                            <option value="₹40,000 - ₹75,000">₹40,000 - ₹75,000 (Full Enterprise Build)</option>
-                            <option value="₹75,000+">₹75,000+ (Commercial Scale)</option>
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="text-slate-300 block mb-1 text-[11px] font-bold">Target Timeline</label>
+                          <label className="text-slate-300 block mb-1 font-bold text-[11px]">Target Timeline</label>
                           <select
                             value={formData.targetDeadline}
                             onChange={(e) => setFormData({ ...formData, targetDeadline: e.target.value })}
                             className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3 py-2 text-white focus:outline-none cursor-pointer"
                           >
-                            <option value="1 Week (Urgent / Express)">1 Week (Express Delivery)</option>
+                            <option value="1 Week (Express Delivery)">1 Week (Express Delivery)</option>
                             <option value="2-3 Weeks (Standard)">2-3 Weeks (Standard)</option>
                             <option value="1 Month">1 Month</option>
-                            <option value="2+ Months (Milestone-based)">2+ Months</option>
+                            <option value="Flexible">Flexible Timeline</option>
                           </select>
                         </div>
 
                         <div>
-                          <label className="text-slate-300 block mb-1 text-[11px] font-bold">Document Link (Optional)</label>
-                          <input
-                            type="url"
-                            value={formData.docLink}
-                            onChange={(e) => setFormData({ ...formData, docLink: e.target.value })}
-                            placeholder="Paste link to synopsis or PDF (Optional)"
-                            className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3 py-2 text-white placeholder:text-slate-500 focus:outline-none"
-                          />
+                          <label className="text-slate-300 block mb-1 font-bold text-[11px]">Approximate Budget</label>
+                          <select
+                            value={formData.budgetRange}
+                            onChange={(e) => setFormData({ ...formData, budgetRange: e.target.value })}
+                            className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3 py-2 text-white focus:outline-none cursor-pointer"
+                          >
+                            <option value="₹10,000 - ₹20,000">₹10,000 - ₹20,000 (Student Capstone)</option>
+                            <option value="₹20,000 - ₹40,000">₹20,000 - ₹40,000 (Advanced AI / Full-Stack)</option>
+                            <option value="₹40,000+">₹40,000+ (Full Enterprise SaaS)</option>
+                          </select>
                         </div>
                       </div>
                     </div>
                   ) : (
-                    /* TAB 2: INSTANT CALL BACK SPECIFICS */
-                    <div className="space-y-4">
-                      <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/40 space-y-2">
-                        <h4 className="font-display font-bold text-white text-sm flex items-center gap-2">
-                          <PhoneCall className="w-4 h-4 text-purple-400 shrink-0" />
-                          <span>Direct Architecture Consultation with ProjectXia Lead Developer</span>
-                        </h4>
-                        <p className="text-slate-300 text-[11px] leading-relaxed">
-                          Speak directly with our in-house engineering leads. We will analyze your project scope, recommend optimal tech stacks, outline milestones, and provide a fixed quotation within 1 hour.
+                    /* TAB 2: SIMPLE INSTANT CALLBACK FORM */
+                    <div className="space-y-3 pt-1">
+                      <div className="p-3.5 rounded-2xl bg-purple-950/40 border border-purple-500/30 text-[11px] text-slate-300 leading-relaxed">
+                        <p className="font-bold text-white flex items-center gap-1.5 mb-1">
+                          <PhoneCall className="w-4 h-4 text-purple-400" />
+                          <span>Direct Phone / WhatsApp Discussion</span>
                         </p>
+                        <span>Our Senior Developer will call you directly to discuss your requirements, tech stack, and deliver a fixed timeline quote.</span>
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                          <label className="text-slate-300 block mb-1 text-[11px] font-bold">Preferred Consultation Channel</label>
+                          <label className="text-slate-300 block mb-1 font-bold text-[11px]">How should we reach you?</label>
                           <select
                             value={formData.consultationMode}
                             onChange={(e) => setFormData({ ...formData, consultationMode: e.target.value })}
                             className="w-full bg-gray-900 border border-slate-800 focus:border-purple-400 rounded-xl px-3.5 py-2.5 text-white focus:outline-none cursor-pointer"
                           >
                             <option value="PHONE_CALL">Direct Phone Call</option>
-                            <option value="WHATSAPP">WhatsApp Voice / Chat</option>
-                            <option value="GOOGLE_MEET">Google Meet Screen Share</option>
+                            <option value="WHATSAPP">WhatsApp Voice / Message</option>
                           </select>
                         </div>
 
                         <div>
-                          <label className="text-slate-300 block mb-1 text-[11px] font-bold">Preferred Callback Time</label>
+                          <label className="text-slate-300 block mb-1 font-bold text-[11px]">Best Time to Call</label>
                           <select
                             value={formData.preferredTimeSlot}
                             onChange={(e) => setFormData({ ...formData, preferredTimeSlot: e.target.value })}
                             className="w-full bg-gray-900 border border-slate-800 focus:border-purple-400 rounded-xl px-3.5 py-2.5 text-white focus:outline-none cursor-pointer"
                           >
                             <option value="Immediate (Next 30 Minutes)">Immediate (Next 30 Minutes)</option>
-                            <option value="Morning (10:00 AM - 01:00 PM)">Morning (10:00 AM - 01:00 PM)</option>
-                            <option value="Afternoon (02:00 PM - 05:00 PM)">Afternoon (02:00 PM - 05:00 PM)</option>
-                            <option value="Evening (06:00 PM - 09:00 PM)">Evening (06:00 PM - 09:00 PM)</option>
+                            <option value="Morning (10:00 AM - 01:00 PM)">Morning (10 AM - 1 PM)</option>
+                            <option value="Afternoon (02:00 PM - 05:00 PM)">Afternoon (2 PM - 5 PM)</option>
+                            <option value="Evening (06:00 PM - 09:00 PM)">Evening (6 PM - 9 PM)</option>
                           </select>
                         </div>
                       </div>
 
                       <div>
-                        <label className="text-slate-300 block mb-1 text-[11px] font-bold">
-                          Brief Note / What do you want to discuss?
+                        <label className="text-slate-300 block mb-1 font-bold text-[11px]">
+                          Quick Note (Optional)
                         </label>
                         <textarea
-                          rows={3}
+                          rows={2}
                           value={formData.requirements}
                           onChange={(e) => setFormData({ ...formData, requirements: e.target.value })}
-                          placeholder="Describe your software requirement or the topic you want to build..."
+                          placeholder="What project or topic do you want to discuss?"
                           className="w-full bg-gray-900 border border-slate-800 focus:border-purple-400 rounded-xl p-3 text-white placeholder:text-slate-500 focus:outline-none"
                         />
                       </div>
                     </div>
                   )}
 
-                  {/* Submission Button */}
-                  <div className="pt-3 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-800">
-                    <div className="flex items-center gap-2 text-slate-400 text-[11px]">
+                  {/* Submit CTA */}
+                  <div className="pt-2 flex flex-col sm:flex-row items-center justify-between gap-3 border-t border-slate-800">
+                    <div className="flex items-center gap-1.5 text-slate-400 text-[11px]">
                       <Lock className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                      <span>Sent directly to <strong className="text-cyan-300">theprojectxia@gmail.com</strong></span>
+                      <span>Direct email to <strong className="text-cyan-300">theprojectxia@gmail.com</strong></span>
                     </div>
 
                     <button
                       type="submit"
                       disabled={submitting}
-                      className={`w-full sm:w-auto px-6 py-3 rounded-xl font-display font-black text-xs flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer ${
+                      className={`w-full sm:w-auto px-7 py-3 rounded-xl font-display font-black text-xs flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer ${
                         activeTab === 'callback'
                           ? 'bg-gradient-to-r from-purple-500 via-pink-500 to-rose-500 text-white shadow-purple-500/25 hover:opacity-95'
                           : 'bg-cyan-500 hover:bg-cyan-400 text-black shadow-cyan-500/25'
                       }`}
                     >
                       {submitting ? (
-                        <span>Dispatching to theprojectxia@gmail.com...</span>
+                        <span>Submitting...</span>
                       ) : (
                         <>
                           <Send className="w-4 h-4" />
                           <span>
-                            {activeTab === 'callback' ? 'Schedule Call Back Now' : 'Submit Idea to ProjectXia Team'}
+                            {activeTab === 'callback' ? 'Request Call Back' : 'Submit My Idea'}
                           </span>
                         </>
                       )}
