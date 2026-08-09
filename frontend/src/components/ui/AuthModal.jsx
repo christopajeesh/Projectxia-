@@ -253,7 +253,10 @@ const AuthModal = () => {
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
       navigate('/marketplace');
     } else {
-      if (res.notRegistered || res.statusCode === 404) {
+      if (res.noPasswordSet) {
+        setErrorMsg(res.message || 'This account does not have a password yet.');
+        setStatusMsg('💡 You can click "Forgot Password?" above to set a password for this email, or switch to Instant OTP Code.');
+      } else if (res.notRegistered || res.statusCode === 404) {
         setUnregisteredEmail(cleanEmail);
         setShowNotRegisteredPopup(true);
       } else if (res.alreadyRegistered || res.statusCode === 409) {

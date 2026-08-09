@@ -355,7 +355,8 @@ export const loginUser = async (req, res) => {
     if (!user.password) {
       return res.status(400).json({
         success: false,
-        message: 'This account does not have a password. Please sign in with Google or Email OTP.',
+        noPasswordSet: true,
+        message: 'This account does not have a password yet (registered via Google or OTP). You can sign in using Instant OTP Code or click "Forgot Password?" to create a password.',
       });
     }
 
@@ -375,7 +376,7 @@ export const loginUser = async (req, res) => {
 
       return res.status(401).json({
         success: false,
-        message: 'Invalid password. Please try again or use OTP verification.',
+        message: 'Invalid password. Please try again or use Instant OTP verification.',
       });
     }
 
@@ -414,12 +415,12 @@ export const loginUser = async (req, res) => {
 };
 
 // ============================================================
-// SEND OTP (RESILIENT WITH CONSOLE & EMAIL DISPATCH)
+// SEND OTP (UNIVERSAL DISPATCH FOR EMAIL & MOBILE)
 // ============================================================
 
 export const sendOtp = async (req, res) => {
   try {
-    const { identifier, email, mobile, name, mode } = req.body;
+    const { identifier, email, mobile, name } = req.body;
     const rawIdentifier = identifier || email || mobile;
 
     if (!rawIdentifier) {
@@ -439,31 +440,6 @@ export const sendOtp = async (req, res) => {
         success: false,
         message: 'Please provide a valid email or international phone number.',
       });
-    }
-
-    // Check if account exists for signin or register mode
-    if (mode === 'signin') {
-      const existingUser = isEmail
-        ? await User.findOne({ email: cleanIdentifier })
-        : await User.findOne({ mobile: cleanPhone });
-      if (!existingUser) {
-        return res.status(404).json({
-          success: false,
-          notRegistered: true,
-          message: `No ProjectXia account found for ${cleanIdentifier}. Please register to continue.`,
-        });
-      }
-    } else if (mode === 'register') {
-      const existingUser = isEmail
-        ? await User.findOne({ email: cleanIdentifier })
-        : await User.findOne({ mobile: cleanPhone });
-      if (existingUser) {
-        return res.status(409).json({
-          success: false,
-          alreadyRegistered: true,
-          message: `An account with ${cleanIdentifier} already exists. Please sign in instead.`,
-        });
-      }
     }
 
     // ========================================================

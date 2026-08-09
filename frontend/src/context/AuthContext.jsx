@@ -76,6 +76,7 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       return {
         success: false,
+        noPasswordSet: err.response?.data?.noPasswordSet || false,
         notRegistered: err.response?.data?.notRegistered || err.response?.status === 404 || false,
         statusCode: err.response?.status,
         message: err.response?.data?.message || 'Login failed. Please verify credentials.',
