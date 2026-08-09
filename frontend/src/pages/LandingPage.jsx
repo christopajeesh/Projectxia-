@@ -87,6 +87,7 @@ const LandingPage = () => {
   const [isScanning, setIsScanning] = useState(false);
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     fetchFeatured();
   }, []);
 

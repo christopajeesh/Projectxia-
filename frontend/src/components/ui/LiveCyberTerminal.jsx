@@ -12,10 +12,12 @@ const LiveCyberTerminal = ({ className = '' }) => {
     { text: '⚡ ProjectXia Quantum Kernel v4.2.0 [Online]', type: 'system' },
     { text: 'Type "help" to view available engineering commands or "scan" to test code.', type: 'info' },
   ]);
-  const bottomRef = useRef(null);
+  const containerRef = useRef(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (containerRef.current) {
+      containerRef.current.scrollTop = containerRef.current.scrollHeight;
+    }
   }, [history]);
 
   const handleCommand = (e) => {
@@ -94,7 +96,7 @@ const LiveCyberTerminal = ({ className = '' }) => {
       </div>
 
       {/* Terminal Output Area */}
-      <div className="p-4 h-48 overflow-y-auto space-y-2 leading-relaxed bg-[#030712]/90 select-text">
+      <div ref={containerRef} className="p-4 h-48 overflow-y-auto space-y-2 leading-relaxed bg-[#030712]/90 select-text">
         {history.map((line, idx) => (
           <div
             key={idx}
@@ -115,7 +117,6 @@ const LiveCyberTerminal = ({ className = '' }) => {
             {line.text}
           </div>
         ))}
-        <div ref={bottomRef} />
       </div>
 
       {/* Terminal Input Line */}

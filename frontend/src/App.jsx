@@ -24,11 +24,16 @@ import ChatPage from './pages/ChatPage';
 import AiShieldPage from './pages/AiShieldPage';
 import AdminPage from './pages/AdminPage';
 
-// Auto-scroll to top on every navigation or login
+// Auto-scroll to top on every navigation or page load
 const ScrollToTop = () => {
   const { pathname } = useLocation();
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+    if (typeof window !== 'undefined') {
+      if ('scrollRestoration' in window.history) {
+        window.history.scrollRestoration = 'manual';
+      }
+      window.scrollTo(0, 0);
+    }
   }, [pathname]);
   return null;
 };
