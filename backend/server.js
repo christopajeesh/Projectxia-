@@ -105,12 +105,17 @@ app.get('*', (req, res, next) => {
 app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-  console.log(`
-  ======================================================
-  🚀 [ProjectXia Backend Engine] OPERATIONAL ON PORT ${PORT}
-  🛡️ [Security Shield] Zero-Day & Plagiarism Defense ACTIVE
-  🌐 [Real-Time Gateway] Socket.IO Engine LISTENING
-  ======================================================
-  `);
-});
+
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
+  server.listen(PORT, () => {
+    console.log(`
+    ======================================================
+    🚀 [ProjectXia Backend Engine] OPERATIONAL ON PORT ${PORT}
+    🛡️ [Security Shield] Zero-Day & Plagiarism Defense ACTIVE
+    🌐 [Real-Time Gateway] Socket.IO Engine LISTENING
+    ======================================================
+    `);
+  });
+}
+
+export default app;
