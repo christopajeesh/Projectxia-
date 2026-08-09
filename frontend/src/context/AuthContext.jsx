@@ -76,6 +76,8 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       return {
         success: false,
+        notRegistered: err.response?.data?.notRegistered || err.response?.status === 404 || false,
+        statusCode: err.response?.status,
         message: err.response?.data?.message || 'Login failed. Please verify credentials.',
       };
     } finally {
@@ -104,6 +106,8 @@ export const AuthProvider = ({ children }) => {
     } catch (err) {
       return {
         success: false,
+        alreadyRegistered: err.response?.status === 409 || err.response?.data?.alreadyRegistered || false,
+        statusCode: err.response?.status,
         message: err.response?.data?.message || 'Registration failed.',
       };
     } finally {
@@ -269,14 +273,17 @@ export const AuthProvider = ({ children }) => {
   };
 
   // Send OTP to phone/email
-  const sendOtp = async (identifier) => {
+  const sendOtp = async (identifier, mode = 'signin') => {
     setIsLoading(true);
     try {
-      const res = await api.post('/auth/send-otp', { identifier });
+      const res = await api.post('/auth/send-otp', { identifier, mode });
       return { success: true, message: res.data.message, otp: res.data.otp };
     } catch (err) {
       return {
         success: false,
+        notRegistered: err.response?.data?.notRegistered || err.response?.status === 404 || false,
+        alreadyRegistered: err.response?.data?.alreadyRegistered || err.response?.status === 409 || false,
+        statusCode: err.response?.status,
         message: err.response?.data?.message || 'Failed to send OTP code.',
       };
     } finally {

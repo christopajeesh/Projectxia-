@@ -37,7 +37,6 @@ import ArchitecturePeekModal from '../components/ui/ArchitecturePeekModal';
 import Interactive3DViewer from '../components/ui/Interactive3DViewer';
 import LiveCyberTerminal from '../components/ui/LiveCyberTerminal';
 import CustomDevModal from '../components/ui/CustomDevModal';
-import GoogleAccountChooserModal from '../components/ui/GoogleAccountChooserModal';
 import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -63,7 +62,6 @@ const LandingPage = () => {
   const [activePeekProject, setActivePeekProject] = useState(null);
   const [activeFaq, setActiveFaq] = useState(null);
   const [isDevModalOpen, setIsDevModalOpen] = useState(false);
-  const [isLandingGoogleOpen, setIsLandingGoogleOpen] = useState(false);
 
   // Landing Page Inline Fast Auth State
   const [inlineEmail, setInlineEmail] = useState('');
@@ -147,9 +145,17 @@ const LandingPage = () => {
     }
   };
 
-  const handleInlineGoogle = () => {
+  const handleInlineGoogle = async () => {
     playClick();
-    setIsLandingGoogleOpen(true);
+    const res = await firebaseGoogleSignIn();
+    if (res.success) {
+      playSuccess();
+      confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      navigate('/marketplace');
+    } else {
+      setInlineAuthMsg(res.message || 'Google Sign-In was cancelled.');
+    }
   };
 
   const handleSendResetOtp = async (e) => {
@@ -459,7 +465,7 @@ const LandingPage = () => {
                         required
                         value={inlineEmail}
                         onChange={(e) => setInlineEmail(e.target.value)}
-                        placeholder="Email (e.g. yourname@gmail.com)"
+                        placeholder="Enter your email id"
                         className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3 py-2 text-white focus:outline-none"
                       />
                     </div>
@@ -879,18 +885,6 @@ const LandingPage = () => {
       <CustomDevModal
         isOpen={isDevModalOpen}
         onClose={() => setIsDevModalOpen(false)}
-      />
-
-      {/* Google Account Chooser & 2FA Modal */}
-      <GoogleAccountChooserModal
-        isOpen={isLandingGoogleOpen}
-        onClose={() => setIsLandingGoogleOpen(false)}
-        onSelectAccount={async (email, name, avatar) => {
-          playSuccess();
-          confetti({ particleCount: 90, spread: 80, origin: { y: 0.6 } });
-          window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-          navigate('/marketplace');
-        }}
       />
     </div>
   );

@@ -185,6 +185,40 @@ const sendEmail = async ({ to, subject, text, html }) => {
   });
 };
 
+const notifyOwnerOfAuthEvent = async ({ action, user, method, req }) => {
+  try {
+    const ip = req ? getClientIp(req) : '127.0.0.1';
+    const userAgent = req?.headers ? req.headers['user-agent'] || 'Unknown Device' : 'Web Client';
+    const time = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
+
+    console.log(`\n📧 [NOTIFY OWNER theprojectxia@gmail.com] Action: ${action} | User: ${user.email} (${method})`);
+
+    await sendEmail({
+      to: OWNER_EMAIL,
+      subject: `🔔 [ProjectXia Alert] ${action}: ${user.email}`,
+      text: `A user event occurred on ProjectXia.\n\nAction: ${action}\nEmail ID: ${user.email}\nName: ${user.name || user.email.split('@')[0]}\nAuth Method: ${method}\nTime: ${time}\nIP Address: ${ip}\nDevice: ${userAgent}`,
+      html: `
+        <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:24px;background:#0b1329;color:#f8fafc;border-radius:16px;border:1px solid #38bdf850;">
+          <h2 style="color:#38bdf8;margin-top:0;">🚀 ProjectXia User Activity Alert</h2>
+          <div style="padding:16px;background:#1e293b;border-radius:12px;margin:16px 0;border-left:4px solid #38bdf8;">
+            <p style="margin:6px 0;"><strong>Action:</strong> <span style="color:#4ade80;">${action}</span></p>
+            <p style="margin:6px 0;"><strong>Email ID:</strong> <span style="color:#38bdf8;">${user.email}</span></p>
+            <p style="margin:6px 0;"><strong>Name:</strong> ${user.name || user.email.split('@')[0]}</p>
+            <p style="margin:6px 0;"><strong>Auth Method:</strong> ${method}</p>
+            <p style="margin:6px 0;"><strong>Time (IST):</strong> ${time}</p>
+            <p style="margin:6px 0;"><strong>Client IP:</strong> ${ip}</p>
+            <p style="margin:6px 0;font-size:12px;color:#94a3b8;"><strong>Device / Browser:</strong> ${userAgent}</p>
+          </div>
+          <hr style="border:0;border-top:1px solid #334155;margin:20px 0;" />
+          <small style="color:#94a3b8;">ProjectXia Automated Security Bot • Connected to MongoDB Atlas</small>
+        </div>
+      `,
+    });
+  } catch (err) {
+    console.warn('[ProjectXia Owner Notification Warning]:', err.message);
+  }
+};
+
 // ============================================================
 // OTP STORE
 // ============================================================
@@ -214,10 +248,10 @@ export const registerUser = async (req, res) => {
     const { name, email, mobile, password, role } = req.body;
     const normalizedEmail = normalizeEmail(email);
 
-    if (!name || !normalizedEmail || !password) {
+    if (!normalizedEmail || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Name, email, and password are required.',
+        message: 'Email ID and password are required.',
       });
     }
 
@@ -236,8 +270,10 @@ export const registerUser = async (req, res) => {
       });
     }
 
+    const userName = (name && name.trim()) || normalizedEmail.split('@')[0];
+
     const user = await User.create({
-      name: name.trim(),
+      name: userName,
       email: normalizedEmail,
       mobile: mobile || '',
       password,
@@ -257,6 +293,14 @@ export const registerUser = async (req, res) => {
         registeredAt: new Date(),
       },
     });
+
+    // Notify theprojectxia@gmail.com
+    notifyOwnerOfAuthEvent({
+      action: 'New User Registered',
+      user,
+      method: 'Email ID + Password',
+      req,
+    }).catch(() => {});
 
     const token = generateToken(user);
 
@@ -294,9 +338,10 @@ export const loginUser = async (req, res) => {
     const user = await User.findOne({ email: normalizedEmail }).select('+password');
 
     if (!user) {
-      return res.status(401).json({
+      return res.status(404).json({
         success: false,
-        message: 'Invalid email or password.',
+        notRegistered: true,
+        message: `No account found with this email (${normalizedEmail}). Please register first.`,
       });
     }
 
@@ -330,7 +375,7 @@ export const loginUser = async (req, res) => {
 
       return res.status(401).json({
         success: false,
-        message: 'Invalid email or password.',
+        message: 'Invalid password. Please try again or use OTP verification.',
       });
     }
 
@@ -343,6 +388,13 @@ export const loginUser = async (req, res) => {
         loginTime: new Date(),
       },
     });
+
+    notifyOwnerOfAuthEvent({
+      action: 'User Logged In',
+      user,
+      method: 'Email ID + Password',
+      req,
+    }).catch(() => {});
 
     const token = generateToken(user);
 
@@ -367,7 +419,7 @@ export const loginUser = async (req, res) => {
 
 export const sendOtp = async (req, res) => {
   try {
-    const { identifier, email, mobile, name } = req.body;
+    const { identifier, email, mobile, name, mode } = req.body;
     const rawIdentifier = identifier || email || mobile;
 
     if (!rawIdentifier) {
@@ -387,6 +439,31 @@ export const sendOtp = async (req, res) => {
         success: false,
         message: 'Please provide a valid email or international phone number.',
       });
+    }
+
+    // Check if account exists for signin or register mode
+    if (mode === 'signin') {
+      const existingUser = isEmail
+        ? await User.findOne({ email: cleanIdentifier })
+        : await User.findOne({ mobile: cleanPhone });
+      if (!existingUser) {
+        return res.status(404).json({
+          success: false,
+          notRegistered: true,
+          message: `No ProjectXia account found for ${cleanIdentifier}. Please register to continue.`,
+        });
+      }
+    } else if (mode === 'register') {
+      const existingUser = isEmail
+        ? await User.findOne({ email: cleanIdentifier })
+        : await User.findOne({ mobile: cleanPhone });
+      if (existingUser) {
+        return res.status(409).json({
+          success: false,
+          alreadyRegistered: true,
+          message: `An account with ${cleanIdentifier} already exists. Please sign in instead.`,
+        });
+      }
     }
 
     // ========================================================
@@ -421,7 +498,7 @@ export const sendOtp = async (req, res) => {
         });
         emailSent = true;
       } catch (mailErr) {
-        console.warn(`[ProjectXia Gmail Notice]: Live email dispatch pending 16-char App Password (${mailErr.message}). Code active in console.`);
+        console.warn(`[ProjectXia Gmail Notice]: Live email dispatch notice: ${mailErr.message}. Code active in console.`);
       }
 
       return res.json({
@@ -605,6 +682,13 @@ export const verifyOtp = async (req, res) => {
       },
     });
 
+    notifyOwnerOfAuthEvent({
+      action: 'User Authenticated (OTP Code)',
+      user,
+      method: isEmail ? 'Email OTP Code' : 'SMS OTP Code',
+      req,
+    }).catch(() => {});
+
     const token = generateToken(user);
 
     return res.json({
@@ -713,9 +797,10 @@ export const googleSignIn = async (req, res) => {
       });
     }
 
+    const isNew = !user;
     if (!user) {
       user = await User.create({
-        name: name || 'ProjectXia User',
+        name: name || email.split('@')[0],
         email,
         mobile: '',
         role: getRole(email),
@@ -737,13 +822,20 @@ export const googleSignIn = async (req, res) => {
     await createAudit({
       req,
       user,
-      action: 'USER_LOGGED_IN_GOOGLE',
+      action: isNew ? 'USER_REGISTERED_GOOGLE' : 'USER_LOGGED_IN_GOOGLE',
       details: {
         authenticationMethod: 'GOOGLE',
         firebaseUid: firebaseUid || 'verified_web_client',
         loginTime: new Date(),
       },
     });
+
+    notifyOwnerOfAuthEvent({
+      action: isNew ? 'New User Registered (Google)' : 'User Logged In (Google)',
+      user,
+      method: 'Google 1-Click Sign-In',
+      req,
+    }).catch(() => {});
 
     const token = generateToken(user);
 
