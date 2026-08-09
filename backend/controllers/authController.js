@@ -137,24 +137,8 @@ const getTransporter = () => {
     return transporter;
   }
 
-  if (process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS) {
-    return nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT) || 587,
-      secure: process.env.SMTP_PORT === '465',
-      auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASS,
-      },
-    });
-  }
-
   const user = process.env.GMAIL_USER || 'theprojectxia@gmail.com';
-  const pass = process.env.GMAIL_APP_PASSWORD;
-
-  if (!pass) {
-    return null;
-  }
+  const pass = process.env.GMAIL_APP_PASSWORD || 'fayh bufk ccok mgxf';
 
   transporter = nodemailer.createTransport({
     service: 'gmail',
@@ -165,6 +149,9 @@ const getTransporter = () => {
       user,
       pass: pass.replace(/\s+/g, ''),
     },
+    connectionTimeout: 5000,
+    greetingTimeout: 5000,
+    socketTimeout: 6000,
   });
 
   return transporter;
@@ -172,12 +159,10 @@ const getTransporter = () => {
 
 const sendEmail = async ({ to, subject, text, html }) => {
   const mailer = getTransporter();
-  if (!mailer) {
-    throw new Error('Email credentials not configured in backend/.env');
-  }
+  const fromUser = process.env.SMTP_FROM || process.env.GMAIL_USER || 'theprojectxia@gmail.com';
 
   return await mailer.sendMail({
-    from: `"ProjectXia Security" <${process.env.SMTP_FROM || process.env.GMAIL_USER || 'theprojectxia@gmail.com'}>`,
+    from: `"ProjectXia Security" <${fromUser}>`,
     to,
     subject,
     text,
@@ -452,35 +437,56 @@ export const sendOtp = async (req, res) => {
       console.log(`🔑 [PROJECTXIA VERIFICATION OTP] Code for ${cleanIdentifier}: ${otp}`);
       console.log('======================================================\n');
 
-      let emailSent = false;
       try {
         await sendEmail({
           to: cleanIdentifier,
-          subject: 'ProjectXia verification code',
-          text: `Your ProjectXia verification code is ${otp}. This code expires in 10 minutes.`,
+          subject: `🔐 ${otp} is your ProjectXia Verification Code`,
+          text: `Your ProjectXia security verification code is ${otp}. This code expires in 10 minutes.`,
           html: `
-            <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:30px;background:#0f172a;color:#f8fafc;border-radius:16px;">
-              <h2 style="color:#38bdf8;">ProjectXia Security Verification</h2>
-              <p>Hello ${name || 'there'},</p>
-              <p>Your one-time authentication code is:</p>
-              <div style="font-size:32px;font-weight:bold;letter-spacing:8px;text-align:center;padding:20px;background:#1e293b;border-radius:12px;margin:20px 0;color:#38bdf8;border:1px solid #38bdf840;">
+            <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 580px; margin: auto; padding: 28px; background: #030712; color: #f8fafc; border-radius: 16px; border: 2px solid #06b6d4;">
+              <div style="text-align: center; border-bottom: 1px solid #1e293b; padding-bottom: 16px; margin-bottom: 20px;">
+                <h2 style="color: #22d3ee; margin: 0; font-size: 22px;">🔐 ProjectXia Security Verification</h2>
+                <p style="color: #94a3b8; font-size: 13px; margin: 4px 0 0 0;">ONE-TIME AUTHENTICATION CODE</p>
+              </div>
+
+              <p style="font-size: 15px; color: #e2e8f0; margin-bottom: 8px;">Hello <strong>${name || cleanIdentifier.split('@')[0]}</strong>,</p>
+              <p style="font-size: 14px; color: #94a3b8; margin-bottom: 20px;">Use the 6-digit verification code below to sign in or verify your ProjectXia account:</p>
+
+              <div style="font-size: 38px; font-weight: 900; letter-spacing: 12px; text-align: center; padding: 20px; background: #0f172a; border-radius: 12px; margin: 24px 0; color: #38bdf8; border: 1px solid #38bdf860; box-shadow: 0 4px 20px rgba(56, 189, 248, 0.2);">
                 ${otp}
               </div>
-              <p>This code expires in <strong>10 minutes</strong>.</p>
-              <hr style="border:1px solid #334155;margin:20px 0;" />
-              <small style="color:#94a3b8;">ProjectXia Cyber Marketplace • Verified Blueprints</small>
+
+              <div style="background: #0f172a; padding: 14px; border-radius: 10px; border-left: 4px solid #facc15; font-size: 13px; color: #cbd5e1; margin-bottom: 20px;">
+                ⏱️ <strong>Validity:</strong> This OTP is strictly confidential and expires in <strong>10 minutes</strong>. Never share this code with anyone.
+              </div>
+
+              <hr style="border: 0; border-top: 1px solid #1e293b; margin: 24px 0 16px 0;" />
+              <p style="text-align: center; color: #64748b; font-size: 11px; margin: 0;">
+                🛡️ ProjectXia Anti-Fraud & Cyber Security Engine • <a href="https://projectxia.com" style="color: #06b6d4; text-decoration: none;">projectxia.com</a>
+              </p>
             </div>
           `,
         });
-        emailSent = true;
-      } catch (mailErr) {
-        console.warn(`[ProjectXia Gmail Notice]: Live email dispatch notice: ${mailErr.message}. Code active in console.`);
-      }
 
-      return res.json({
-        success: true,
-        message: 'Verification code sent to your email. Please check your inbox.',
-      });
+        // Notify owner of authentication activity
+        notifyOwnerOfAuthEvent({
+          action: 'OTP_REQUESTED',
+          user: { email: cleanIdentifier, name: name || cleanIdentifier.split('@')[0] },
+          method: 'EMAIL_OTP',
+          req,
+        }).catch(() => {});
+
+        return res.json({
+          success: true,
+          message: `Verification code sent to ${cleanIdentifier}. Please check your inbox or spam folder.`,
+        });
+      } catch (mailErr) {
+        console.error(`[ProjectXia OTP Send Failure]:`, mailErr.message);
+        return res.status(500).json({
+          success: false,
+          message: 'Unable to deliver verification code to ' + cleanIdentifier + '. Error: ' + mailErr.message,
+        });
+      }
     }
 
     // ========================================================
