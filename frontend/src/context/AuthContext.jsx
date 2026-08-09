@@ -429,24 +429,19 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     const cleanIdentifier = String(identifier).trim().toLowerCase();
     try {
-      try {
-        const res = await api.post('/auth/send-otp', { identifier: cleanIdentifier, mode });
-        if (res.data?.success) {
-          return { success: true, message: res.data.message, otp: res.data.otp };
-        }
-      } catch (apiErr) {}
-
-      const localOtp = String(Math.floor(100000 + Math.random() * 900000));
-      sessionStorage.setItem('px_otp_' + cleanIdentifier, localOtp);
-      return {
-        success: true,
-        message: `Verification code sent to ${cleanIdentifier}. (Code: ${localOtp})`,
-        otp: localOtp,
-      };
-    } catch (err) {
+      const res = await api.post('/auth/send-otp', { identifier: cleanIdentifier, mode });
+      if (res.data?.success) {
+        return { success: true, message: res.data.message, otp: res.data.otp };
+      }
       return {
         success: false,
-        message: 'Failed to send OTP code.',
+        message: res.data?.message || 'Failed to dispatch verification code.',
+      };
+    } catch (err) {
+      console.error('[Send OTP Error]:', err);
+      return {
+        success: false,
+        message: err.response?.data?.message || 'Unable to send OTP code. Please check your email address.',
       };
     } finally {
       setIsLoading(false);
@@ -458,36 +453,21 @@ export const AuthProvider = ({ children }) => {
     setIsLoading(true);
     const cleanIdentifier = String(otpData.identifier).trim().toLowerCase();
     try {
-      try {
-        const res = await api.post('/auth/verify-otp', { ...otpData, identifier: cleanIdentifier });
-        if (res.data?.token && res.data?.user) {
-          saveAuthSession(res.data.token, res.data.user);
-          setIsAuthModalOpen(false);
-          return { success: true, user: res.data.user, message: res.data.message };
-        }
-      } catch (apiErr) {}
-
-      const storedOtp = sessionStorage.getItem('px_otp_' + cleanIdentifier);
-      if (storedOtp && String(otpData.otp).trim() !== storedOtp && String(otpData.otp).trim().length < 6) {
-        return { success: false, message: 'Invalid verification code.' };
+      const res = await api.post('/auth/verify-otp', { ...otpData, identifier: cleanIdentifier });
+      if (res.data?.token && res.data?.user) {
+        saveAuthSession(res.data.token, res.data.user);
+        setIsAuthModalOpen(false);
+        return { success: true, user: res.data.user, message: res.data.message };
       }
-
-      const fallbackUser = {
-        id: 'usr_' + Date.now(),
-        email: cleanIdentifier,
-        name: cleanIdentifier.split('@')[0],
-        role: cleanIdentifier === 'theprojectxia@gmail.com' ? 'owner' : 'user',
-        authProvider: 'otp',
-        isVerified: true,
-      };
-      const fallbackToken = 'px_tok_' + Math.random().toString(36).slice(2) + Date.now();
-      saveAuthSession(fallbackToken, fallbackUser);
-      setIsAuthModalOpen(false);
-      return { success: true, user: fallbackUser };
-    } catch (err) {
       return {
         success: false,
-        message: err.response?.data?.message || 'OTP verification failed.',
+        message: res.data?.message || 'OTP verification failed. Please try again.',
+      };
+    } catch (err) {
+      console.error('[Verify OTP Error]:', err);
+      return {
+        success: false,
+        message: err.response?.data?.message || 'Invalid or expired verification code.',
       };
     } finally {
       setIsLoading(false);
