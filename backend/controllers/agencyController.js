@@ -287,10 +287,12 @@ export const submitCustomInquiry = async (req, res) => {
     // 2. Add to in-memory store
     agencyStore.inquiries.unshift(newInquiry);
 
-    // 3. Dispatch High-Priority Email Notification to theprojectxia@gmail.com asynchronously
-    dispatchTeamNotificationEmail(newInquiry).catch(err => {
-      console.warn('[Agency Async Email Warning]:', err.message);
-    });
+    // 3. Dispatch High-Priority Email Notification to theprojectxia@gmail.com (Awaited to ensure serverless delivery)
+    try {
+      await dispatchTeamNotificationEmail(newInquiry);
+    } catch (mailErr) {
+      console.warn('[Agency Async Email Warning]:', mailErr.message);
+    }
 
     return res.status(201).json({
       success: true,
