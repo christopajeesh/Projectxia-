@@ -157,27 +157,37 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
                   <CheckCircle2 className="w-7 h-7" />
                 </div>
 
-                <div className="space-y-1.5">
-                  <h3 className="text-xl font-display font-black text-white">
-                    Project Idea Received!
+                <div className="space-y-2">
+                  <h3 className="text-xl sm:text-2xl font-display font-black text-white">
+                    Project Request Submitted!
                   </h3>
-                  <p className="text-xs font-mono text-slate-300 max-w-md mx-auto leading-relaxed">
-                    Our Core Engineering Team has received your project specs at theprojectxia@gmail.com. We will analyze your requirements and reach out to you directly.
-                  </p>
+                  <div className="p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-300 font-mono text-xs max-w-md mx-auto leading-relaxed shadow-lg shadow-emerald-950/50">
+                    <p className="font-bold flex items-center justify-center gap-1.5 text-white">
+                      <Clock className="w-4 h-4 text-emerald-400 animate-spin-slow" />
+                      <span>Guaranteed Response within 12 Hours</span>
+                    </p>
+                    <p className="mt-1 text-[11px] text-emerald-200/90">
+                      Our ProjectXia Engineering Team has received your specifications and will connect with you on WhatsApp / Phone directly.
+                    </p>
+                  </div>
                 </div>
 
                 <div className="max-w-sm mx-auto p-4 rounded-2xl bg-gray-900/90 border border-slate-800 text-left font-mono text-xs space-y-2 text-slate-300">
                   <div className="flex justify-between border-b border-slate-800 pb-1.5">
-                    <span className="text-slate-500">Contact:</span>
+                    <span className="text-slate-500">Your Contact:</span>
                     <span className="text-cyan-300 font-bold">{formData.mobile || formData.email}</span>
                   </div>
                   <div className="flex justify-between border-b border-slate-800 pb-1.5">
+                    <span className="text-slate-500">Contact Window:</span>
+                    <span className="text-emerald-400 font-bold">⚡ Within 12 Hours</span>
+                  </div>
+                  <div className="flex justify-between border-b border-slate-800 pb-1.5">
                     <span className="text-slate-500">Assigned Team:</span>
-                    <span className="text-emerald-400">ProjectXia Developing Team</span>
+                    <span className="text-white">ProjectXia Engineering Team</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-slate-500">Status:</span>
-                    <span className="text-yellow-400 font-bold">🔍 In Lead Review</span>
+                    <span className="text-slate-500">Notification:</span>
+                    <span className="text-cyan-400 font-bold">Delivered to Leadership</span>
                   </div>
                 </div>
 
