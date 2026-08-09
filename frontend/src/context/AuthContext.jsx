@@ -130,7 +130,7 @@ export const AuthProvider = ({ children }) => {
             googleData = {
               idToken,
               email: result.user.email,
-              name: result.user.displayName || userName || 'Google Innovator',
+              name: result.user.displayName || userName || result.user.email.split('@')[0],
               avatar: result.user.photoURL || undefined,
             };
           }
@@ -147,7 +147,7 @@ export const AuthProvider = ({ children }) => {
         return { success: true, user: res.data.user };
       }
 
-      // 3. If direct email was provided by client in input box
+      // 3. Fallback: If direct email was provided by client in input box or parameter
       const targetEmail = userEmail ? userEmail.trim().toLowerCase() : '';
       if (targetEmail && targetEmail.includes('@')) {
         const res = await api.post('/auth/google', {
@@ -160,10 +160,11 @@ export const AuthProvider = ({ children }) => {
         return { success: true, user: res.data.user };
       }
 
-      // 4. Prompt user to choose their account
+      // 4. Prompt user to enter their Gmail if popup didn't return an account
       return {
         success: false,
-        message: 'Please select your Google account in the popup or enter your email address.',
+        needEmailPrompt: true,
+        message: 'Please enter your Google Email ID in the box below and tap Continue with Google.',
       };
     } catch (err) {
       console.error('[Google Sign-In Error]:', err);

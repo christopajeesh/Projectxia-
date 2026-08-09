@@ -343,7 +343,8 @@ const AuthModal = () => {
     playClick();
 
     try {
-      const res = await firebaseGoogleSignIn();
+      const cleanEmail = emailInput ? emailInput.trim().toLowerCase() : '';
+      const res = await firebaseGoogleSignIn(cleanEmail);
       setLoading(false);
 
       if (res.success) {
@@ -353,7 +354,11 @@ const AuthModal = () => {
         window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
         navigate('/marketplace');
       } else {
-        setErrorMsg(res.message || 'Google Sign-In was cancelled or failed.');
+        if (res.needEmailPrompt) {
+          setStatusMsg('Please enter your Google Email ID in the box below and tap Continue with Google.');
+        } else {
+          setErrorMsg(res.message || 'Google Sign-In failed. Please try again.');
+        }
       }
     } catch (err) {
       setLoading(false);

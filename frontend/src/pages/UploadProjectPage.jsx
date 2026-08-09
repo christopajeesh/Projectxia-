@@ -105,7 +105,7 @@ const UploadProjectPage = () => {
     description: '',
     category: 'AI & Data Science (AI / ML)',
     projectType: 'Hardware + Software',
-    price: 2999,
+    price: '2999',
     techStack: 'PyTorch, Python 3.10, FastAPI, React',
     githubUrl: 'https://github.com/projectxia',
     documentation: '# Project Runbook\n\n```bash\nnpm install\nnpm run dev\n```',
@@ -158,6 +158,11 @@ const UploadProjectPage = () => {
   const handleStep1Next = () => {
     playClick();
     setErrorMessage('');
+
+    if (formData.price === '' || isNaN(Number(formData.price)) || Number(formData.price) < 0) {
+      setErrorMessage('Please enter a valid asking price (₹ INR).');
+      return;
+    }
 
     // Strict Anti-Gibberish & Spam Validation
     const validationError = validateTextQuality(formData.title, formData.description);
@@ -379,8 +384,11 @@ const UploadProjectPage = () => {
                   <input
                     type="number"
                     required
+                    min="0"
+                    step="1"
                     value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: Number(e.target.value) })}
+                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                    placeholder="e.g. 2999"
                     className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none font-mono"
                   />
                 </div>
