@@ -29,47 +29,77 @@ const dispatchTeamNotificationEmail = async (inquiryData) => {
     const waPhone = cleanPhone.length === 10 ? `91${cleanPhone}` : cleanPhone;
     const waLink = waPhone ? `https://wa.me/${waPhone}?text=Hi%20${encodeURIComponent(inquiryData.clientName || 'there')},%20we%20received%20your%20custom%20software%20project%20request%20on%20ProjectXia!` : '';
 
-    const emailSubject = `🚨 [NEW CUSTOM SOFTWARE BUILD REQUEST] "${inquiryData.projectTitle}" from ${inquiryData.clientName} (${inquiryData.clientMobile})`;
+    const emailSubject = `🚨 [NEW CUSTOM SOFTWARE BUILD REQUEST] "${inquiryData.projectTitle}" - ${inquiryData.clientName} (${inquiryData.clientMobile})`;
 
     const emailHtml = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #030712; color: #f3f4f6; padding: 24px; border-radius: 14px; max-width: 620px; margin: auto; border: 2px solid #06b6d4;">
-        <div style="display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px;">
-          <div>
-            <h2 style="color: #22d3ee; margin: 0; font-size: 20px;">🚀 PROJECTXIA CUSTOM SOFTWARE ALERT</h2>
-            <p style="color: #94a3b8; font-size: 12px; margin: 4px 0 0 0;">NEW IN-HOUSE ENGINEERING LEAD RECEIVED</p>
-          </div>
+        <div style="border-bottom: 1px solid #1e293b; padding-bottom: 12px; margin-bottom: 16px;">
+          <h2 style="color: #22d3ee; margin: 0; font-size: 20px;">🚀 PROJECTXIA CUSTOM SOFTWARE ALERT</h2>
+          <p style="color: #94a3b8; font-size: 12px; margin: 4px 0 0 0;">NEW IN-HOUSE ENGINEERING LEAD RECEIVED</p>
         </div>
 
-        <!-- Quick Action Buttons -->
-        ${waLink ? `
-          <div style="margin-bottom: 16px; background-color: #064e3b; padding: 12px; border-radius: 10px; border: 1px solid #059669; text-align: center;">
-            <p style="color: #a7f3d0; margin: 0 0 8px 0; font-size: 13px; font-weight: bold;">⚡ Quick Client Response:</p>
-            <a href="${waLink}" target="_blank" style="background-color: #22c55e; color: #000000; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 900; font-size: 13px; display: inline-block; box-shadow: 0 4px 12px rgba(34,197,94,0.3);">
-              💬 Open WhatsApp Chat with ${inquiryData.clientName}
+        <!-- Quick Contact Action Bar -->
+        <div style="margin-bottom: 16px; background-color: #0f172a; padding: 14px; border-radius: 10px; border: 1px solid #334155; text-align: center;">
+          <p style="color: #94a3b8; margin: 0 0 10px 0; font-size: 12px; font-weight: bold; text-transform: uppercase; letter-spacing: 0.5px;">⚡ Instant Client Reachout Options:</p>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; justify-content: center;">
+            ${waLink ? `
+              <a href="${waLink}" target="_blank" style="background-color: #22c55e; color: #000000; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 900; font-size: 13px; display: inline-block; margin: 4px;">
+                💬 Chat on WhatsApp (${inquiryData.clientMobile})
+              </a>
+            ` : ''}
+            <a href="tel:${inquiryData.clientMobile}" style="background-color: #0284c7; color: #ffffff; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 900; font-size: 13px; display: inline-block; margin: 4px;">
+              📞 Call ${inquiryData.clientMobile}
+            </a>
+            <a href="mailto:${inquiryData.clientEmail}" style="background-color: #a855f7; color: #ffffff; padding: 10px 18px; border-radius: 8px; text-decoration: none; font-weight: 900; font-size: 13px; display: inline-block; margin: 4px;">
+              ✉️ Email ${inquiryData.clientEmail}
             </a>
           </div>
-        ` : ''}
-
-        <!-- Client & Project Overview Box -->
-        <div style="background-color: #0f172a; padding: 16px; border-radius: 10px; border-left: 4px solid #38bdf8;">
-          <h3 style="margin-top: 0; color: #38bdf8; font-size: 15px;">📋 Client & Requirement Summary</h3>
-          <p style="margin: 6px 0;"><strong>👤 Client Name:</strong> <span style="color: #ffffff;">${inquiryData.clientName}</span></p>
-          <p style="margin: 6px 0;"><strong>📱 Phone / WhatsApp:</strong> <a href="tel:${inquiryData.clientMobile}" style="color: #22d3ee; font-weight: bold; font-size: 14px;">${inquiryData.clientMobile}</a></p>
-          <p style="margin: 6px 0;"><strong>✉️ Email Address:</strong> <a href="mailto:${inquiryData.clientEmail}" style="color: #38bdf8;">${inquiryData.clientEmail}</a></p>
-          <p style="margin: 6px 0;"><strong>💡 Project Title:</strong> <span style="color: #facc15; font-weight: bold;">${inquiryData.projectTitle}</span></p>
-          <p style="margin: 6px 0;"><strong>💰 Budget Range:</strong> <span style="color: #4ade80; font-weight: bold;">${inquiryData.budgetRange || `₹${inquiryData.budget?.toLocaleString('en-IN')}`}</span></p>
-          <p style="margin: 6px 0;"><strong>⏱️ Target Timeline:</strong> <span style="color: #ffffff;">${inquiryData.targetDeadline || `${inquiryData.timelineDays} Days`}</span></p>
-          <p style="margin: 6px 0;"><strong>🆔 Lead Tracking ID:</strong> <span style="color: #94a3b8; font-family: monospace;">${inquiryData._id}</span></p>
         </div>
 
-        <!-- Requirement Scope -->
+        <!-- Client & Lead Details Box -->
+        <div style="background-color: #0f172a; padding: 18px; border-radius: 10px; border-left: 5px solid #06b6d4;">
+          <h3 style="margin-top: 0; color: #38bdf8; font-size: 16px; border-bottom: 1px solid #1e293b; padding-bottom: 8px;">📋 Client Information</h3>
+          
+          <table style="width: 100%; font-size: 14px; color: #e2e8f0; border-collapse: collapse;">
+            <tr>
+              <td style="padding: 6px 0; color: #94a3b8; width: 140px;"><strong>👤 Full Name:</strong></td>
+              <td style="padding: 6px 0; color: #ffffff; font-weight: bold; font-size: 15px;">${inquiryData.clientName}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #94a3b8;"><strong>📱 Phone / WhatsApp:</strong></td>
+              <td style="padding: 6px 0;"><a href="tel:${inquiryData.clientMobile}" style="color: #22d3ee; font-weight: bold; text-decoration: none; font-size: 15px;">${inquiryData.clientMobile}</a></td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #94a3b8;"><strong>✉️ Email Address:</strong></td>
+              <td style="padding: 6px 0;"><a href="mailto:${inquiryData.clientEmail}" style="color: #38bdf8; text-decoration: none;">${inquiryData.clientEmail}</a></td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #94a3b8;"><strong>💡 Software Title:</strong></td>
+              <td style="padding: 6px 0; color: #facc15; font-weight: bold;">${inquiryData.projectTitle}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #94a3b8;"><strong>💰 Budget Range:</strong></td>
+              <td style="padding: 6px 0; color: #4ade80; font-weight: bold;">${inquiryData.budgetRange || `₹${inquiryData.budget?.toLocaleString('en-IN')}`}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #94a3b8;"><strong>⏱️ Target Timeline:</strong></td>
+              <td style="padding: 6px 0; color: #ffffff;">${inquiryData.targetDeadline || `${inquiryData.timelineDays} Days`}</td>
+            </tr>
+            <tr>
+              <td style="padding: 6px 0; color: #94a3b8;"><strong>🆔 Lead Tracking ID:</strong></td>
+              <td style="padding: 6px 0; color: #64748b; font-family: monospace;">${inquiryData._id}</td>
+            </tr>
+          </table>
+        </div>
+
+        <!-- Full Requirement Scope -->
         <div style="margin-top: 16px; background-color: #111827; padding: 16px; border-radius: 10px; border: 1px solid #1e293b;">
-          <h4 style="color: #c084fc; margin-top: 0; font-size: 14px;">📝 Full Project Requirements / Idea Abstract:</h4>
-          <div style="color: #e2e8f0; font-size: 14px; line-height: 1.6; white-space: pre-wrap; background-color: #030712; padding: 12px; border-radius: 8px; border: 1px solid #334155;">${inquiryData.requirements || inquiryData.description}</div>
+          <h4 style="color: #c084fc; margin-top: 0; font-size: 14px;">📝 Project Requirements & Features:</h4>
+          <div style="color: #f8fafc; font-size: 14px; line-height: 1.6; white-space: pre-wrap; background-color: #030712; padding: 14px; border-radius: 8px; border: 1px solid #334155;">${inquiryData.requirements || inquiryData.description}</div>
         </div>
 
         <div style="margin-top: 20px; text-align: center; color: #64748b; font-size: 11px; border-top: 1px solid #1e293b; padding-top: 12px;">
-          🛡️ ProjectXia In-House Engineering Engine • Dispatched directly to <strong>theprojectxia@gmail.com</strong>
+          🛡️ ProjectXia In-House Engineering Engine • Delivered to <strong>theprojectxia@gmail.com</strong>
         </div>
       </div>
     `;
