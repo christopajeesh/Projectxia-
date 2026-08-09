@@ -130,74 +130,68 @@ const Navbar = () => {
               </div>
             </Link>
 
-            {/* Desktop Navigation Links - Always Visible from md screens */}
-            <nav className="hidden md:flex items-center gap-1 lg:gap-2">
-              {navLinks.map((link) => {
-                const Icon = link.icon;
-                const isActive = link.path && location.pathname === link.path;
+            {/* Navigation Links - Permanently Visible on ALL screen sizes */}
+            <nav className="flex items-center gap-1 sm:gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  playClick();
+                  navigate('/marketplace');
+                }}
+                className={`px-2 sm:px-3 py-1.5 rounded-xl font-display font-bold text-xs flex items-center gap-1 transition-all cursor-pointer ${
+                  location.pathname === '/marketplace'
+                    ? 'text-cyan-300 bg-cyan-500/20 border border-cyan-400/50 shadow-neon-cyan'
+                    : 'text-slate-200 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10'
+                }`}
+              >
+                <Code className="w-3.5 h-3.5 text-cyan-400" />
+                <span className="hidden sm:inline">Marketplace</span>
+                <span className="sm:hidden">Market</span>
+              </button>
 
-                if (link.isHighlight) {
-                  return (
-                    <button
-                      key={link.name}
-                      onClick={(e) => handleNavClick(link, e)}
-                      onMouseEnter={playHover}
-                      className={`px-3 py-1.5 rounded-xl font-display font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
-                        isActive
-                          ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/40 border border-cyan-400'
-                          : 'bg-cyan-500/15 hover:bg-cyan-500/25 text-cyan-300 hover:text-white border border-cyan-500/40 shadow-sm shadow-cyan-500/20'
-                      }`}
-                    >
-                      <Icon className="w-3.5 h-3.5" />
-                      <span>{link.name}</span>
-                    </button>
-                  );
-                }
+              <button
+                type="button"
+                onClick={() => {
+                  playClick();
+                  navigate('/ai-shield');
+                }}
+                className={`px-2 sm:px-3 py-1.5 rounded-xl font-display font-bold text-xs flex items-center gap-1 transition-all cursor-pointer ${
+                  location.pathname === '/ai-shield'
+                    ? 'text-purple-300 bg-purple-500/25 border border-purple-400/60 shadow-lg'
+                    : 'text-purple-300 hover:text-white bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/30'
+                }`}
+              >
+                <Shield className="w-3.5 h-3.5 text-purple-400" />
+                <span className="hidden sm:inline">Plagiarism Check</span>
+                <span className="sm:hidden">Shield</span>
+              </button>
 
-                if (link.isSpecialAction) {
-                  return (
-                    <button
-                      key={link.name}
-                      onClick={(e) => handleNavClick(link, e)}
-                      onMouseEnter={playHover}
-                      className="px-2.5 lg:px-3 py-1.5 rounded-xl font-display font-bold text-xs transition-all flex items-center gap-1.5 cursor-pointer bg-gradient-to-r from-purple-950/80 via-blue-950/80 to-cyan-950/80 border border-purple-500/40 text-purple-300 hover:text-white hover:border-purple-400 shadow-md group"
-                    >
-                      <Icon className="w-3.5 h-3.5 text-amber-300 animate-pulse" />
-                      <span className="hidden lg:inline">{link.name}</span>
-                      <span className="lg:hidden">Custom Dev</span>
-                      <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-purple-400 text-black font-extrabold">
-                        {link.badge}
-                      </span>
-                    </button>
-                  );
-                }
-
-                return (
-                  <button
-                    key={link.name}
-                    onClick={(e) => handleNavClick(link, e)}
-                    onMouseEnter={playHover}
-                    className={`px-2.5 lg:px-3 py-1.5 rounded-xl font-display font-semibold text-xs transition-all flex items-center gap-1.5 cursor-pointer ${
-                      isActive
-                        ? 'text-cyan-400 bg-cyan-500/10 border border-cyan-500/30 shadow-neon-cyan'
-                        : 'text-slate-300 hover:text-white hover:bg-white/5 border border-transparent'
-                    }`}
-                  >
-                    <Icon className="w-3.5 h-3.5" />
-                    <span>{link.name}</span>
-                  </button>
-                );
-              })}
+              <button
+                type="button"
+                onClick={() => {
+                  playClick();
+                  if (!isAuthenticated) {
+                    openAuthModal('login', 'Please log in or register to publish and sell your project.');
+                  } else {
+                    navigate('/upload');
+                  }
+                }}
+                className="px-2.5 sm:px-3.5 py-1.5 rounded-xl font-display font-black text-xs flex items-center gap-1 bg-cyan-500 hover:bg-cyan-400 text-black shadow-lg shadow-cyan-500/30 border border-cyan-300 transition-all hover:scale-105 cursor-pointer whitespace-nowrap"
+              >
+                <UploadCloud className="w-3.5 h-3.5 text-black" />
+                <span className="hidden xs:inline">Sell Project</span>
+                <span className="xs:hidden">Sell</span>
+              </button>
             </nav>
 
             {/* Right Action Cluster */}
-            <div className="flex items-center gap-1.5 sm:gap-2.5">
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {/* Deals & Messages Direct Hub */}
               <Link
                 to="/chat"
                 onClick={playClick}
                 title="Live Negotiations & Deals"
-                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-950/50 hover:bg-emerald-900/80 border border-emerald-500/40 text-emerald-300 hover:text-white transition-all cursor-pointer shadow-md text-xs font-mono font-bold"
+                className="hidden md:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-950/50 hover:bg-emerald-900/80 border border-emerald-500/40 text-emerald-300 hover:text-white transition-all cursor-pointer shadow-md text-xs font-mono font-bold"
               >
                 <MessageSquare className="w-4 h-4 text-emerald-400" />
                 <span className="hidden lg:inline">Deals & Chat</span>
@@ -209,7 +203,7 @@ const Navbar = () => {
                   toggleMute();
                 }}
                 title={isMuted ? 'Unmute Audio' : 'Mute Cyber Audio FX'}
-                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                className="p-1.5 sm:p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
               >
                 {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-cyan-400" />}
               </button>
@@ -219,14 +213,14 @@ const Navbar = () => {
                 /* Unauthenticated: Login / Register Trigger */
                 <button
                   onClick={() => openAuthModal('login', 'Please log in or register to access verified projects.')}
-                  className="px-3.5 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-black font-display font-black text-xs shadow-lg shadow-cyan-500/25 flex items-center gap-1.5 transition-all hover:scale-105 cursor-pointer shrink-0"
+                  className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-black font-display font-black text-xs shadow-lg shadow-cyan-500/25 flex items-center gap-1 transition-all hover:scale-105 cursor-pointer shrink-0"
                 >
                   <LogIn className="w-3.5 h-3.5" />
-                  <span>Login / Register</span>
+                  <span>Login</span>
                 </button>
               ) : (
                 /* Authenticated User: Profile Dropdown AND Direct Logout Button */
-                <div className="flex items-center gap-1.5 sm:gap-2">
+                <div className="flex items-center gap-1 sm:gap-2">
                   <button
                     onClick={handleLogout}
                     title="Sign Out"

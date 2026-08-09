@@ -105,8 +105,17 @@ const AuthModal = () => {
   const [statusMsg, setStatusMsg] = useState('');
   const [showTermsInAuth, setShowTermsInAuth] = useState(false);
 
-  // Sync mode when opened
+  // Sync mode and wipe all inputs clean on open
   useEffect(() => {
+    setEmailInput('');
+    setPasswordInput('');
+    setConfirmPasswordInput('');
+    setForgotOtp('');
+    setForgotNewPassword('');
+    setForgotConfirmPassword('');
+    setOtpCode('');
+    setActiveEmail('');
+
     if (authModalMode === 'register') {
       setAuthType('register');
     } else if (authModalMode === 'forgot') {
@@ -806,7 +815,8 @@ const AuthModal = () => {
                     <input
                       type={showPassword ? 'text' : 'password'}
                       required
-                      autoComplete={authType === 'register' ? 'new-password' : 'current-password'}
+                      autoComplete="new-password"
+                      name="secure_px_password_field"
                       value={passwordInput}
                       onChange={(e) => setPasswordInput(e.target.value)}
                       placeholder="Enter password"
