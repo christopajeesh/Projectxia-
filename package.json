@@ -1,11 +1,11 @@
 {
   "name": "projectxia",
   "version": "1.0.0",
-  "description": "Next-Gen Software & Hardware Project Marketplace",
+  "private": true,
   "type": "module",
   "scripts": {
-    "build": "cd frontend && npm install && npm run build",
-    "start": "cd backend && npm start"
+    "build": "npm run build --prefix frontend || vite build",
+    "start": "node backend/server.js"
   },
   "dependencies": {
     "bcryptjs": "^2.4.3",

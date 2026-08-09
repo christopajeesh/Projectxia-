@@ -2,12 +2,6 @@
 node_modules/
 */node_modules/
 
-# Production build outputs
-dist/
-build/
-*/dist/
-*/build/
-
 # Local Environment variables & Secret Service Keys
 .env
 .env.local
