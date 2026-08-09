@@ -207,7 +207,7 @@ const AuthModal = () => {
         confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
         closeAuthModal();
         window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-        navigate('/marketplace');
+        navigate('/');
       } else {
         setErrorMsg(res?.message || 'Incorrect verification code. Please check the code.');
       }
@@ -216,7 +216,8 @@ const AuthModal = () => {
       playSuccess();
       confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
       closeAuthModal();
-      navigate('/marketplace');
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      navigate('/');
     }
   };
 
@@ -268,7 +269,7 @@ const AuthModal = () => {
       confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
       closeAuthModal();
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-      navigate('/marketplace');
+      navigate('/');
     } else {
       if (res?.noPasswordSet) {
         setErrorMsg(res.message || 'This account does not have a password yet.');
@@ -352,7 +353,7 @@ const AuthModal = () => {
         confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
         closeAuthModal();
         window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-        navigate('/marketplace');
+        navigate('/');
       } else {
         setErrorMsg(res?.message || 'Password reset failed. Please verify the code.');
       }
@@ -361,7 +362,8 @@ const AuthModal = () => {
       playSuccess();
       confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
       closeAuthModal();
-      navigate('/marketplace');
+      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+      navigate('/');
     }
   };
 
@@ -384,7 +386,7 @@ const AuthModal = () => {
         confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
         closeAuthModal();
         window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-        navigate('/marketplace');
+        navigate('/');
       } else {
         if (res.needEmailPrompt) {
           setStatusMsg('Please enter your Google Email ID in the box below and tap Continue with Google.');

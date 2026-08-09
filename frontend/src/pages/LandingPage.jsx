@@ -124,7 +124,7 @@ const LandingPage = () => {
       playSuccess();
       confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-      navigate('/marketplace');
+      navigate('/');
     } else {
       setInlineAuthMsg(res.message);
     }
@@ -139,7 +139,7 @@ const LandingPage = () => {
       playSuccess();
       confetti({ particleCount: 80, spread: 80, origin: { y: 0.6 } });
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-      navigate('/marketplace');
+      navigate('/');
     } else {
       setInlineAuthMsg(res.message);
     }
