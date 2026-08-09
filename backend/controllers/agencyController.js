@@ -153,6 +153,9 @@ export const submitCustomInquiry = async (req, res) => {
       type = 'IDEA_SUBMISSION',
       techPreferences,
       docLink,
+      ndaSigned = true,
+    } = req.body || {};
+
     // Server-Side Anti-Fake / Anti-Spam Validation
     const trimmedName = String(clientName || '').trim();
     if (trimmedName && (trimmedName.length < 2 || /^(asdf|qwerty|test|xyz|abc|user|unknown)$/i.test(trimmedName))) {
