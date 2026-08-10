@@ -256,283 +256,159 @@ const LandingPage = () => {
           <div className="absolute inset-0 bg-gradient-to-b from-[#030712]/30 via-transparent to-[#030712]/50" />
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-            
-            {/* LEFT HERO TEXT COLUMN */}
-            <div className="lg:col-span-7 text-center lg:text-left space-y-6">
-              {/* Ultra-Futuristic Shimmer Badge */}
-              <motion.div
-                initial={{ opacity: 0, y: -20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-gradient-to-r from-cyan-950/80 via-purple-950/60 to-cyan-950/80 border border-cyan-400/50 backdrop-blur-xl shadow-neon-cyan"
-              >
-                <div className="p-1 rounded-full bg-cyan-500/20 text-cyan-300">
-                  <Sparkles className="w-3.5 h-3.5 animate-spin" />
-                </div>
-                <span className="text-xs font-mono font-bold text-cyan-300 tracking-wider uppercase">
-                  ⚡ Next-Gen Engineering Ecosystem • All Departments
-                </span>
-                <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping ml-1" />
-              </motion.div>
-
-              {/* Main Headline with High-End Syne Typography */}
-              <motion.h1
-                initial={{ opacity: 0, scale: 0.96 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.6 }}
-                className="text-4xl sm:text-6xl lg:text-7xl font-display font-black tracking-tight text-white leading-[1.08]"
-              >
-                Where Engineering Innovators <br />
-                <span className="text-gradient-cyan">Buy, Sell & Build Genuine Projects</span>
-              </motion.h1>
-
-              {/* Mission Statement */}
-              <motion.p
-                initial={{ opacity: 0, y: 15 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="text-base sm:text-lg text-slate-300 font-sans leading-relaxed max-w-2xl"
-              >
-                The verified ecosystem for engineering students, creators, and researchers across <strong className="text-cyan-300 font-bold">CSE, ECE, EEE, Mech, AI, and IoT</strong>. Complete source code, circuit schematics, 4K video walkthroughs, built-in code originality check, and our dedicated custom engineering team.
-              </motion.p>
-
-              {/* CTA Action Buttons with Auth Gates */}
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: 0.2 }}
-                className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2"
-              >
-                {/* 1. Explore Projects */}
-                <button
-                  type="button"
-                  onClick={() => handleProtectedNavigation('/marketplace', 'Please log in or register to explore verified engineering projects.')}
-                  className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-black font-display font-black text-sm shadow-xl shadow-cyan-500/25 flex items-center gap-2 transition-all hover:scale-105 cursor-pointer"
-                >
-                  <Code className="w-4 h-4 text-black shrink-0" />
-                  <span>Explore Projects</span>
-                  <ArrowRight className="w-4 h-4 text-black shrink-0" />
-                </button>
-
-                {/* 2. Plagiarism Checker */}
-                <button
-                  type="button"
-                  onClick={() => handleProtectedNavigation('/ai-shield', 'Please log in or register to run AI Plagiarism & Code Integrity scans.')}
-                  className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-purple-950 via-indigo-900 to-purple-900 hover:from-purple-900 hover:to-indigo-800 border-2 border-purple-400/80 text-purple-200 hover:text-white font-display font-bold text-sm flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-purple-900/40 cursor-pointer"
-                >
-                  <Shield className="w-4 h-4 text-purple-400 shrink-0" />
-                  <span>Plagiarism Checker</span>
-                </button>
-
-                {/* 3. Build My Idea */}
-                <button
-                  type="button"
-                  onClick={() => {
-                    playSuccess();
-                    setIsDevModalOpen(true);
-                  }}
-                  className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-purple-950/80 to-slate-900 hover:from-amber-500/30 hover:to-purple-900 border border-amber-400/60 backdrop-blur-md text-amber-200 hover:text-white font-display font-bold text-sm flex items-center gap-2 transition-all hover:scale-105 shadow-md cursor-pointer"
-                >
-                  <Lightbulb className="w-4 h-4 text-amber-300 animate-pulse shrink-0" />
-                  <span>Build My Idea (Custom)</span>
-                </button>
-
-                {/* 4. Sell a Project */}
-                <button
-                  type="button"
-                  onClick={() => handleProtectedNavigation('/upload', 'Please log in or register to upload and monetize your project.')}
-                  className="px-5 py-3.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/40 text-emerald-300 font-display font-bold text-xs transition-all hover:scale-105 cursor-pointer flex items-center gap-1.5"
-                >
-                  <UploadCloud className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>+ Sell a Project</span>
-                </button>
-              </motion.div>
-
-              {/* 4 Pillars Quick Overview Cards */}
-              <div className="grid grid-cols-2 gap-3 pt-3">
-                <div
-                  onClick={() => handleProtectedNavigation('/marketplace', 'Please log in or register to explore verified engineering projects.')}
-                  className="p-3.5 rounded-2xl bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/30 hover:border-cyan-400 transition-all cursor-pointer group shadow-lg"
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-400 group-hover:bg-cyan-400 group-hover:text-black transition-colors">
-                      <Code className="w-4 h-4" />
-                    </div>
-                    <span className="font-display font-bold text-xs text-white group-hover:text-cyan-300">1. Buy Projects</span>
-                  </div>
-                  <p className="text-[11px] text-slate-300 leading-snug">
-                    Verified source code, circuits & 4K video walkthroughs.
-                  </p>
-                </div>
-
-                <div
-                  onClick={() => handleProtectedNavigation('/upload', 'Please log in or register to upload and monetize your project.')}
-                  className="p-3.5 rounded-2xl bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/30 hover:border-emerald-400 transition-all cursor-pointer group shadow-lg"
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 group-hover:bg-emerald-400 group-hover:text-black transition-colors">
-                      <UploadCloud className="w-4 h-4" />
-                    </div>
-                    <span className="font-display font-bold text-xs text-white group-hover:text-emerald-300">2. Sell Your Project</span>
-                  </div>
-                  <p className="text-[11px] text-slate-300 leading-snug">
-                    Monetize your original projects & code with direct payouts.
-                  </p>
-                </div>
-
-                <div
-                  onClick={() => handleProtectedNavigation('/ai-shield', 'Please log in or register to run AI Plagiarism & Code Integrity scans.')}
-                  className="p-3.5 rounded-2xl bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/30 hover:border-purple-400 transition-all cursor-pointer group shadow-lg"
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-400 group-hover:bg-purple-400 group-hover:text-black transition-colors">
-                      <Shield className="w-4 h-4" />
-                    </div>
-                    <span className="font-display font-bold text-xs text-white group-hover:text-purple-300">3. Plagiarism Check</span>
-                  </div>
-                  <p className="text-[11px] text-slate-300 leading-snug">
-                    Scan code & IEEE thesis reports for originality score.
-                  </p>
-                </div>
-
-                <div
-                  onClick={() => {
-                    playSuccess();
-                    setIsDevModalOpen(true);
-                  }}
-                  className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-950/60 to-blue-950/60 hover:from-purple-900/80 hover:to-blue-900/80 border border-purple-500/40 hover:border-purple-300 transition-all cursor-pointer group shadow-lg"
-                >
-                  <div className="flex items-center gap-2 mb-1">
-                    <div className="p-1.5 rounded-lg bg-amber-400/20 text-amber-300 group-hover:bg-amber-400 group-hover:text-black transition-colors">
-                      <Lightbulb className="w-4 h-4" />
-                    </div>
-                    <span className="font-display font-bold text-xs text-white group-hover:text-amber-300">4. Build Custom</span>
-                  </div>
-                  <p className="text-[11px] text-slate-300 leading-snug">
-                    Hire our in-house engineers with 12h callback.
-                  </p>
-                </div>
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="text-center max-w-4xl mx-auto space-y-7">
+            {/* Ultra-Futuristic Shimmer Badge */}
+            <motion.div
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-gradient-to-r from-cyan-950/80 via-purple-950/60 to-cyan-950/80 border border-cyan-400/50 backdrop-blur-xl shadow-neon-cyan"
+            >
+              <div className="p-1 rounded-full bg-cyan-500/20 text-cyan-300">
+                <Sparkles className="w-3.5 h-3.5 animate-spin" />
               </div>
-            </div>
+              <span className="text-xs font-mono font-bold text-cyan-300 tracking-wider uppercase">
+                ⚡ Next-Gen Engineering Ecosystem • All Departments
+              </span>
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping ml-1" />
+            </motion.div>
 
-            {/* RIGHT COLUMN: ENGINEERING QUALITY & TRUST ASSURANCE SHOWCASE */}
-            <div className="lg:col-span-5 relative flex flex-col items-center justify-center space-y-4">
-              <div className="w-full rounded-3xl p-6 sm:p-7 bg-gradient-to-b from-gray-950/95 via-slate-900/90 to-gray-950/95 border-2 border-cyan-500/40 backdrop-blur-3xl shadow-2xl shadow-cyan-500/15 space-y-4">
-                {/* Header */}
-                <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3.5">
-                  <div className="flex items-center gap-3">
-                    <div className="p-2.5 rounded-2xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-neon-cyan shrink-0">
-                      <ShieldCheck className="w-5 h-5 animate-pulse" />
-                    </div>
-                    <div>
-                      <h3 className="font-display font-black text-sm text-white tracking-wide">
-                        PROJECTXIA VERIFIED STANDARDS
-                      </h3>
-                      <p className="text-[10px] font-mono text-slate-400">
-                        100% Genuine Engineering Guarantee
-                      </p>
-                    </div>
+            {/* Main Headline with High-End Syne Typography */}
+            <motion.h1
+              initial={{ opacity: 0, scale: 0.96 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.6 }}
+              className="text-4xl sm:text-6xl lg:text-7xl font-display font-black tracking-tight text-white leading-[1.08]"
+            >
+              Where Engineering Innovators <br />
+              <span className="text-gradient-cyan">Buy, Sell & Build Genuine Projects</span>
+            </motion.h1>
+
+            {/* Mission Statement */}
+            <motion.p
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.1 }}
+              className="text-base sm:text-lg text-slate-300 font-sans leading-relaxed max-w-3xl mx-auto"
+            >
+              The verified ecosystem for engineering students, creators, and researchers across <strong className="text-cyan-300 font-bold">CSE, ECE, EEE, Mech, AI, and IoT</strong>. Complete source code, circuit schematics, 4K video walkthroughs, built-in code originality check, and our dedicated custom engineering team.
+            </motion.p>
+
+            {/* CTA Action Buttons with Auth Gates */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="flex flex-wrap items-center justify-center gap-3 pt-2"
+            >
+              {/* 1. Explore Projects */}
+              <button
+                type="button"
+                onClick={() => handleProtectedNavigation('/marketplace', 'Please log in or register to explore verified engineering projects.')}
+                className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-black font-display font-black text-sm shadow-xl shadow-cyan-500/25 flex items-center gap-2 transition-all hover:scale-105 cursor-pointer"
+              >
+                <Code className="w-4 h-4 text-black shrink-0" />
+                <span>Explore Projects</span>
+                <ArrowRight className="w-4 h-4 text-black shrink-0" />
+              </button>
+
+              {/* 2. Plagiarism Checker */}
+              <button
+                type="button"
+                onClick={() => handleProtectedNavigation('/ai-shield', 'Please log in or register to run AI Plagiarism & Code Integrity scans.')}
+                className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-purple-950 via-indigo-900 to-purple-900 hover:from-purple-900 hover:to-indigo-800 border-2 border-purple-400/80 text-purple-200 hover:text-white font-display font-bold text-sm flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-purple-900/40 cursor-pointer"
+              >
+                <Shield className="w-4 h-4 text-purple-400 shrink-0" />
+                <span>Plagiarism Checker</span>
+              </button>
+
+              {/* 3. Build My Idea */}
+              <button
+                type="button"
+                onClick={() => {
+                  playSuccess();
+                  setIsDevModalOpen(true);
+                }}
+                className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-purple-950/80 to-slate-900 hover:from-amber-500/30 hover:to-purple-900 border border-amber-400/60 backdrop-blur-md text-amber-200 hover:text-white font-display font-bold text-sm flex items-center gap-2 transition-all hover:scale-105 shadow-md cursor-pointer"
+              >
+                <Lightbulb className="w-4 h-4 text-amber-300 animate-pulse shrink-0" />
+                <span>Build My Idea (Custom)</span>
+              </button>
+
+              {/* 4. Sell a Project */}
+              <button
+                type="button"
+                onClick={() => handleProtectedNavigation('/upload', 'Please log in or register to upload and monetize your project.')}
+                className="px-5 py-3.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/40 text-emerald-300 font-display font-bold text-xs transition-all hover:scale-105 cursor-pointer flex items-center gap-1.5"
+              >
+                <UploadCloud className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>+ Sell a Project</span>
+              </button>
+            </motion.div>
+
+            {/* 4 Pillars Quick Overview Cards */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-4 text-left">
+              <div
+                onClick={() => handleProtectedNavigation('/marketplace', 'Please log in or register to explore verified engineering projects.')}
+                className="p-4 rounded-2xl bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/30 hover:border-cyan-400 transition-all cursor-pointer group shadow-lg"
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <div className="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-400 group-hover:bg-cyan-400 group-hover:text-black transition-colors">
+                    <Code className="w-4 h-4" />
                   </div>
-                  <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-bold flex items-center gap-1">
-                    <CheckCircle2 className="w-3 h-3" /> AUDITED
-                  </span>
+                  <span className="font-display font-bold text-xs text-white group-hover:text-cyan-300">1. Buy Projects</span>
                 </div>
+                <p className="text-[11px] text-slate-300 leading-snug">
+                  Verified source code, circuits & 4K video walkthroughs.
+                </p>
+              </div>
 
-                {/* 4 Pillars of Excellence */}
-                <div className="space-y-2.5 text-xs font-sans">
-                  {/* Item 1 */}
-                  <div
-                    onClick={() => handleProtectedNavigation('/marketplace', 'Please log in or register to explore verified engineering projects.')}
-                    className="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-cyan-400/50 flex items-center justify-between transition-all cursor-pointer group shadow-sm"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-cyan-950/80 text-cyan-400 shrink-0">
-                        <Code className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <span className="font-bold text-white group-hover:text-cyan-300 block text-xs">
-                          Complete Code & Hardware Circuits
-                        </span>
-                        <span className="text-[11px] text-slate-400 block font-mono">
-                          KiCAD schematics, PCB Gerbers & full tested runbooks
-                        </span>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-cyan-400 group-hover:translate-x-1 transition-transform shrink-0" />
+              <div
+                onClick={() => handleProtectedNavigation('/upload', 'Please log in or register to upload and monetize your project.')}
+                className="p-4 rounded-2xl bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/30 hover:border-emerald-400 transition-all cursor-pointer group shadow-lg"
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 group-hover:bg-emerald-400 group-hover:text-black transition-colors">
+                    <UploadCloud className="w-4 h-4" />
                   </div>
-
-                  {/* Item 2 */}
-                  <div
-                    onClick={() => handleProtectedNavigation('/marketplace', 'Please log in or register to explore verified engineering projects.')}
-                    className="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-blue-400/50 flex items-center justify-between transition-all cursor-pointer group shadow-sm"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-blue-950/80 text-blue-400 shrink-0">
-                        <CheckCircle2 className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <span className="font-bold text-white group-hover:text-blue-300 block text-xs">
-                          4K Milestone Video Proof
-                        </span>
-                        <span className="text-[11px] text-slate-400 block font-mono">
-                          Every listed project includes video demonstration
-                        </span>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition-transform shrink-0" />
-                  </div>
-
-                  {/* Item 3 */}
-                  <div
-                    onClick={() => handleProtectedNavigation('/ai-shield', 'Please log in or register to run AI Plagiarism & Code Integrity scans.')}
-                    className="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-purple-400/50 flex items-center justify-between transition-all cursor-pointer group shadow-sm"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-purple-950/80 text-purple-400 shrink-0">
-                        <Shield className="w-4 h-4" />
-                      </div>
-                      <div>
-                        <span className="font-bold text-white group-hover:text-purple-300 block text-xs">
-                          AST Plagiarism & Backdoor Audited
-                        </span>
-                        <span className="text-[11px] text-slate-400 block font-mono">
-                          0% cloned boilerplate & zero security vulnerabilities
-                        </span>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform shrink-0" />
-                  </div>
-
-                  {/* Item 4 */}
-                  <div
-                    onClick={() => {
-                      playSuccess();
-                      setIsDevModalOpen(true);
-                    }}
-                    className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-950/70 via-indigo-950/60 to-slate-900/80 hover:from-purple-900/90 hover:to-indigo-900/90 border border-purple-500/40 hover:border-purple-300 flex items-center justify-between transition-all cursor-pointer group shadow-sm"
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-amber-400/20 text-amber-300 shrink-0">
-                        <Lightbulb className="w-4 h-4 animate-pulse" />
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-white group-hover:text-amber-300 text-xs">
-                            In-House Engineering Team
-                          </span>
-                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-400 text-black font-extrabold">
-                            12H CALLBACK
-                          </span>
-                        </div>
-                        <span className="text-[11px] text-slate-400 block font-mono">
-                          Direct inquiry to theprojectxia@gmail.com
-                        </span>
-                      </div>
-                    </div>
-                    <ArrowRight className="w-4 h-4 text-amber-300 group-hover:translate-x-1 transition-transform shrink-0" />
-                  </div>
+                  <span className="font-display font-bold text-xs text-white group-hover:text-emerald-300">2. Sell Your Project</span>
                 </div>
+                <p className="text-[11px] text-slate-300 leading-snug">
+                  Monetize your original projects & code with direct payouts.
+                </p>
+              </div>
+
+              <div
+                onClick={() => handleProtectedNavigation('/ai-shield', 'Please log in or register to run AI Plagiarism & Code Integrity scans.')}
+                className="p-4 rounded-2xl bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/30 hover:border-purple-400 transition-all cursor-pointer group shadow-lg"
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-400 group-hover:bg-purple-400 group-hover:text-black transition-colors">
+                    <Shield className="w-4 h-4" />
+                  </div>
+                  <span className="font-display font-bold text-xs text-white group-hover:text-purple-300">3. Plagiarism Check</span>
+                </div>
+                <p className="text-[11px] text-slate-300 leading-snug">
+                  Scan code & IEEE thesis reports for originality score.
+                </p>
+              </div>
+
+              <div
+                onClick={() => {
+                  playSuccess();
+                  setIsDevModalOpen(true);
+                }}
+                className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/60 to-blue-950/60 hover:from-purple-900/80 hover:to-blue-900/80 border border-purple-500/40 hover:border-purple-300 transition-all cursor-pointer group shadow-lg"
+              >
+                <div className="flex items-center gap-2 mb-1.5">
+                  <div className="p-1.5 rounded-lg bg-amber-400/20 text-amber-300 group-hover:bg-amber-400 group-hover:text-black transition-colors">
+                    <Lightbulb className="w-4 h-4" />
+                  </div>
+                  <span className="font-display font-bold text-xs text-white group-hover:text-amber-300">4. Build Custom</span>
+                </div>
+                <p className="text-[11px] text-slate-300 leading-snug">
+                  Hire our in-house engineers with 12h callback.
+                </p>
               </div>
             </div>
           </div>
