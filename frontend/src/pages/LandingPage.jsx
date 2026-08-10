@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Shield,
+  ShieldCheck,
   Sparkles,
   Zap,
   Lock,
