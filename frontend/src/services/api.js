@@ -2,7 +2,19 @@ import axios from 'axios';
 
 const isLocalhost = typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
-let rawBase = import.meta.env.VITE_API_URL || (isLocalhost ? 'http://localhost:5000' : '');
+// In production (https://www.projectxia.com), never call insecure http://localhost:5000
+let rawBase = '';
+if (isLocalhost) {
+  rawBase = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+} else {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl && envUrl.startsWith('https://')) {
+    rawBase = envUrl;
+  } else {
+    rawBase = '';
+  }
+}
+
 if (rawBase && rawBase.endsWith('/')) {
   rawBase = rawBase.slice(0, -1);
 }
