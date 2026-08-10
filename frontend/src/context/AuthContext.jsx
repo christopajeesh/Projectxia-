@@ -45,18 +45,6 @@ export const AuthProvider = ({ children }) => {
       setToken(null);
     }
     setIsLoading(false);
-
-    // Global listener for session expiry
-    const handleAuthExpired = (event) => {
-      setUser(null);
-      setToken(null);
-      setAuthPromptReason(event.detail?.message || 'Your session has expired. Please log in or enter OTP to continue.');
-      setAuthModalMode('login');
-      setIsAuthModalOpen(true);
-    };
-
-    window.addEventListener('projectxia_auth_expired', handleAuthExpired);
-    return () => window.removeEventListener('projectxia_auth_expired', handleAuthExpired);
   }, []);
 
   const saveAuthSession = (newToken, newUser) => {

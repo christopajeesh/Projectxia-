@@ -123,6 +123,17 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
     preferredContact: 'WHATSAPP_AND_CALL',
   });
 
+  React.useEffect(() => {
+    if (isOpen && user) {
+      setFormData((prev) => ({
+        ...prev,
+        name: prev.name || user.name || '',
+        email: prev.email || user.email || '',
+        mobile: prev.mobile || user.mobile || '',
+      }));
+    }
+  }, [isOpen, user]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     playClick();

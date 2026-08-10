@@ -45,38 +45,12 @@ api.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor for automatic error logging & graceful session expiry
+// Response interceptor for logging errors gracefully without breaking user session
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     const errorMsg = error.response?.data?.message || error.message;
     console.warn('[ProjectXia API Interceptor]:', errorMsg);
-
-    // If token expired or signature mismatch (401), broadcast auth expired event
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
-      const isAuthError =
-        errorMsg.includes('expired') ||
-        errorMsg.includes('signature') ||
-        errorMsg.includes('invalid') ||
-        errorMsg.includes('Unauthorized') ||
-        errorMsg.includes('Bearer token');
-
-      if (isAuthError) {
-        try {
-          sessionStorage.removeItem('projectxia_token');
-          sessionStorage.removeItem('projectxia_user');
-          localStorage.removeItem('projectxia_token');
-          localStorage.removeItem('projectxia_user');
-        } catch (e) {}
-
-        window.dispatchEvent(
-          new CustomEvent('projectxia_auth_expired', {
-            detail: { message: errorMsg },
-          })
-        );
-      }
-    }
-
     return Promise.reject(error);
   }
 );
