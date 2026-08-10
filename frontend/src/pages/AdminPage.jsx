@@ -41,20 +41,22 @@ import api from '../services/api';
 import confetti from 'canvas-confetti';
 
 const PIPELINE_STATUSES = [
-  { id: 'EMAIL_SENT', label: '1. Sent to Lead Email', color: 'emerald' },
-  { id: 'ARCHITECT_REVIEW', label: '2. Architect Review', color: 'cyan' },
-  { id: 'PROPOSAL_SENT', label: '3. Specs & Proposal', color: 'blue' },
-  { id: 'IN_DEVELOPMENT', label: '4. In Development', color: 'purple' },
-  { id: 'DELIVERED', label: '5. Final Delivery', color: 'emerald' },
+  { id: 'EMAIL_SENT', label: '1. Email Sent', badge: 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40' },
+  { id: 'ARCHITECT_REVIEW', label: '2. Architect Review', badge: 'bg-cyan-950/80 text-cyan-300 border-cyan-500/40' },
+  { id: 'PROPOSAL_SENT', label: '3. Specs & Proposal', badge: 'bg-blue-950/80 text-blue-300 border-blue-500/40' },
+  { id: 'IN_DEVELOPMENT', label: '4. In Development', badge: 'bg-purple-950/80 text-purple-300 border-purple-500/40' },
+  { id: 'DELIVERED', label: '5. Completed & Delivered', badge: 'bg-emerald-950/80 text-emerald-400 border-emerald-500/40' },
+  { id: 'ON_HOLD', label: '⏸️ Paused / On Hold', badge: 'bg-amber-950/80 text-amber-300 border-amber-500/40' },
 ];
 
 const AdminPage = () => {
   const { playClick, playSuccess, playShield } = useSound();
   const { user } = useAuth();
 
-  const [activeTab, setActiveTab] = useState('agency'); // 'agency', 'activity', 'users', 'broadcast'
+  const [activeTab, setActiveTab] = useState('agency'); // 'agency', 'projects', 'activity', 'users', 'broadcast'
   const [metrics, setMetrics] = useState(null);
   const [agencyLeads, setAgencyLeads] = useState([]);
+  const [projectsList, setProjectsList] = useState([]);
   const [usersList, setUsersList] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
   const [announcement, setAnnouncement] = useState({ title: '', message: '' });
@@ -96,14 +98,18 @@ const AdminPage = () => {
   const fetchAdminData = async () => {
     setIsRefreshing(true);
     try {
-      const [mRes, uRes, lRes] = await Promise.all([
+      const [mRes, uRes, lRes, pRes] = await Promise.all([
         api.get('/admin/metrics').catch(() => ({ data: { metrics: null, auditLogs: [] } })),
         api.get('/admin/users').catch(() => ({ data: { users: [] } })),
         api.get('/admin/agency-leads').catch(() => ({ data: { agencyLeads: [] } })),
+        api.get('/projects').catch(() => ({ data: { projects: [] } })),
       ]);
 
+      const deletedLeads = JSON.parse(localStorage.getItem('projectxia_admin_deleted_leads') || '[]');
+      const deletedProjects = JSON.parse(localStorage.getItem('projectxia_admin_deleted_projects') || '[]');
       const customData = getSavedLeadsData();
-      const rawLeads = lRes.data?.agencyLeads || [];
+      const rawLeads = (lRes.data?.agencyLeads || []).filter((l) => !deletedLeads.includes(l._id) && !deletedLeads.includes(l.id));
+      const rawProjects = (pRes.data?.projects || []).filter((p) => !deletedProjects.includes(p._id) && !deletedProjects.includes(p.id));
 
       // Merge server data with local status updates
       const mergedLeads = rawLeads.map((lead) => {
@@ -117,13 +123,14 @@ const AdminPage = () => {
 
       setMetrics(mRes.data?.metrics || {
         totalUsers: 142,
-        totalProjects: 68,
+        totalProjects: rawProjects.length || 68,
         totalIntrusionsBlocked: 219,
         serverUptime: '99.98%',
       });
       setAuditLogs(mRes.data?.auditLogs || []);
       setUsersList(uRes.data?.users || []);
       setAgencyLeads(mergedLeads);
+      setProjectsList(rawProjects);
     } catch (e) {
       console.warn('Admin fetch note:', e);
     } finally {
@@ -137,10 +144,44 @@ const AdminPage = () => {
       prev.map((lead) => (lead._id === leadId ? { ...lead, status: newStatus } : lead))
     );
     saveLeadsCustomData(leadId, { status: newStatus });
-    confetti({ particleCount: 25, spread: 35, origin: { y: 0.7 } });
+    confetti({ particleCount: 30, spread: 45, origin: { y: 0.7 } });
 
     // Sync to backend if endpoint available
     api.put(`/admin/agency-leads/${leadId}/status`, { status: newStatus }).catch(() => {});
+  };
+
+  const handleDeleteLead = (leadId) => {
+    playShield();
+    if (window.confirm('⚠️ Are you sure you want to permanently delete this project lead / work inquiry? This action cannot be undone.')) {
+      setAgencyLeads((prev) => prev.filter((lead) => lead._id !== leadId && lead.id !== leadId));
+      
+      try {
+        const deleted = JSON.parse(localStorage.getItem('projectxia_admin_deleted_leads') || '[]');
+        deleted.push(leadId);
+        localStorage.setItem('projectxia_admin_deleted_leads', JSON.stringify(deleted));
+      } catch (e) {}
+
+      api.delete(`/admin/agency-leads/${leadId}`).catch(() => {});
+      playSuccess();
+      confetti({ particleCount: 35, spread: 50 });
+    }
+  };
+
+  const handleDeleteProject = (projectId) => {
+    playShield();
+    if (window.confirm('⚠️ Are you sure you want to permanently delete this listed project work from the platform?')) {
+      setProjectsList((prev) => prev.filter((p) => p._id !== projectId && p.id !== projectId));
+      
+      try {
+        const deleted = JSON.parse(localStorage.getItem('projectxia_admin_deleted_projects') || '[]');
+        deleted.push(projectId);
+        localStorage.setItem('projectxia_admin_deleted_projects', JSON.stringify(deleted));
+      } catch (e) {}
+
+      api.delete(`/projects/${projectId}`).catch(() => {});
+      playSuccess();
+      confetti({ particleCount: 35, spread: 50 });
+    }
   };
 
   const handleSaveNotes = (leadId) => {
@@ -515,6 +556,7 @@ const AdminPage = () => {
         <div className="flex items-center gap-2 border-b border-slate-800 overflow-x-auto">
           {[
             { id: 'agency', label: `🚀 Inbound Client Leads (${agencyLeads.length})` },
+            { id: 'projects', label: `📦 Listed Project Works (${projectsList.length})` },
             { id: 'activity', label: `📡 Secret Activity Logs (${auditLogs.length})` },
             { id: 'users', label: `🛡️ User Governance (${usersList.length})` },
             { id: 'broadcast', label: '📢 Live Broadcaster' },
@@ -561,6 +603,7 @@ const AdminPage = () => {
                   { id: 'PROPOSAL_SENT', label: '3. Proposal' },
                   { id: 'IN_DEVELOPMENT', label: '4. In Dev' },
                   { id: 'DELIVERED', label: '5. Delivered' },
+                  { id: 'ON_HOLD', label: '⏸️ Paused' },
                 ].map((f) => (
                   <button
                     key={f.id}
@@ -600,7 +643,7 @@ const AdminPage = () => {
                   return (
                     <div
                       key={leadId}
-                      className="p-6 rounded-3xl bg-gray-950/90 border border-cyan-500/30 hover:border-cyan-500/60 transition-all space-y-4 shadow-xl backdrop-blur-2xl"
+                      className="p-6 rounded-3xl bg-gray-950/90 border border-cyan-500/30 hover:border-cyan-500/60 transition-all space-y-4 shadow-xl backdrop-blur-2xl relative"
                     >
                       {/* Header row */}
                       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-800 pb-3">
@@ -640,13 +683,19 @@ const AdminPage = () => {
                           </div>
                         </div>
 
-                        <div className="flex sm:flex-col items-center sm:items-end justify-between gap-1">
+                        <div className="flex flex-wrap items-center gap-2 sm:justify-end">
                           <span className="px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 text-xs font-bold">
                             {lead.budget || lead.budgetRange || '₹15,000 - ₹30,000'}
                           </span>
-                          <span className="text-[10px] text-slate-500 mt-0.5">
-                            {new Date(lead.createdAt || Date.now()).toLocaleString()}
-                          </span>
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteLead(leadId)}
+                            className="p-2 rounded-xl bg-rose-950/60 hover:bg-rose-900 border border-rose-500/40 text-rose-300 hover:text-white transition-all cursor-pointer flex items-center gap-1 text-[11px]"
+                            title="Delete this work inquiry"
+                          >
+                            <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                            <span>Delete</span>
+                          </button>
                         </div>
                       </div>
 
@@ -689,7 +738,7 @@ const AdminPage = () => {
                           </span>
                         </div>
 
-                        <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-2">
                           {PIPELINE_STATUSES.map((step) => {
                             const isCurrent = currentStatus === step.id;
                             return (
@@ -796,6 +845,86 @@ const AdminPage = () => {
                               <span>Call Client</span>
                             </a>
                           )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB: LISTED MARKETPLACE PROJECTS & WORKS */}
+        {activeTab === 'projects' && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="text-lg font-display font-bold text-white">Marketplace Project Works Governance</h3>
+                <p className="text-xs font-mono text-slate-400">
+                  Manage, review, or permanently delete any listed engineering project on ProjectXia.
+                </p>
+              </div>
+              <span className="text-xs font-bold text-cyan-400 bg-cyan-950/60 border border-cyan-500/30 px-3 py-1 rounded-full">
+                {projectsList.length} Active Works
+              </span>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {projectsList.length === 0 ? (
+                <div className="col-span-2 p-12 text-center bg-gray-900/60 rounded-3xl border border-slate-800 text-slate-400">
+                  <p className="font-bold text-white">No listed projects found</p>
+                </div>
+              ) : (
+                projectsList.map((proj) => {
+                  const pId = proj._id || proj.id;
+                  return (
+                    <div
+                      key={pId}
+                      className="p-5 rounded-3xl bg-gray-950/90 border border-slate-800 hover:border-cyan-500/40 transition-all flex flex-col justify-between gap-4"
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="px-2.5 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-500/40 text-[10px] font-bold">
+                            {proj.category || 'Computer Science'}
+                          </span>
+                          <span className="font-display font-black text-emerald-400 text-base">
+                            ₹{proj.price ? Number(proj.price).toLocaleString() : '1,999'}
+                          </span>
+                        </div>
+
+                        <h4 className="font-display font-bold text-sm text-white line-clamp-1">
+                          {proj.title || 'Engineering Project Repository'}
+                        </h4>
+                        <p className="text-xs text-slate-400 line-clamp-2">
+                          {proj.description || 'Full source code, circuit schematic, and documentation bundle.'}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-3 border-t border-slate-800/80 text-[11px]">
+                        <span className="text-slate-500">
+                          Creator: <strong className="text-slate-300">{proj.seller?.name || proj.author || 'Verified Innovator'}</strong>
+                        </span>
+
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={`/project/${pId}`}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="px-3 py-1.5 rounded-lg bg-gray-900 hover:bg-gray-800 border border-slate-700 text-slate-300 hover:text-white text-[10px] font-bold flex items-center gap-1"
+                          >
+                            <ExternalLink className="w-3 h-3 text-cyan-400" />
+                            <span>Preview</span>
+                          </a>
+
+                          <button
+                            type="button"
+                            onClick={() => handleDeleteProject(pId)}
+                            className="px-3 py-1.5 rounded-lg bg-rose-950/70 hover:bg-rose-900 border border-rose-500/40 text-rose-300 hover:text-white text-[10px] font-bold flex items-center gap-1 cursor-pointer"
+                          >
+                            <Trash2 className="w-3 h-3 text-rose-400" />
+                            <span>Delete Work</span>
+                          </button>
                         </div>
                       </div>
                     </div>
