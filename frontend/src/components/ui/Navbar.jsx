@@ -19,6 +19,9 @@ import {
   PhoneCall,
   HelpCircle,
   CheckCircle2,
+  Layers,
+  ArrowRight,
+  UserCheck,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSound } from '../../context/SoundContext';
@@ -37,48 +40,60 @@ const Navbar = () => {
   const [isCustomModalOpen, setIsCustomModalOpen] = useState(false);
   const [showGuideModal, setShowGuideModal] = useState(false);
 
+  // Clear, Plain-English Navigation Tabs for Common People
   const navLinks = [
     {
-      name: 'Marketplace',
-      subtitle: 'Browse & Buy Projects',
+      name: 'Browse Projects',
+      subtitle: 'Buy Code & Videos',
       path: '/marketplace',
       icon: Code,
+      accentColor: 'cyan',
+      forWhom: 'For Students & Buyers',
+      description: 'Explore authentic ready-to-run software, AI, and hardware projects with verified working demo videos and full downloadable source code.',
       protected: true,
-      description: 'Explore authentic hardware, software, and AI final year projects with verified video demos & source code.',
     },
     {
       name: 'Plagiarism Check',
-      subtitle: 'Code Originality Scanner',
+      subtitle: 'Scan Code & Thesis',
       path: '/ai-shield',
       icon: Shield,
+      accentColor: 'purple',
+      forWhom: 'For Academics & Researchers',
+      description: 'Scan your code or IEEE project report against billions of sources to detect plagiarism, security flaws, and get an authenticity trust badge.',
       protected: true,
-      description: 'Scan code, firmware & IEEE abstracts for plagiarism, security vulnerabilities, and trust score.',
     },
     {
       name: 'Build Custom Software',
-      subtitle: 'In-House Dev Team',
+      subtitle: 'Hire Our Dev Team',
       isSpecialAction: true,
       icon: Lightbulb,
+      accentColor: 'amber',
       badge: 'DEV TEAM',
+      forWhom: 'For Custom Requirements',
+      description: 'Need a custom app, thesis project, or AI tool built from scratch? Request the ProjectXia engineering team with a guaranteed 12-hour callback.',
       protected: false,
-      description: 'Request the ProjectXia engineering team to build your custom software, app, or thesis project with a 12-hour callback.',
     },
     {
-      name: 'Sell Project',
-      subtitle: 'Monetize Your Code',
+      name: 'Sell Your Project',
+      subtitle: 'Earn Money from Code',
       path: '/upload',
       icon: UploadCloud,
-      protected: true,
+      accentColor: 'emerald',
       isHighlight: true,
-      description: 'Upload and monetize your original hardware or software projects and receive payouts directly.',
+      badge: 'MONETIZE',
+      forWhom: 'For Creators & Developers',
+      description: 'Upload your original engineering project or code to start earning passive income every time someone purchases it.',
+      protected: true,
     },
     {
-      name: 'Messages & Deals',
-      subtitle: 'Direct 1-on-1 Chat',
+      name: 'Creator Chat & Deals',
+      subtitle: 'Talk & Negotiate',
       path: '/chat',
       icon: MessageSquare,
+      accentColor: 'blue',
+      forWhom: 'For 1-on-1 Discussions',
+      description: 'Direct real-time private chat with project creators to ask technical questions, negotiate prices, or request custom features.',
       protected: true,
-      description: 'Chat directly with project creators, ask questions, negotiate prices, and request custom modifications.',
     },
   ];
 
@@ -109,86 +124,91 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-cyan-500/25 bg-black/95 backdrop-blur-2xl shadow-xl shadow-cyan-950/40">
-        {/* Top Information & Status Bar */}
-        <div className="hidden sm:flex items-center justify-between px-4 sm:px-8 py-1.5 bg-gradient-to-r from-gray-950 via-cyan-950/40 to-gray-950 border-b border-cyan-500/15 text-[11px] font-mono">
+      <header className="sticky top-0 z-40 w-full border-b border-cyan-500/20 bg-gray-950/90 backdrop-blur-2xl shadow-xl shadow-black/60">
+        {/* Top Helper & Explainer Bar */}
+        <div className="hidden sm:flex items-center justify-between px-4 sm:px-8 py-1.5 bg-gradient-to-r from-gray-950 via-cyan-950/40 to-gray-950 border-b border-cyan-500/15 text-[11px] font-sans">
           <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1 text-cyan-400 font-bold">
-              <Activity className="w-3 h-3 animate-pulse" />
-              <span>PLATFORM STATUS: LIVE & VERIFIED</span>
+            <span className="flex items-center gap-1.5 text-cyan-400 font-bold font-mono">
+              <Activity className="w-3 h-3 animate-pulse text-cyan-400" />
+              <span>PROJECTXIA LIVE HUB</span>
             </span>
-            <span className="text-slate-600">|</span>
-            <span className="text-emerald-400 font-semibold">
-              🎓 HARDWARE, SOFTWARE & CAPSTONE ENGINEERING HUB
+            <span className="text-slate-700">|</span>
+            <span className="text-slate-300 font-medium">
+              Verified Engineering Projects, In-House Custom Builds & AI Plagiarism Defense
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-400">
+          <div className="flex items-center gap-4">
             <button
-              onClick={() => setShowGuideModal(true)}
-              className="flex items-center gap-1 text-cyan-300 hover:text-cyan-200 transition-colors cursor-pointer bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30"
+              onClick={() => {
+                playClick();
+                setShowGuideModal(true);
+              }}
+              className="flex items-center gap-1.5 text-cyan-300 hover:text-cyan-100 transition-all cursor-pointer bg-cyan-950/70 hover:bg-cyan-900/80 px-2.5 py-0.5 rounded-lg border border-cyan-400/40 font-medium text-[11px] shadow-sm hover:scale-105"
             >
-              <HelpCircle className="w-3 h-3" />
-              <span>How It Works / Tabs Guide</span>
+              <HelpCircle className="w-3.5 h-3.5 text-cyan-400" />
+              <span>What is each tab for? (Tabs Guide)</span>
             </button>
-            <span className="flex items-center gap-1.5 text-[10px]">
+            <span className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-400">
               <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-emerald-400 animate-ping' : 'bg-emerald-400'}`} />
-              <span>REAL-TIME ENGINE: ACTIVE</span>
+              <span>ENGINE ACTIVE</span>
             </span>
           </div>
         </div>
 
         <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-18 gap-2">
+          <div className="flex items-center justify-between h-16 sm:h-20 gap-2">
             
             {/* BRAND LOGO */}
             <Link
               to="/"
               onClick={playClick}
-              className="flex items-center gap-2 group cursor-pointer shrink-0"
+              className="flex items-center gap-2.5 group cursor-pointer shrink-0"
               title="ProjectXia Home"
             >
-              <div className="relative p-2 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-600 border border-cyan-400 shadow-neon-cyan group-hover:scale-105 transition-all">
+              <div className="relative p-2.5 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-600 border border-cyan-400 shadow-neon-cyan group-hover:scale-105 transition-all">
                 <Shield className="w-5 h-5 text-black" />
-                <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-cyan-300 animate-spin" />
+                <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-cyan-200 animate-spin" />
               </div>
               <div className="flex flex-col">
-                <span className="font-display font-black text-base sm:text-xl tracking-tight text-white">
+                <span className="font-display font-black text-lg sm:text-2xl tracking-tight text-white leading-none">
                   PROJECT<span className="text-cyan-400">XIA</span>
                 </span>
-                <span className="text-[9px] font-mono text-slate-400 -mt-1 hidden xs:block">
-                  Verified Engineering Marketplace
+                <span className="text-[10px] font-mono text-slate-400 mt-0.5 hidden xs:block tracking-wider uppercase">
+                  Engineering Hub
                 </span>
               </div>
             </Link>
 
-            {/* Navigation Links with clear purpose styling */}
-            <nav className="flex items-center gap-1.5 sm:gap-2">
-              {/* 1. Marketplace */}
+            {/* Desktop Navigation Tabs (Clear Plain-English Titles & Sub-Explainers) */}
+            <nav className="hidden md:flex items-center gap-1.5 lg:gap-2">
+              {/* Tab 1: Browse Projects */}
               <button
                 type="button"
                 onClick={() => {
                   playClick();
                   if (!isAuthenticated) {
-                    openAuthModal('login', 'Please log in or register to explore and access verified engineering projects.');
+                    openAuthModal('login', 'Please log in or register to explore and download verified engineering projects.');
                   } else {
                     navigate('/marketplace');
                   }
                 }}
-                title="Browse & Buy Verified Projects with Videos & Source Code"
-                className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-display font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`group px-3 py-2 rounded-xl transition-all cursor-pointer text-left flex items-center gap-2 border ${
                   location.pathname === '/marketplace'
-                    ? 'text-cyan-300 bg-cyan-500/20 border border-cyan-400/50 shadow-neon-cyan'
-                    : 'text-slate-200 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10'
+                    ? 'bg-cyan-500/20 border-cyan-400/60 shadow-neon-cyan text-cyan-300'
+                    : 'bg-slate-900/60 hover:bg-slate-800/80 border-slate-800/90 hover:border-cyan-500/40 text-slate-200 hover:text-white'
                 }`}
               >
-                <Code className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
-                <div className="flex flex-col text-left">
-                  <span>Marketplace</span>
+                <div className={`p-1.5 rounded-lg ${location.pathname === '/marketplace' ? 'bg-cyan-400 text-black' : 'bg-cyan-950/60 text-cyan-400 group-hover:bg-cyan-500/20'}`}>
+                  <Code className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-display font-extrabold text-xs leading-tight">Browse Projects</span>
+                  <span className="text-[10px] font-sans text-slate-400 group-hover:text-slate-300 leading-none">Source Code & Videos</span>
                 </div>
               </button>
 
-              {/* 2. Plagiarism Check */}
+              {/* Tab 2: Plagiarism Check */}
               <button
                 type="button"
                 onClick={() => {
@@ -199,41 +219,45 @@ const Navbar = () => {
                     navigate('/ai-shield');
                   }
                 }}
-                title="AI Plagiarism & Code Security Integrity Scanner"
-                className={`px-2.5 sm:px-3 py-1.5 rounded-xl font-display font-bold text-xs flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`group px-3 py-2 rounded-xl transition-all cursor-pointer text-left flex items-center gap-2 border ${
                   location.pathname === '/ai-shield'
-                    ? 'text-purple-300 bg-purple-500/25 border border-purple-400/60 shadow-lg'
-                    : 'text-purple-300 hover:text-white bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/30'
+                    ? 'bg-purple-500/20 border-purple-400/60 shadow-lg text-purple-300'
+                    : 'bg-slate-900/60 hover:bg-slate-800/80 border-slate-800/90 hover:border-purple-500/40 text-slate-200 hover:text-white'
                 }`}
               >
-                <Shield className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                <div className="flex flex-col text-left">
-                  <span className="hidden sm:inline">Plagiarism Check</span>
-                  <span className="sm:hidden">Shield</span>
+                <div className={`p-1.5 rounded-lg ${location.pathname === '/ai-shield' ? 'bg-purple-400 text-black' : 'bg-purple-950/60 text-purple-400 group-hover:bg-purple-500/20'}`}>
+                  <Shield className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-display font-extrabold text-xs leading-tight">Plagiarism Check</span>
+                  <span className="text-[10px] font-sans text-slate-400 group-hover:text-slate-300 leading-none">Scan Code & Thesis</span>
                 </div>
               </button>
 
-              {/* 3. Build Software Hub (Request Call / Custom Project) */}
+              {/* Tab 3: Build Custom Software */}
               <button
                 type="button"
                 onClick={() => {
                   playClick();
                   setIsCustomModalOpen(true);
                 }}
-                title="Request ProjectXia Developing Team to Build Your Custom Software from Scratch"
-                className="px-2.5 sm:px-3 py-1.5 rounded-xl font-display font-bold text-xs flex items-center gap-1.5 bg-gradient-to-r from-purple-950/90 via-indigo-950/90 to-blue-950/90 border border-purple-500/50 text-purple-300 hover:text-white hover:border-purple-300 shadow-md transition-all hover:scale-105 cursor-pointer"
+                className="group px-3 py-2 rounded-xl transition-all cursor-pointer text-left flex items-center gap-2 bg-gradient-to-r from-purple-950/60 via-indigo-950/70 to-slate-900/80 border border-purple-500/40 hover:border-purple-400 shadow-md hover:scale-[1.02]"
               >
-                <Lightbulb className="w-3.5 h-3.5 text-amber-300 animate-pulse shrink-0" />
-                <div className="flex items-center gap-1">
-                  <span className="hidden sm:inline">Build Custom</span>
-                  <span className="sm:hidden">Build</span>
-                  <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-purple-400 text-black font-extrabold">
-                    DEV TEAM
-                  </span>
+                <div className="p-1.5 rounded-lg bg-amber-400/20 text-amber-300 group-hover:bg-amber-400 group-hover:text-black transition-colors">
+                  <Lightbulb className="w-4 h-4 animate-pulse" />
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-1">
+                    <span className="font-display font-extrabold text-xs text-purple-200 group-hover:text-white leading-tight">Build Custom</span>
+                    <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-gradient-to-r from-amber-400 to-purple-400 text-black font-extrabold">
+                      DEV TEAM
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-sans text-slate-400 group-hover:text-slate-300 leading-none">Hire Our Engineers</span>
                 </div>
               </button>
 
-              {/* 4. Sell Project */}
+              {/* Tab 4: Sell Your Project */}
               <button
                 type="button"
                 onClick={() => {
@@ -244,18 +268,25 @@ const Navbar = () => {
                     navigate('/upload');
                   }
                 }}
-                title="List your original software/hardware project to earn revenue"
-                className="px-2.5 sm:px-3.5 py-1.5 rounded-xl font-display font-black text-xs flex items-center gap-1 bg-cyan-500 hover:bg-cyan-400 text-black shadow-lg shadow-cyan-500/30 border border-cyan-300 transition-all hover:scale-105 cursor-pointer whitespace-nowrap"
+                className={`group px-3 py-2 rounded-xl transition-all cursor-pointer text-left flex items-center gap-2 border ${
+                  location.pathname === '/upload'
+                    ? 'bg-emerald-500/25 border-emerald-400/60 shadow-lg text-emerald-300'
+                    : 'bg-emerald-950/40 hover:bg-emerald-900/60 border-emerald-500/30 hover:border-emerald-400 text-slate-200 hover:text-white'
+                }`}
               >
-                <UploadCloud className="w-3.5 h-3.5 text-black shrink-0" />
-                <span className="hidden xs:inline">Sell Project</span>
-                <span className="xs:hidden">Sell</span>
+                <div className="p-1.5 rounded-lg bg-emerald-400 text-black">
+                  <UploadCloud className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-display font-black text-xs text-emerald-300 leading-tight">Sell Your Project</span>
+                  <span className="text-[10px] font-sans text-emerald-400/80 leading-none">Earn Money on Code</span>
+                </div>
               </button>
             </nav>
 
-            {/* Right Action Cluster */}
-            <div className="flex items-center gap-1.5 sm:gap-2">
-              {/* Deals & Messages Direct Hub */}
+            {/* Right Action Cluster: Chat, Audio & Account */}
+            <div className="flex items-center gap-1.5 sm:gap-2.5">
+              {/* Deals & Creator Chat */}
               <button
                 type="button"
                 onClick={() => {
@@ -266,18 +297,27 @@ const Navbar = () => {
                     navigate('/chat');
                   }
                 }}
-                title="Live Negotiations & 1-on-1 Deals with Creators"
-                className="hidden md:flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-emerald-950/50 hover:bg-emerald-900/80 border border-emerald-500/40 text-emerald-300 hover:text-white transition-all cursor-pointer shadow-md text-xs font-mono font-bold"
+                title="Direct 1-on-1 Chat with Creators"
+                className={`hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl border transition-all cursor-pointer text-left ${
+                  location.pathname === '/chat'
+                    ? 'bg-blue-500/20 border-blue-400/60 text-blue-300'
+                    : 'bg-slate-900/60 hover:bg-slate-800/80 border-slate-800 hover:border-blue-500/40 text-slate-200 hover:text-white'
+                }`}
               >
-                <MessageSquare className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span className="hidden lg:inline">Deals & Chat</span>
+                <div className="p-1 rounded-lg bg-blue-950 text-blue-400">
+                  <MessageSquare className="w-3.5 h-3.5" />
+                </div>
+                <div className="flex flex-col">
+                  <span className="font-display font-bold text-xs leading-tight">Creator Chat</span>
+                  <span className="text-[10px] text-slate-400 leading-none">Talk & Negotiate</span>
+                </div>
               </button>
 
-              {/* Sound Toggle */}
+              {/* Sound Audio Toggle */}
               <button
                 onClick={toggleMute}
                 title={isMuted ? 'Unmute Audio' : 'Mute Cyber Audio FX'}
-                className="p-1.5 sm:p-2 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-300 hover:text-white transition-colors cursor-pointer"
+                className="p-2 rounded-xl bg-slate-900/70 hover:bg-slate-800 border border-slate-800 text-slate-300 hover:text-white transition-colors cursor-pointer"
               >
                 {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume2 className="w-4 h-4 text-cyan-400" />}
               </button>
@@ -285,18 +325,21 @@ const Navbar = () => {
               {/* AUTH STATE: LOGIN/REGISTER vs PROFILE & LOGOUT */}
               {!isAuthenticated ? (
                 <button
-                  onClick={() => openAuthModal('login', 'Please log in or register to access verified projects.')}
-                  className="px-3 sm:px-4 py-1.5 sm:py-2 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-black font-display font-black text-xs shadow-lg shadow-cyan-500/25 flex items-center gap-1 transition-all hover:scale-105 cursor-pointer shrink-0"
+                  onClick={() => {
+                    playClick();
+                    openAuthModal('login', 'Please log in or register to access verified projects.');
+                  }}
+                  className="px-3.5 sm:px-5 py-2 sm:py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-black font-display font-black text-xs shadow-lg shadow-cyan-500/25 flex items-center gap-1.5 transition-all hover:scale-105 cursor-pointer shrink-0"
                 >
-                  <LogIn className="w-3.5 h-3.5" />
+                  <LogIn className="w-4 h-4" />
                   <span>Login / Register</span>
                 </button>
               ) : (
-                <div className="flex items-center gap-1 sm:gap-2">
+                <div className="flex items-center gap-1.5 sm:gap-2">
                   <button
                     onClick={handleLogout}
                     title="Sign Out"
-                    className="px-2.5 sm:px-3 py-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/40 text-rose-300 font-display font-bold text-xs flex items-center gap-1 transition-all hover:scale-105 shadow-md cursor-pointer"
+                    className="px-3 py-2 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/40 text-rose-300 font-display font-bold text-xs flex items-center gap-1.5 transition-all hover:scale-105 shadow-md cursor-pointer"
                   >
                     <LogOut className="w-3.5 h-3.5" />
                     <span className="hidden sm:inline">Logout</span>
@@ -309,7 +352,7 @@ const Navbar = () => {
                         playClick();
                         setUserDropdownOpen(!userDropdownOpen);
                       }}
-                      className="flex items-center gap-1.5 p-1 rounded-xl bg-white/5 hover:bg-white/10 border border-cyan-500/30 transition-all cursor-pointer"
+                      className="flex items-center gap-1.5 p-1 rounded-xl bg-slate-900 border border-cyan-500/30 transition-all cursor-pointer"
                     >
                       <img
                         src={user?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user?.name || user?.email || 'User')}&backgroundColor=080e1e,101f4e&textColor=00f0ff`}
@@ -329,7 +372,7 @@ const Navbar = () => {
                         <Link
                           to="/profile"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="block px-4 py-2.5 text-xs text-slate-300 hover:bg-cyan-500/20 hover:text-cyan-300"
+                          className="block px-4 py-2.5 text-xs text-slate-300 hover:bg-cyan-500/20 hover:text-cyan-300 font-medium"
                         >
                           👤 My Profile & Dashboard
                         </Link>
@@ -337,7 +380,7 @@ const Navbar = () => {
                         <Link
                           to="/profile?tab=software_requests"
                           onClick={() => setUserDropdownOpen(false)}
-                          className="block px-4 py-2.5 text-xs text-slate-300 hover:bg-cyan-500/20 hover:text-cyan-300"
+                          className="block px-4 py-2.5 text-xs text-slate-300 hover:bg-cyan-500/20 hover:text-cyan-300 font-medium"
                         >
                           📋 My Custom Build Inquiries
                         </Link>
@@ -366,7 +409,7 @@ const Navbar = () => {
 
                         <button
                           onClick={handleLogout}
-                          className="w-full text-left px-4 py-2.5 text-xs text-rose-400 hover:bg-rose-500/20 flex items-center gap-2 border-t border-cyan-500/20 cursor-pointer"
+                          className="w-full text-left px-4 py-2.5 text-xs text-rose-400 hover:bg-rose-500/20 flex items-center gap-2 border-t border-cyan-500/20 cursor-pointer font-bold"
                         >
                           <LogOut className="w-3.5 h-3.5" />
                           <span>Logout & Lock Session</span>
@@ -380,7 +423,7 @@ const Navbar = () => {
               {/* Mobile Hamburger Menu */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 rounded-xl bg-white/5 border border-white/10 text-slate-300"
+                className="md:hidden p-2 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-200"
               >
                 {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
               </button>
@@ -390,33 +433,47 @@ const Navbar = () => {
 
         {/* Mobile Dropdown Menu */}
         {mobileMenuOpen && (
-          <div className="md:hidden px-4 pt-2 pb-6 bg-gray-950/95 border-b border-cyan-500/25 space-y-2 font-mono text-xs">
+          <div className="md:hidden px-4 pt-3 pb-6 bg-gray-950/98 border-b border-cyan-500/25 space-y-2.5">
+            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
+              <span className="text-[11px] font-mono text-cyan-400 font-bold">NAVIGATION MENU</span>
+              <button
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setShowGuideModal(true);
+                }}
+                className="text-[10px] text-cyan-300 underline font-medium"
+              >
+                What do these tabs do?
+              </button>
+            </div>
+
             {navLinks.map((link) => {
               const Icon = link.icon;
               return (
                 <button
                   key={link.name}
                   onClick={(e) => handleNavClick(link, e)}
-                  className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left ${
+                  className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
                     link.isSpecialAction
-                      ? 'bg-gradient-to-r from-cyan-950 via-purple-950 to-blue-950 border border-cyan-400/60 text-cyan-300 font-bold'
-                      : 'bg-white/5 text-slate-200'
+                      ? 'bg-gradient-to-r from-purple-950/80 to-slate-900 border border-purple-500/50 text-white'
+                      : link.isHighlight
+                      ? 'bg-emerald-950/50 border border-emerald-500/40 text-white'
+                      : 'bg-slate-900/80 border border-slate-800 text-slate-200'
                   }`}
                 >
-                  <div className="flex items-center gap-2">
-                    <Icon className="w-4 h-4 text-cyan-400 shrink-0" />
+                  <div className="flex items-center gap-3">
+                    <div className="p-2 rounded-xl bg-black/40 text-cyan-400">
+                      <Icon className="w-4 h-4" />
+                    </div>
                     <div>
-                      <span className="block font-bold">{link.name}</span>
-                      <span className="text-[10px] text-slate-400">{link.subtitle}</span>
+                      <span className="block font-display font-extrabold text-sm text-white">{link.name}</span>
+                      <span className="text-xs text-slate-400">{link.subtitle}</span>
                     </div>
                   </div>
                   {link.badge && (
-                    <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-cyan-400 text-black font-extrabold">
+                    <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-400 text-black font-extrabold">
                       {link.badge}
                     </span>
-                  )}
-                  {link.protected && !isAuthenticated && !link.badge && (
-                    <Lock className="w-3 h-3 text-slate-500" />
                   )}
                 </button>
               );
@@ -428,7 +485,7 @@ const Navbar = () => {
                   setMobileMenuOpen(false);
                   openAuthModal('login');
                 }}
-                className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 text-black font-bold flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-purple-600 text-black font-display font-black text-xs flex items-center justify-center gap-2 shadow-xl shadow-cyan-500/25 mt-2"
               >
                 <LogIn className="w-4 h-4" />
                 <span>Login / Register</span>
@@ -436,7 +493,7 @@ const Navbar = () => {
             ) : (
               <button
                 onClick={handleLogout}
-                className="w-full py-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-300 font-bold flex items-center justify-center gap-2"
+                className="w-full py-3.5 rounded-2xl bg-rose-950/60 border border-rose-500/40 text-rose-300 font-display font-bold text-xs flex items-center justify-center gap-2 mt-2"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Logout</span>
@@ -448,51 +505,68 @@ const Navbar = () => {
 
       {/* Interactive Tabs Guide Modal for Common People */}
       {showGuideModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
-          <div className="relative w-full max-w-2xl bg-gray-950 border border-cyan-500/40 rounded-3xl p-6 sm:p-8 space-y-5 text-slate-100 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-2xl">
+          <div className="relative w-full max-w-2xl bg-gray-950 border-2 border-cyan-500/40 rounded-3xl p-6 sm:p-8 space-y-6 text-slate-100 shadow-2xl">
             <div className="flex items-center justify-between border-b border-cyan-500/20 pb-4">
-              <div className="flex items-center gap-2">
-                <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-300">
-                  <HelpCircle className="w-5 h-5" />
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-2xl bg-gradient-to-tr from-cyan-500 to-blue-600 text-black font-bold">
+                  <Layers className="w-6 h-6" />
                 </div>
                 <div>
-                  <h3 className="font-display font-black text-lg text-white">
-                    What is each tab or page created for?
+                  <h3 className="font-display font-black text-xl text-white">
+                    What is each tab or page for?
                   </h3>
                   <p className="text-xs text-slate-400">
-                    A simple guide for all students, innovators, and visitors on ProjectXia
+                    A simple guide for students, buyers, developers, and visitors on ProjectXia
                   </p>
                 </div>
               </div>
               <button
                 onClick={() => setShowGuideModal(false)}
-                className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white cursor-pointer"
+                className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
-            <div className="space-y-3 font-sans text-xs max-h-[65vh] overflow-y-auto pr-1">
+            <div className="space-y-3.5 text-xs max-h-[60vh] overflow-y-auto pr-1">
               {navLinks.map((item, idx) => (
-                <div key={idx} className="p-3.5 rounded-2xl bg-gray-900/80 border border-slate-800 space-y-1">
-                  <div className="flex items-center gap-2">
-                    <item.icon className="w-4 h-4 text-cyan-400" />
-                    <span className="font-bold text-white text-sm">{item.name}</span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-500/30">
-                      {item.subtitle}
+                <div
+                  key={idx}
+                  className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800 space-y-2 hover:border-cyan-500/40 transition-colors"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2.5">
+                      <div className="p-2 rounded-xl bg-cyan-950/60 border border-cyan-500/30 text-cyan-400">
+                        <item.icon className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="font-display font-extrabold text-white text-sm block">
+                          {item.name}
+                        </span>
+                        <span className="text-[11px] text-cyan-300 font-medium">
+                          {item.subtitle}
+                        </span>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-cyan-950 text-cyan-300 border border-cyan-500/30 font-bold">
+                      {item.forWhom}
                     </span>
                   </div>
-                  <p className="text-slate-300 text-xs leading-relaxed pl-6">
+                  <p className="text-slate-300 text-xs leading-relaxed pl-1">
                     {item.description}
                   </p>
                 </div>
               ))}
             </div>
 
-            <div className="pt-2 flex justify-end border-t border-slate-800">
+            <div className="pt-3 flex items-center justify-between border-t border-slate-800">
+              <span className="text-[11px] text-slate-400">
+                Need help deciding? Click <strong>Build Custom</strong> to talk to our engineers.
+              </span>
               <button
                 onClick={() => setShowGuideModal(false)}
-                className="px-5 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-display font-bold text-xs cursor-pointer"
+                className="px-6 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-display font-black text-xs cursor-pointer shadow-lg shadow-cyan-500/20"
               >
                 Got It • Close Guide
               </button>
