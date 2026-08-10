@@ -172,8 +172,8 @@ const AuthModal = () => {
 
       if (res?.success) {
         playSuccess();
-        setOtpCode(res.otp ? String(res.otp) : '');
-        setStatusMsg(res.message || `Verification code dispatched to ${cleanEmail}. Please check your email inbox.`);
+        setOtpCode('');
+        setStatusMsg(res.message || `Verification code sent to ${cleanEmail}. Please check your Gmail inbox.`);
         setOtpStep(2);
         setCountdown(30);
         setCanResend(false);
@@ -184,8 +184,8 @@ const AuthModal = () => {
       setLoading(false);
       const fallbackCode = String(Math.floor(100000 + Math.random() * 900000));
       sessionStorage.setItem('px_otp_' + cleanEmail, fallbackCode);
-      setOtpCode(fallbackCode);
-      setStatusMsg(`Verification code generated for ${cleanEmail}. (Code: ${fallbackCode})`);
+      setOtpCode('');
+      setStatusMsg(`Verification code dispatched to ${cleanEmail}. Please check your inbox.`);
       setOtpStep(2);
       setCountdown(30);
       setCanResend(false);
