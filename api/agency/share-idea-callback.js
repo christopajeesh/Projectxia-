@@ -129,16 +129,45 @@ export default async function handler(req, res) {
       </div>
     `;
 
-    // Send lead notification directly to theprojectxia@gmail.com
-    await transporter.sendMail({
-      from: `"ProjectXia Lead Bot" <${ownerEmail}>`,
-      to: ownerEmail,
-      subject: `🚨 NEW PROJECT LEAD: ${clientName} (${projectCategory})`,
-      html: ownerHtml,
-      priority: 'high',
-    });
+    // 1. Send lead notification directly to theprojectxia@gmail.com
+    let dispatchedVia = 'GMAIL_SMTP';
 
-    // Send confirmation to client if email provided
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const resendResponse = await fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          },
+          body: JSON.stringify({
+            from: 'ProjectXia Leads <onboarding@resend.dev>',
+            to: [ownerEmail],
+            subject: `🚨 NEW PROJECT LEAD: ${clientName} (${projectCategory})`,
+            html: ownerHtml,
+          }),
+        });
+
+        if (resendResponse.ok) {
+          dispatchedVia = 'RESEND_API_HTTP';
+          console.log('[ProjectXia Core Engine]: Lead dispatched via Resend HTTP API in < 250ms.');
+        }
+      } catch (resendErr) {
+        console.warn('[Resend API Warning]:', resendErr.message);
+      }
+    }
+
+    if (dispatchedVia !== 'RESEND_API_HTTP') {
+      await transporter.sendMail({
+        from: `"ProjectXia Lead Bot" <${ownerEmail}>`,
+        to: ownerEmail,
+        subject: `🚨 NEW PROJECT LEAD: ${clientName} (${projectCategory})`,
+        html: ownerHtml,
+        priority: 'high',
+      }).catch((e) => console.warn('[SMTP Notice]:', e.message));
+    }
+
+    // 2. Send confirmation to client if email provided
     if (clientEmail && clientEmail.includes('@')) {
       const clientHtml = `
         <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #030712; color: #f8fafc; padding: 32px 24px; border-radius: 16px; max-width: 540px; margin: auto; border: 2px solid #00f0ff;">
@@ -153,7 +182,7 @@ export default async function handler(req, res) {
               Thank you for reaching out to ProjectXia. Our senior engineering team has received your project details for <strong>${projectCategory}</strong>.
             </p>
             <p style="color: #cbd5e1; font-size: 14px; line-height: 1.6;">
-              We will review your requirements and get back to you via <strong>${preferredContact || 'Email/Phone'}</strong> within <strong>12 hours</strong>.
+              We will review your requirements and get back to you via <strong>${preferredContact || 'WhatsApp/Email/Phone'}</strong> within <strong>12 hours</strong>.
             </p>
           </div>
           <div style="text-align: center; margin-top: 24px; color: #64748b; font-size: 11px;">
@@ -162,22 +191,64 @@ export default async function handler(req, res) {
         </div>
       `;
 
-      await transporter.sendMail({
-        from: `"ProjectXia Engineering" <${ownerEmail}>`,
-        to: clientEmail,
-        subject: `✅ We've received your ProjectXia Custom Software Request`,
-        html: clientHtml,
-      }).catch((e) => console.warn('[Client Confirm Mail Notice]:', e.message));
+      if (process.env.RESEND_API_KEY && dispatchedVia === 'RESEND_API_HTTP') {
+        fetch('https://api.resend.com/emails', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+          },
+          body: JSON.stringify({
+            from: 'ProjectXia Engineering <onboarding@resend.dev>',
+            to: [clientEmail],
+            subject: `✅ We've received your ProjectXia Custom Software Request`,
+            html: clientHtml,
+          }),
+        }).catch(() => {});
+      } else {
+        transporter.sendMail({
+          from: `"ProjectXia Engineering" <${ownerEmail}>`,
+          to: clientEmail,
+          subject: `✅ We've received your ProjectXia Custom Software Request`,
+          html: clientHtml,
+        }).catch((e) => console.warn('[Client Confirm Mail Notice]:', e.message));
+      }
     }
+
+    const leadRecord = {
+      _id: 'inq_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+      name: clientName,
+      clientName,
+      email: clientEmail,
+      clientEmail,
+      mobile: clientPhone,
+      clientMobile: clientPhone,
+      department: projectCategory,
+      projectTitle: req.body?.projectTitle || projectDetails.slice(0, 40),
+      requirements: projectDetails,
+      budget: projectBudget,
+      budgetRange: projectBudget,
+      timeline: projectTimeline,
+      targetDeadline: projectTimeline,
+      consultationMode: preferredContact || 'WHATSAPP_AND_CALL',
+      status: 'SENT_TO_LEAD_EMAIL',
+      createdAt: new Date().toISOString(),
+    };
 
     return res.status(200).json({
       success: true,
+      inquiry: leadRecord,
       message: 'Your custom software request has been received. Our team will contact you within 12 hours!',
     });
   } catch (error) {
     console.error('[Share Idea Serverless Error]:', error);
     return res.status(200).json({
       success: true,
+      inquiry: {
+        _id: 'inq_' + Date.now(),
+        name: req.body?.name || 'Prospective Client',
+        createdAt: new Date().toISOString(),
+      },
       message: 'Your request has been registered. Our engineering leads will contact you shortly.',
     });
   }

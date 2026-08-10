@@ -284,15 +284,25 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
                   </div>
                   <div className="flex justify-between">
                     <span className="text-slate-400">Delivery Alert:</span>
-                    <span className="text-cyan-400 font-bold">Delivered to theprojectxia@gmail.com</span>
+                    <span className="text-cyan-400 font-bold">Dispatched to theprojectxia@gmail.com</span>
                   </div>
                 </div>
 
-                <div className="pt-2 flex justify-center">
+                <div className="max-w-md mx-auto space-y-2.5 pt-2">
+                  <a
+                    href={`https://wa.me/917594924788?text=${encodeURIComponent(`Hi ProjectXia Engineering Team! I just submitted my custom project request on ProjectXia for: "${formData.projectTitle || formData.requirements.slice(0, 40)}". Looking forward to discussing the architecture blueprint!`)}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-display font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 transition-all hover:scale-102 cursor-pointer"
+                  >
+                    <MessageCircle className="w-4 h-4" />
+                    <span>💬 Chat with Lead Engineer on WhatsApp Now</span>
+                  </a>
+
                   <button
                     type="button"
                     onClick={handleResetAndClose}
-                    className="px-8 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-display font-black text-xs shadow-lg shadow-cyan-500/25 transition-all cursor-pointer"
+                    className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-mono transition-all cursor-pointer"
                   >
                     Done • Return to Platform
                   </button>
