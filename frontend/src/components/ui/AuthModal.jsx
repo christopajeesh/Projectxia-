@@ -65,8 +65,6 @@ const AuthModal = () => {
 
   // Mode: 'signin' | 'register' | 'forgot'
   const [authType, setAuthType] = useState('signin');
-  // Verification Style for standard signin/register: 'password' | 'otp'
-  const [emailAuthMode, setEmailAuthMode] = useState('password');
 
   // Input fields
   const [emailInput, setEmailInput] = useState('');
@@ -92,10 +90,7 @@ const AuthModal = () => {
   // Already Registered Account Popup Modal State
   const [showAlreadyRegisteredPopup, setShowAlreadyRegisteredPopup] = useState(false);
 
-  // OTP Verification steps (for Instant OTP sign-in / registration)
-  const [otpStep, setOtpStep] = useState(1); // 1 = Enter Email ID, 2 = Enter & Verify OTP
-  const [otpCode, setOtpCode] = useState('');
-  const [activeEmail, setActiveEmail] = useState('');
+  // Countdown timer for forgot password resend
   const [countdown, setCountdown] = useState(30);
   const [canResend, setCanResend] = useState(false);
 
@@ -113,8 +108,6 @@ const AuthModal = () => {
     setForgotOtp('');
     setForgotNewPassword('');
     setForgotConfirmPassword('');
-    setOtpCode('');
-    setActiveEmail('');
 
     if (authModalMode === 'register') {
       setAuthType('register');
@@ -124,17 +117,16 @@ const AuthModal = () => {
     } else {
       setAuthType('signin');
     }
-    setOtpStep(1);
     setErrorMsg('');
     setStatusMsg('');
     setShowNotRegisteredPopup(false);
     setShowAlreadyRegisteredPopup(false);
   }, [authModalMode, isAuthModalOpen]);
 
-  // Countdown timer for OTP resend
+  // Countdown timer for forgot password OTP resend
   useEffect(() => {
     let timer;
-    if ((otpStep === 2 || (authType === 'forgot' && forgotStep === 2)) && countdown > 0) {
+    if (authType === 'forgot' && forgotStep === 2 && countdown > 0) {
       timer = setInterval(() => {
         setCountdown((prev) => prev - 1);
       }, 1000);
@@ -142,90 +134,11 @@ const AuthModal = () => {
       setCanResend(true);
     }
     return () => clearInterval(timer);
-  }, [otpStep, forgotStep, authType, countdown]);
+  }, [forgotStep, authType, countdown]);
 
   if (!isAuthModalOpen) return null;
 
   const passwordStrength = getPasswordStrength(authType === 'forgot' ? forgotNewPassword : passwordInput);
-
-  // ============================================================
-  // FLOW 1: SEND OTP (Instant Sign-in / Registration)
-  // ============================================================
-  const handleSendOtp = async (e) => {
-    if (e) e.preventDefault();
-    setErrorMsg('');
-    setStatusMsg('');
-
-    const cleanEmail = emailInput.trim().toLowerCase();
-    if (!cleanEmail || !cleanEmail.includes('@')) {
-      setErrorMsg('Please enter a valid email address (e.g. name@gmail.com).');
-      return;
-    }
-
-    setActiveEmail(cleanEmail);
-    setLoading(true);
-    playClick();
-
-    try {
-      const res = await sendOtp(cleanEmail, authType);
-      setLoading(false);
-
-      if (res?.success) {
-        playSuccess();
-        setOtpCode('');
-        setStatusMsg(res.message || `Verification code sent to ${cleanEmail}. Please check your Gmail inbox.`);
-        setOtpStep(2);
-        setCountdown(30);
-        setCanResend(false);
-      } else {
-        setErrorMsg(res?.message || 'Failed to dispatch verification code. Please check your email.');
-      }
-    } catch (err) {
-      setLoading(false);
-      const fallbackCode = String(Math.floor(100000 + Math.random() * 900000));
-      sessionStorage.setItem('px_otp_' + cleanEmail, fallbackCode);
-      setOtpCode('');
-      setStatusMsg(`Verification code dispatched to ${cleanEmail}. Please check your inbox.`);
-      setOtpStep(2);
-      setCountdown(30);
-      setCanResend(false);
-    }
-  };
-
-  // ============================================================
-  // FLOW 2: VERIFY OTP (Instant Code Complete)
-  // ============================================================
-  const handleVerifyOtp = async (e) => {
-    if (e) e.preventDefault();
-    setErrorMsg('');
-    setLoading(true);
-    playClick();
-
-    try {
-      const res = await verifyOtp({
-        identifier: activeEmail,
-        otp: otpCode,
-      });
-      setLoading(false);
-
-      if (res?.success !== false) {
-        playSuccess();
-        confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
-        closeAuthModal();
-        window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-        navigate('/');
-      } else {
-        setErrorMsg(res?.message || 'Incorrect verification code. Please check the code.');
-      }
-    } catch (err) {
-      setLoading(false);
-      playSuccess();
-      confetti({ particleCount: 100, spread: 80, origin: { y: 0.6 } });
-      closeAuthModal();
-      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-      navigate('/');
-    }
-  };
 
   // ============================================================
   // FLOW 3: EMAIL + PASSWORD AUTHENTICATION (With Confirm Password)
@@ -513,46 +426,6 @@ const AuthModal = () => {
                     <span>Create Account</span>
                   </button>
                 </div>
-
-                {/* Email Method: Password vs OTP */}
-                <div className="flex items-center justify-between text-[11px] pb-1">
-                  <span className="text-slate-400 font-bold">Email Method:</span>
-                  <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        playClick();
-                        setEmailAuthMode('password');
-                        setErrorMsg('');
-                        setStatusMsg('');
-                      }}
-                      className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
-                        emailAuthMode === 'password'
-                          ? 'bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/30'
-                          : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      🔑 Password
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        playClick();
-                        setEmailAuthMode('otp');
-                        setOtpStep(1);
-                        setErrorMsg('');
-                        setStatusMsg('');
-                      }}
-                      className={`px-2.5 py-1 rounded-lg transition-colors cursor-pointer ${
-                        emailAuthMode === 'otp'
-                          ? 'bg-cyan-500/20 text-cyan-300 font-bold border border-cyan-500/30'
-                          : 'text-slate-400 hover:text-white'
-                      }`}
-                    >
-                      ⚡ Instant OTP Code
-                    </button>
-                  </div>
-                </div>
               </>
             ) : (
               /* Forgot Password Back Button Header */
@@ -776,7 +649,7 @@ const AuthModal = () => {
                   </button>
                 </form>
               )
-            ) : emailAuthMode === 'password' ? (
+            ) : (
               /* ======================================================= */
               /* VIEW B: EMAIL + PASSWORD AUTHENTICATION (With Confirm)  */
               /* ======================================================= */
@@ -926,118 +799,6 @@ const AuthModal = () => {
                   )}
                 </button>
               </form>
-            ) : (
-              /* ======================================================= */
-              /* VIEW C: INSTANT OTP CODE FLOW                           */
-              /* ======================================================= */
-              otpStep === 1 ? (
-                <form onSubmit={handleSendOtp} className="space-y-4">
-                  {/* Email ID */}
-                  <div>
-                    <label className="block text-slate-300 text-[11px] mb-1 font-bold">
-                      Email ID
-                    </label>
-                    <div className="relative">
-                      <Mail className="absolute left-3 top-3 w-4 h-4 text-cyan-400" />
-                      <input
-                        type="email"
-                        required
-                        autoComplete="email"
-                        value={emailInput}
-                        onChange={(e) => setEmailInput(e.target.value)}
-                        placeholder="Enter your email id"
-                        className="w-full bg-gray-900/90 border border-slate-800 focus:border-cyan-400 rounded-xl pl-9 pr-3 py-2.5 text-white text-xs focus:outline-none"
-                      />
-                    </div>
-                  </div>
-
-                  {/* Send OTP Button */}
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-display font-black text-xs flex items-center justify-center gap-2 shadow-xl shadow-cyan-500/20 transition-all cursor-pointer disabled:opacity-50 active:scale-[0.99]"
-                  >
-                    {loading ? (
-                      <RefreshCw className="w-4 h-4 animate-spin text-black" />
-                    ) : (
-                      <>
-                        <span>{authType === 'signin' ? 'Send Sign-In Code' : 'Send Verification Code'}</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-                </form>
-              ) : (
-                /* Step 2: Verify OTP */
-                <form onSubmit={handleVerifyOtp} className="space-y-4">
-                  <div className="p-3 bg-gray-900/90 border border-slate-800 rounded-xl flex items-center justify-between text-xs">
-                    <div>
-                      <span className="text-slate-400 text-[10px] block">Verification Email:</span>
-                      <span className="font-bold text-cyan-300">{activeEmail}</span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        playClick();
-                        setOtpStep(1);
-                        setErrorMsg('');
-                      }}
-                      className="text-[10px] text-cyan-400 hover:underline cursor-pointer"
-                    >
-                      Change
-                    </button>
-                  </div>
-
-                  <div>
-                    <label className="block text-slate-300 text-[11px] mb-1 font-bold">
-                      Enter 6-Digit Code from Your Email
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      maxLength={6}
-                      autoComplete="one-time-code"
-                      value={otpCode}
-                      onChange={(e) => setOtpCode(e.target.value)}
-                      placeholder="Enter 6 digits"
-                      className="w-full bg-gray-900/90 border-2 border-cyan-500/50 focus:border-cyan-400 rounded-xl px-3 py-3 text-center text-white text-xl tracking-[8px] font-mono font-bold focus:outline-none focus:ring-2 focus:ring-cyan-400/30"
-                    />
-                  </div>
-
-                  <div className="flex items-center justify-between text-[11px] text-slate-400">
-                    <span>
-                      {countdown > 0 ? (
-                        <>Resend code in <strong className="text-cyan-400">{countdown}s</strong></>
-                      ) : (
-                        <button
-                          type="button"
-                          onClick={handleSendOtp}
-                          className="text-cyan-400 hover:underline font-bold cursor-pointer"
-                        >
-                          Resend Code Now
-                        </button>
-                      )}
-                    </span>
-                    <span className="text-[10px] text-slate-500">Zero-Trust Shield</span>
-                  </div>
-
-                  <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-400 via-cyan-500 to-blue-600 hover:opacity-95 text-black font-display font-black text-xs flex items-center justify-center gap-2 shadow-xl shadow-cyan-500/30 transition-all cursor-pointer disabled:opacity-50 active:scale-[0.99]"
-                  >
-                    {loading ? (
-                      <RefreshCw className="w-4 h-4 animate-spin text-black" />
-                    ) : (
-                      <>
-                        <CheckCircle2 className="w-4 h-4 text-black" />
-                        <span>Verify & Enter Dashboard</span>
-                        <ArrowRight className="w-4 h-4" />
-                      </>
-                    )}
-                  </button>
-                </form>
-              )
             )}
 
             {/* Terms & Conditions Notice */}
