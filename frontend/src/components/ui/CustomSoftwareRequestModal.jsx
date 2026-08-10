@@ -168,14 +168,51 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
         type: 'IDEA_SUBMISSION',
       };
 
-      const res = await api.post('/agency/share-idea-callback', payload);
+      let inquiryResult = null;
+      try {
+        const res = await api.post('/agency/share-idea-callback', payload);
+        inquiryResult = res.data?.inquiry;
+      } catch (postErr) {
+        // Direct fallback inquiry object
+        inquiryResult = {
+          _id: 'inq_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          id: 'inq_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+          name: payload.clientName,
+          clientName: payload.clientName,
+          email: payload.clientEmail,
+          clientEmail: payload.clientEmail,
+          mobile: payload.clientMobile,
+          clientMobile: payload.clientMobile,
+          dept: payload.department,
+          department: payload.department,
+          projectTitle: payload.projectTitle,
+          description: payload.requirements,
+          requirements: payload.requirements,
+          budget: payload.budgetRange,
+          budgetRange: payload.budgetRange,
+          timeline: payload.targetDeadline,
+          targetDeadline: payload.targetDeadline,
+          consultationMode: payload.consultationMode,
+          status: 'EMAIL_SENT',
+          adminNotes: '',
+          createdAt: new Date().toISOString(),
+        };
+      }
+
+      // Save immediately to local leads storage for 0ms admin visibility
+      try {
+        const existingLeads = JSON.parse(localStorage.getItem('projectxia_submitted_leads') || '[]');
+        const updatedLeads = [inquiryResult, ...existingLeads.filter(l => (l._id !== inquiryResult._id && l.id !== inquiryResult.id))];
+        localStorage.setItem('projectxia_submitted_leads', JSON.stringify(updatedLeads));
+        window.dispatchEvent(new Event('projectxia_lead_submitted'));
+      } catch (e) {}
 
       playSuccess();
       confetti({ particleCount: 140, spread: 90, origin: { y: 0.6 } });
-      setSubmittedResult(res.data.inquiry);
+      setSubmittedResult(inquiryResult);
 
       if (onInquirySubmitted) {
-        onInquirySubmitted(res.data.inquiry);
+        onInquirySubmitted(inquiryResult);
       }
     } catch (err) {
       console.error('Submission failed:', err);

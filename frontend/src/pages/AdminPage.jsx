@@ -93,6 +93,12 @@ const AdminPage = () => {
 
   useEffect(() => {
     fetchAdminData();
+    window.addEventListener('projectxia_lead_submitted', fetchAdminData);
+    window.addEventListener('storage', fetchAdminData);
+    return () => {
+      window.removeEventListener('projectxia_lead_submitted', fetchAdminData);
+      window.removeEventListener('storage', fetchAdminData);
+    };
   }, []);
 
   const fetchAdminData = async () => {
@@ -107,13 +113,59 @@ const AdminPage = () => {
 
       const deletedLeads = JSON.parse(localStorage.getItem('projectxia_admin_deleted_leads') || '[]');
       const deletedProjects = JSON.parse(localStorage.getItem('projectxia_admin_deleted_projects') || '[]');
+      const localSubmittedLeads = JSON.parse(localStorage.getItem('projectxia_submitted_leads') || '[]');
+      const localUploadedProjects = JSON.parse(localStorage.getItem('projectxia_uploaded_projects') || '[]');
+
       const customData = getSavedLeadsData();
-      const rawLeads = (lRes.data?.agencyLeads || []).filter((l) => !deletedLeads.includes(l._id) && !deletedLeads.includes(l.id));
-      const rawProjects = (pRes.data?.projects || []).filter((p) => !deletedProjects.includes(p._id) && !deletedProjects.includes(p.id));
+
+      // Combined Leads (Local Immediate + Serverless)
+      const serverLeads = lRes.data?.agencyLeads || [];
+      const combinedLeadsMap = new Map();
+
+      localSubmittedLeads.forEach((l) => {
+        const id = l._id || l.id;
+        if (id && !deletedLeads.includes(id)) {
+          combinedLeadsMap.set(id, l);
+        }
+      });
+
+      serverLeads.forEach((l) => {
+        const id = l._id || l.id;
+        if (id && !deletedLeads.includes(id)) {
+          if (!combinedLeadsMap.has(id)) {
+            combinedLeadsMap.set(id, l);
+          }
+        }
+      });
+
+      const rawLeads = Array.from(combinedLeadsMap.values());
+
+      // Combined Projects (Local Immediate + Serverless)
+      const serverProjects = pRes.data?.projects || [];
+      const combinedProjectsMap = new Map();
+
+      localUploadedProjects.forEach((p) => {
+        const id = p._id || p.id;
+        if (id && !deletedProjects.includes(id)) {
+          combinedProjectsMap.set(id, p);
+        }
+      });
+
+      serverProjects.forEach((p) => {
+        const id = p._id || p.id;
+        if (id && !deletedProjects.includes(id)) {
+          if (!combinedProjectsMap.has(id)) {
+            combinedProjectsMap.set(id, p);
+          }
+        }
+      });
+
+      const rawProjects = Array.from(combinedProjectsMap.values());
 
       // Merge server data with local status updates
       const mergedLeads = rawLeads.map((lead) => {
-        const custom = customData[lead._id] || {};
+        const id = lead._id || lead.id;
+        const custom = customData[id] || {};
         return {
           ...lead,
           status: custom.status || lead.status || 'EMAIL_SENT',

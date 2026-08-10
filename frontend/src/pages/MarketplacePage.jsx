@@ -74,6 +74,10 @@ const MarketplacePage = () => {
 
   useEffect(() => {
     fetchMarketplaceProjects();
+    window.addEventListener('storage', fetchMarketplaceProjects);
+    return () => {
+      window.removeEventListener('storage', fetchMarketplaceProjects);
+    };
   }, [selectedCategory, sortBy, verifiedOnly, deliveryType]);
 
   const fetchMarketplaceProjects = async () => {
@@ -88,16 +92,37 @@ const MarketplacePage = () => {
       if (verifiedOnly) params.append('verifiedOnly', 'true');
       if (maxPrice) params.append('maxPrice', maxPrice);
 
-      const res = await api.get(`/projects?${params.toString()}`);
-      if (res.data?.projects) {
-        let fetchedList = res.data.projects;
-        if (deliveryType !== 'All') {
-          fetchedList = fetchedList.filter(p => p.projectType === deliveryType);
+      const res = await api.get(`/projects?${params.toString()}`).catch(() => ({ data: { projects: [] } }));
+      const serverList = res.data?.projects || [];
+      const localList = JSON.parse(localStorage.getItem('projectxia_uploaded_projects') || '[]');
+      const deletedList = JSON.parse(localStorage.getItem('projectxia_admin_deleted_projects') || '[]');
+
+      // Merge local and server lists
+      const combinedMap = new Map();
+      localList.forEach((p) => {
+        const id = p._id || p.id;
+        if (id && !deletedList.includes(id)) {
+          combinedMap.set(id, p);
         }
-        setProjects(fetchedList);
-      } else {
-        setProjects([]);
+      });
+      serverList.forEach((p) => {
+        const id = p._id || p.id;
+        if (id && !deletedList.includes(id)) {
+          if (!combinedMap.has(id)) {
+            combinedMap.set(id, p);
+          }
+        }
+      });
+
+      let fetchedList = Array.from(combinedMap.values());
+      if (deliveryType !== 'All') {
+        fetchedList = fetchedList.filter((p) => p.projectType === deliveryType);
       }
+      if (selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Departments') {
+        fetchedList = fetchedList.filter((p) => (p.category || '').toLowerCase().includes(selectedCategory.toLowerCase().slice(0, 5)));
+      }
+
+      setProjects(fetchedList);
     } catch (e) {
       console.warn('[Marketplace Fetch Warning]:', e.message);
       setProjects([]);
