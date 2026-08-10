@@ -341,6 +341,17 @@ const Navbar = () => {
                 </button>
               ) : (
                 <div className="flex items-center gap-1.5 sm:gap-2">
+                  {/* Super Admin Direct Access Button (Visible ONLY to theprojectxia@gmail.com) */}
+                  {user?.email?.toLowerCase() === 'theprojectxia@gmail.com' && (
+                    <Link
+                      to="/admin"
+                      className="px-3 py-2 rounded-xl bg-rose-950/60 hover:bg-rose-900/80 border border-rose-500/50 text-rose-300 font-display font-bold text-xs flex items-center gap-1.5 transition-all hover:scale-105 shadow-neon-rose shrink-0"
+                    >
+                      <Shield className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
+                      <span className="hidden sm:inline">Admin HUD</span>
+                    </Link>
+                  )}
+
                   <button
                     onClick={handleLogout}
                     title="Sign Out"
@@ -382,14 +393,6 @@ const Navbar = () => {
                           👤 My Profile & Dashboard
                         </Link>
 
-                        <Link
-                          to="/profile?tab=software_requests"
-                          onClick={() => setUserDropdownOpen(false)}
-                          className="block px-4 py-2.5 text-xs text-slate-300 hover:bg-cyan-500/20 hover:text-cyan-300 font-medium"
-                        >
-                          📋 My Custom Build Inquiries
-                        </Link>
-
                         <button
                           onClick={() => {
                             setUserDropdownOpen(false);
@@ -405,10 +408,10 @@ const Navbar = () => {
                           <Link
                             to="/admin"
                             onClick={() => setUserDropdownOpen(false)}
-                            className="block px-4 py-2 text-xs text-rose-300 font-bold bg-rose-950/40 hover:bg-rose-900/60 border-y border-rose-500/30 flex items-center gap-1.5"
+                            className="block px-4 py-2.5 text-xs text-rose-300 font-bold bg-rose-950/60 hover:bg-rose-900/80 border-y border-rose-500/40 flex items-center gap-1.5"
                           >
-                            <Shield className="w-3.5 h-3.5 text-rose-400" />
-                            <span>Super Admin HUD & Reports</span>
+                            <Shield className="w-3.5 h-3.5 text-rose-400 animate-pulse" />
+                            <span>👑 Super Admin HUD & Reports</span>
                           </Link>
                         )}
 
