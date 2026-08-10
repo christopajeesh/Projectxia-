@@ -415,79 +415,92 @@ const LandingPage = () => {
               </div>
             </div>
 
-            {/* RIGHT COLUMN: 4 CORE PILLARS SHOWCASE & ACCESS CARD */}
+            {/* RIGHT COLUMN: ENGINEERING QUALITY & TRUST ASSURANCE SHOWCASE */}
             <div className="lg:col-span-5 relative flex flex-col items-center justify-center space-y-4">
-              {/* Core Pillars Feature Showcase Card */}
-              <div className="w-full rounded-3xl p-6 bg-gradient-to-b from-gray-900/90 via-gray-950/95 to-black border-2 border-cyan-500/30 backdrop-blur-2xl shadow-2xl space-y-4">
-                <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3">
-                  <div className="flex items-center gap-2.5">
-                    <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
-                      <Layers className="w-5 h-5" />
+              <div className="w-full rounded-3xl p-6 sm:p-7 bg-gradient-to-b from-gray-950/95 via-slate-900/90 to-gray-950/95 border-2 border-cyan-500/40 backdrop-blur-3xl shadow-2xl shadow-cyan-500/15 space-y-4">
+                {/* Header */}
+                <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3.5">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 rounded-2xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/40 shadow-neon-cyan shrink-0">
+                      <ShieldCheck className="w-5 h-5 animate-pulse" />
                     </div>
                     <div>
-                      <h3 className="font-display font-black text-sm text-white">
-                        PROJECTXIA CORE SERVICES
+                      <h3 className="font-display font-black text-sm text-white tracking-wide">
+                        PROJECTXIA VERIFIED STANDARDS
                       </h3>
-                      <p className="text-[10px] text-slate-400">
-                        Everything you need in one engineering hub
+                      <p className="text-[10px] font-mono text-slate-400">
+                        100% Genuine Engineering Guarantee
                       </p>
                     </div>
                   </div>
-                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-500/30 font-bold">
-                    VERIFIED
+                  <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 font-bold flex items-center gap-1">
+                    <CheckCircle2 className="w-3 h-3" /> AUDITED
                   </span>
                 </div>
 
-                <div className="space-y-2.5 text-xs">
+                {/* 4 Pillars of Excellence */}
+                <div className="space-y-2.5 text-xs font-sans">
                   {/* Item 1 */}
                   <div
                     onClick={() => handleProtectedNavigation('/marketplace', 'Please log in or register to explore verified engineering projects.')}
-                    className="p-3 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-cyan-400/50 flex items-center justify-between transition-all cursor-pointer group"
+                    className="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-cyan-400/50 flex items-center justify-between transition-all cursor-pointer group shadow-sm"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-cyan-950/80 text-cyan-400">
+                      <div className="p-2 rounded-xl bg-cyan-950/80 text-cyan-400 shrink-0">
                         <Code className="w-4 h-4" />
                       </div>
                       <div>
-                        <span className="font-bold text-white group-hover:text-cyan-300 block">Buy Verified Projects</span>
-                        <span className="text-[10px] text-slate-400">Full source code, circuit diagrams & 4K demo videos</span>
+                        <span className="font-bold text-white group-hover:text-cyan-300 block text-xs">
+                          Complete Code & Hardware Circuits
+                        </span>
+                        <span className="text-[11px] text-slate-400 block font-mono">
+                          KiCAD schematics, PCB Gerbers & full tested runbooks
+                        </span>
                       </div>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-cyan-400 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-4 h-4 text-cyan-400 group-hover:translate-x-1 transition-transform shrink-0" />
                   </div>
 
                   {/* Item 2 */}
                   <div
-                    onClick={() => handleProtectedNavigation('/upload', 'Please log in or register to upload and monetize your project.')}
-                    className="p-3 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-400/50 flex items-center justify-between transition-all cursor-pointer group"
+                    onClick={() => handleProtectedNavigation('/marketplace', 'Please log in or register to explore verified engineering projects.')}
+                    className="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-blue-400/50 flex items-center justify-between transition-all cursor-pointer group shadow-sm"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-emerald-950/80 text-emerald-400">
-                        <UploadCloud className="w-4 h-4" />
+                      <div className="p-2 rounded-xl bg-blue-950/80 text-blue-400 shrink-0">
+                        <CheckCircle2 className="w-4 h-4" />
                       </div>
                       <div>
-                        <span className="font-bold text-white group-hover:text-emerald-300 block">Sell Your Project</span>
-                        <span className="text-[10px] text-slate-400">Upload and monetize your original code with payouts</span>
+                        <span className="font-bold text-white group-hover:text-blue-300 block text-xs">
+                          4K Milestone Video Proof
+                        </span>
+                        <span className="text-[11px] text-slate-400 block font-mono">
+                          Every listed project includes video demonstration
+                        </span>
                       </div>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-4 h-4 text-blue-400 group-hover:translate-x-1 transition-transform shrink-0" />
                   </div>
 
                   {/* Item 3 */}
                   <div
                     onClick={() => handleProtectedNavigation('/ai-shield', 'Please log in or register to run AI Plagiarism & Code Integrity scans.')}
-                    className="p-3 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-purple-400/50 flex items-center justify-between transition-all cursor-pointer group"
+                    className="p-3.5 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-purple-400/50 flex items-center justify-between transition-all cursor-pointer group shadow-sm"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-purple-950/80 text-purple-400">
+                      <div className="p-2 rounded-xl bg-purple-950/80 text-purple-400 shrink-0">
                         <Shield className="w-4 h-4" />
                       </div>
                       <div>
-                        <span className="font-bold text-white group-hover:text-purple-300 block">Plagiarism & Code Check</span>
-                        <span className="text-[10px] text-slate-400">Detect code copy, security bugs & thesis originality</span>
+                        <span className="font-bold text-white group-hover:text-purple-300 block text-xs">
+                          AST Plagiarism & Backdoor Audited
+                        </span>
+                        <span className="text-[11px] text-slate-400 block font-mono">
+                          0% cloned boilerplate & zero security vulnerabilities
+                        </span>
                       </div>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform shrink-0" />
                   </div>
 
                   {/* Item 4 */}
@@ -496,23 +509,43 @@ const LandingPage = () => {
                       playSuccess();
                       setIsDevModalOpen(true);
                     }}
-                    className="p-3 rounded-2xl bg-gradient-to-r from-purple-950/70 to-indigo-950/70 hover:from-purple-900/90 hover:to-indigo-900/90 border border-purple-500/40 hover:border-purple-300 flex items-center justify-between transition-all cursor-pointer group"
+                    className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-950/70 via-indigo-950/60 to-slate-900/80 hover:from-purple-900/90 hover:to-indigo-900/90 border border-purple-500/40 hover:border-purple-300 flex items-center justify-between transition-all cursor-pointer group shadow-sm"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="p-2 rounded-xl bg-amber-400/20 text-amber-300">
+                      <div className="p-2 rounded-xl bg-amber-400/20 text-amber-300 shrink-0">
                         <Lightbulb className="w-4 h-4 animate-pulse" />
                       </div>
                       <div>
                         <div className="flex items-center gap-1.5">
-                          <span className="font-bold text-white group-hover:text-amber-300">Build Custom Software</span>
-                          <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-amber-400 text-black font-extrabold">
+                          <span className="font-bold text-white group-hover:text-amber-300 text-xs">
+                            In-House Engineering Team
+                          </span>
+                          <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-amber-400 text-black font-extrabold">
                             12H CALLBACK
                           </span>
                         </div>
-                        <span className="text-[10px] text-slate-400">Hire our senior developers to build from scratch</span>
+                        <span className="text-[11px] text-slate-400 block font-mono">
+                          Direct inquiry to theprojectxia@gmail.com
+                        </span>
                       </div>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-amber-300 group-hover:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-4 h-4 text-amber-300 group-hover:translate-x-1 transition-transform shrink-0" />
+                  </div>
+                </div>
+
+                {/* Bottom Trust Badges */}
+                <div className="pt-2 border-t border-slate-800/80 grid grid-cols-3 gap-2 text-center text-[10px] font-mono text-slate-400">
+                  <div className="p-2 rounded-xl bg-black/50 border border-slate-800">
+                    <span className="text-cyan-400 font-bold block">✓ Verified</span>
+                    <span>Direct Payouts</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-black/50 border border-slate-800">
+                    <span className="text-emerald-400 font-bold block">🛡️ Anti-Scam</span>
+                    <span>100% Guaranteed</span>
+                  </div>
+                  <div className="p-2 rounded-xl bg-black/50 border border-slate-800">
+                    <span className="text-purple-400 font-bold block">⚡ 24/7</span>
+                    <span>Creator Chat</span>
                   </div>
                 </div>
               </div>
