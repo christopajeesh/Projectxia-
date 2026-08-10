@@ -533,22 +533,6 @@ const LandingPage = () => {
                     <ArrowRight className="w-4 h-4 text-amber-300 group-hover:translate-x-1 transition-transform shrink-0" />
                   </div>
                 </div>
-
-                {/* Bottom Trust Badges */}
-                <div className="pt-2 border-t border-slate-800/80 grid grid-cols-3 gap-2 text-center text-[10px] font-mono text-slate-400">
-                  <div className="p-2 rounded-xl bg-black/50 border border-slate-800">
-                    <span className="text-cyan-400 font-bold block">✓ Verified</span>
-                    <span>Direct Payouts</span>
-                  </div>
-                  <div className="p-2 rounded-xl bg-black/50 border border-slate-800">
-                    <span className="text-emerald-400 font-bold block">🛡️ Anti-Scam</span>
-                    <span>100% Guaranteed</span>
-                  </div>
-                  <div className="p-2 rounded-xl bg-black/50 border border-slate-800">
-                    <span className="text-purple-400 font-bold block">⚡ 24/7</span>
-                    <span>Creator Chat</span>
-                  </div>
-                </div>
               </div>
             </div>
           </div>
