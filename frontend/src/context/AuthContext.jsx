@@ -12,16 +12,31 @@ import {
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [token, setToken] = useState(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Synchronous state initialization for zero-lag, flicker-free rendering
+  const [token, setToken] = useState(() => {
+    try {
+      return sessionStorage.getItem('projectxia_token') || null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [user, setUser] = useState(() => {
+    try {
+      const stored = sessionStorage.getItem('projectxia_user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+
+  const [isLoading, setIsLoading] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const [authModalMode, setAuthModalMode] = useState('login'); // 'login', 'register', 'google', 'forgot'
   const [authPromptReason, setAuthPromptReason] = useState('');
 
-  // Check stored credentials on mount (Session-Scoped: destroyed on tab/browser close)
+  // Validate session integrity on mount
   useEffect(() => {
-    // Clear any permanent legacy localStorage tokens
     try {
       localStorage.removeItem('projectxia_token');
       localStorage.removeItem('projectxia_user');
@@ -31,20 +46,17 @@ export const AuthProvider = ({ children }) => {
     const storedUser = sessionStorage.getItem('projectxia_user');
 
     if (storedToken && storedUser) {
-      setToken(storedToken);
       try {
-        setUser(JSON.parse(storedUser));
+        const parsed = JSON.parse(storedUser);
+        setUser(parsed);
+        setToken(storedToken);
       } catch (e) {
         setUser(null);
         setToken(null);
         sessionStorage.removeItem('projectxia_token');
         sessionStorage.removeItem('projectxia_user');
       }
-    } else {
-      setUser(null);
-      setToken(null);
     }
-    setIsLoading(false);
   }, []);
 
   const saveAuthSession = (newToken, newUser) => {
