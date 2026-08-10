@@ -214,14 +214,7 @@ const LandingPage = () => {
     }, 800);
   };
 
-  const departments = [
-    { name: 'Computer Science (CSE / IT)', focus: 'Web, AI/ML & Cloud', icon: Code, desc: 'Full-stack applications, machine learning models, cloud APIs & cyber security systems' },
-    { name: 'Electronics & Comm (ECE)', focus: 'IoT, VLSI & Embedded', icon: Cpu, desc: 'Microcontroller firmware, ESP32, LoRaWAN wireless nodes & signal processing' },
-    { name: 'Electrical Engineering (EEE)', focus: 'EV & Power Systems', icon: Zap, desc: 'Electric vehicle charging, battery management, solar microgrids & smart grid telemetry' },
-    { name: 'Mechanical & Robotics', focus: 'ROS2 & 3D CAD', icon: Settings, desc: 'Autonomous rovers, robotic arms, SolidWorks CAD modeling & kinematics simulations' },
-    { name: 'Artificial Intelligence & DS', focus: 'Deep Learning & LLMs', icon: Sparkles, desc: 'Computer vision, neural networks, LLM agents & big data analytics pipelines' },
-    { name: 'Blockchain & Web3', focus: 'Smart Contracts & dApps', icon: Layers, desc: 'Verified Solidity smart contracts, decentralized storage & Web3 security protocols' },
-  ];
+
 
   const faqs = [
     {
@@ -896,48 +889,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* DEPARTMENT SPECIALIZATIONS (CSE, ECE, EEE, MECH, AI, BLOCKCHAIN) */}
-      <section className="py-20 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-widest">
-              Engineered for All Departments
-            </span>
-            <h2 className="text-3xl sm:text-4xl font-display font-black text-white mt-1">
-              Hardware & Software Across Engineering Branches
-            </h2>
-            <p className="text-xs font-mono text-slate-400 mt-2">
-              Every department can list their original innovations or discover verified projects.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {departments.map((dept, idx) => {
-              const Icon = dept.icon;
-              return (
-                <div
-                  key={idx}
-                  onClick={() => handleProtectedNavigation(`/marketplace?category=${encodeURIComponent(dept.name)}`, 'Please log in or register to browse department projects.')}
-                  className="p-6 rounded-2xl bg-gray-950/80 border border-cyan-500/20 backdrop-blur-xl hover:border-cyan-400 hover:scale-[1.02] transition-all flex flex-col justify-between group shadow-xl cursor-pointer"
-                >
-                  <div className="flex items-center gap-4 mb-3">
-                    <div className="p-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400 group-hover:bg-cyan-500 group-hover:text-black transition-colors">
-                      <Icon className="w-6 h-6" />
-                    </div>
-                    <div>
-                      <h4 className="font-display font-bold text-base text-white">{dept.name}</h4>
-                      <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/30">
-                        {dept.focus}
-                      </span>
-                    </div>
-                  </div>
-                  <p className="text-xs font-mono text-slate-400">{dept.desc}</p>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
 
       {/* FEATURED PROJECTS CATALOG */}
       <section className="py-16 relative z-10 border-t border-cyan-500/20 bg-gray-950/40">
