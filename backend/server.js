@@ -66,19 +66,19 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// API Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/projects', projectRoutes);
-app.use('/api/chat', chatRoutes);
-app.use('/api/users', userRoutes);
-app.use('/api/admin', adminRoutes);
-app.use('/api/security', securityRoutes);
-app.use('/api/notifications', notificationRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/licenses', licenseRoutes);
-app.use('/api/ai-shield', aiShieldRoutes);
-app.use('/api/agency', agencyRoutes);
-app.use('/api/payouts', payoutRoutes);
+// API Routes (Universal support for local server and Vercel serverless functions)
+app.use(['/api/auth', '/auth'], authRoutes);
+app.use(['/api/projects', '/projects'], projectRoutes);
+app.use(['/api/chat', '/chat'], chatRoutes);
+app.use(['/api/users', '/users'], userRoutes);
+app.use(['/api/admin', '/admin'], adminRoutes);
+app.use(['/api/security', '/security'], securityRoutes);
+app.use(['/api/notifications', '/notifications'], notificationRoutes);
+app.use(['/api/payments', '/payments'], paymentRoutes);
+app.use(['/api/licenses', '/licenses'], licenseRoutes);
+app.use(['/api/ai-shield', '/ai-shield'], aiShieldRoutes);
+app.use(['/api/agency', '/agency'], agencyRoutes);
+app.use(['/api/payouts', '/payouts'], payoutRoutes);
 
 import path from 'path';
 import { fileURLToPath } from 'url';

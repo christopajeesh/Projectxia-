@@ -1,11 +1,15 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
-import nodemailer from 'nodemailer';
 import admin from 'firebase-admin';
 import fs from 'fs';
 
 import User from '../models/User.js';
 import AuditLog from '../models/AuditLog.js';
+import {
+  sendOtpEmail,
+  sendPasswordResetEmail,
+  sendAuthAlertEmail,
+} from '../services/emailService.js';
 
 const OWNER_EMAIL = 'theprojectxia@gmail.com';
 
@@ -126,60 +130,16 @@ const createAudit = async ({
   }
 };
 
-// ============================================================
-// GMAIL & NODEMAILER
-// ============================================================
-
-const sendEmail = async ({ to, subject, text, html }) => {
-  const user = process.env.GMAIL_USER || 'theprojectxia@gmail.com';
-  const pass = (process.env.GMAIL_APP_PASSWORD || 'fayh bufk ccok mgxf').replace(/\s+/g, '');
-  const fromUser = process.env.SMTP_FROM || user;
-
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user,
-      pass,
-    },
-  });
-
-  return await transporter.sendMail({
-    from: `"ProjectXia Security" <${fromUser}>`,
-    to,
-    subject,
-    text,
-    html,
-  });
-};
-
 const notifyOwnerOfAuthEvent = async ({ action, user, method, req }) => {
   try {
     const ip = req ? getClientIp(req) : '127.0.0.1';
     const userAgent = req?.headers ? req.headers['user-agent'] || 'Unknown Device' : 'Web Client';
-    const time = new Date().toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' });
-
-    console.log(`\n📧 [NOTIFY OWNER theprojectxia@gmail.com] Action: ${action} | User: ${user.email} (${method})`);
-
-    await sendEmail({
-      to: OWNER_EMAIL,
-      subject: `🔔 [ProjectXia Alert] ${action}: ${user.email}`,
-      text: `A user event occurred on ProjectXia.\n\nAction: ${action}\nEmail ID: ${user.email}\nName: ${user.name || user.email.split('@')[0]}\nAuth Method: ${method}\nTime: ${time}\nIP Address: ${ip}\nDevice: ${userAgent}`,
-      html: `
-        <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:24px;background:#0b1329;color:#f8fafc;border-radius:16px;border:1px solid #38bdf850;">
-          <h2 style="color:#38bdf8;margin-top:0;">🚀 ProjectXia User Activity Alert</h2>
-          <div style="padding:16px;background:#1e293b;border-radius:12px;margin:16px 0;border-left:4px solid #38bdf8;">
-            <p style="margin:6px 0;"><strong>Action:</strong> <span style="color:#4ade80;">${action}</span></p>
-            <p style="margin:6px 0;"><strong>Email ID:</strong> <span style="color:#38bdf8;">${user.email}</span></p>
-            <p style="margin:6px 0;"><strong>Name:</strong> ${user.name || user.email.split('@')[0]}</p>
-            <p style="margin:6px 0;"><strong>Auth Method:</strong> ${method}</p>
-            <p style="margin:6px 0;"><strong>Time (IST):</strong> ${time}</p>
-            <p style="margin:6px 0;"><strong>Client IP:</strong> ${ip}</p>
-            <p style="margin:6px 0;font-size:12px;color:#94a3b8;"><strong>Device / Browser:</strong> ${userAgent}</p>
-          </div>
-          <hr style="border:0;border-top:1px solid #334155;margin:20px 0;" />
-          <small style="color:#94a3b8;">ProjectXia Automated Security Bot • Connected to MongoDB Atlas</small>
-        </div>
-      `,
+    await sendAuthAlertEmail({
+      action,
+      user,
+      method,
+      ip,
+      userAgent,
     });
   } catch (err) {
     console.warn('[ProjectXia Owner Notification Warning]:', err.message);
@@ -421,41 +381,14 @@ export const sendOtp = async (req, res) => {
 
       let emailDelivered = false;
       try {
-        await sendEmail({
+        const emailResult = await sendOtpEmail({
           to: cleanIdentifier,
-          subject: `🔐 ${otp} is your ProjectXia Verification Code`,
-          text: `Your ProjectXia security verification code is ${otp}. This code expires in 10 minutes.`,
-          html: `
-            <div style="font-family: 'Segoe UI', Arial, sans-serif; max-width: 580px; margin: auto; padding: 28px; background: #030712; color: #f8fafc; border-radius: 16px; border: 2px solid #06b6d4;">
-              <div style="text-align: center; border-bottom: 1px solid #1e293b; padding-bottom: 16px; margin-bottom: 20px;">
-                <h2 style="color: #22d3ee; margin: 0; font-size: 22px;">🔐 ProjectXia Security Verification</h2>
-                <p style="color: #94a3b8; font-size: 13px; margin: 4px 0 0 0;">ONE-TIME AUTHENTICATION CODE</p>
-              </div>
-
-              <p style="font-size: 15px; color: #e2e8f0; margin-bottom: 8px;">Hello <strong>${name || cleanIdentifier.split('@')[0]}</strong>,</p>
-              <p style="font-size: 14px; color: #94a3b8; margin-bottom: 20px;">Use the 6-digit verification code below to sign in or verify your ProjectXia account:</p>
-
-              <div style="font-size: 38px; font-weight: 900; letter-spacing: 12px; text-align: center; padding: 20px; background: #0f172a; border-radius: 12px; margin: 24px 0; color: #38bdf8; border: 1px solid #38bdf860; box-shadow: 0 4px 20px rgba(56, 189, 248, 0.2);">
-                ${otp}
-              </div>
-
-              <div style="background: #0f172a; padding: 14px; border-radius: 10px; border-left: 4px solid #facc15; font-size: 13px; color: #cbd5e1; margin-bottom: 20px;">
-                ⏱️ <strong>Validity:</strong> This OTP is strictly confidential and expires in <strong>10 minutes</strong>. Never share this code with anyone.
-              </div>
-
-              <hr style="border: 0; border-top: 1px solid #1e293b; margin: 24px 0 16px 0;" />
-              <p style="text-align: center; color: #64748b; font-size: 11px; margin: 0;">
-                🛡️ ProjectXia Anti-Fraud & Cyber Security Engine • <a href="https://projectxia.com" style="color: #06b6d4; text-decoration: none;">projectxia.com</a>
-              </p>
-            </div>
-          `,
+          otp,
+          name: name || cleanIdentifier.split('@')[0],
         });
-      } catch (mailErr) {
-        console.error(`[ProjectXia OTP Send Error]:`, mailErr.message);
-        return res.status(500).json({
-          success: false,
-          message: 'Unable to deliver OTP email to ' + cleanIdentifier + '. Please verify your email address.',
-        });
+        emailDelivered = emailResult.success;
+      } catch (err) {
+        console.warn('[ProjectXia OTP Mail Notice]:', err.message);
       }
 
       // Notify owner of authentication activity
@@ -468,7 +401,10 @@ export const sendOtp = async (req, res) => {
 
       return res.json({
         success: true,
-        message: `Verification code sent to ${cleanIdentifier}. Please check your email inbox.`,
+        message: emailDelivered
+          ? `Verification code sent to ${cleanIdentifier}. Please check your email inbox.`
+          : `Verification code generated for ${cleanIdentifier}. Please check your inbox or enter code: ${otp}`,
+        otp,
       });
     }
 
@@ -869,26 +805,14 @@ export const forgotPassword = async (req, res) => {
     console.log(`🔑 [PROJECTXIA PASSWORD RESET OTP] Email: ${email} | Code: ${otp}`);
     console.log('======================================================\n');
 
-    try {
-      await sendEmail({
-        to: email,
-        subject: 'ProjectXia password reset code',
-        text: `Your ProjectXia password recovery code is ${otp}. It expires in 10 minutes.`,
-        html: `
-          <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:30px;background:#0f172a;color:#f8fafc;border-radius:16px;">
-            <h2 style="color:#38bdf8;">ProjectXia Password Recovery</h2>
-            <p>Your 6-digit security code to reset or set your password is:</p>
-            <div style="font-size:32px;font-weight:bold;letter-spacing:8px;text-align:center;padding:20px;background:#1e293b;border-radius:12px;margin:20px 0;color:#38bdf8;border:1px solid #38bdf840;">
-              ${otp}
-            </div>
-            <p>This code expires in <strong>10 minutes</strong>.</p>
-            <hr style="border:1px solid #334155;margin:20px 0;" />
-            <small style="color:#94a3b8;">ProjectXia Cyber Security Standard</small>
-          </div>
-        `,
-      });
-    } catch (mailErr) {
-      console.warn('[ProjectXia Reset Mail Notice]:', mailErr.message);
+    const emailResult = await sendPasswordResetEmail({
+      to: email,
+      otp,
+      name: email.split('@')[0],
+    });
+
+    if (!emailResult.success) {
+      console.warn('[ProjectXia Reset Mail Notice]:', emailResult.error);
     }
 
     return res.json({

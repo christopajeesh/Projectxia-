@@ -2,7 +2,7 @@ import Project from '../models/Project.js';
 import User from '../models/User.js';
 import AuditLog from '../models/AuditLog.js';
 import crypto from 'crypto';
-import nodemailer from 'nodemailer';
+import { sendProjectAlertEmail } from '../services/emailService.js';
 import { memoryStore } from '../seed/seedData.js';
 
 // ============================================================
@@ -55,64 +55,13 @@ export const checkSuspiciousProjectCode = ({ title = '', description = '', githu
 
 const notifyOwnerOfProjectUpload = async ({ project, uploader, isSuspicious, flags, req }) => {
   try {
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) return;
-
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
+    await sendProjectAlertEmail({
+      project,
+      uploader,
+      isSuspicious,
+      flags,
+      ip: req?.ip || '127.0.0.1',
     });
-
-    const subject = isSuspicious
-      ? `🚨 [SUSPICIOUS PROJECT FLAGGED] Potential Copied/Cloned Source: "${project.title}"`
-      : `🛡️ [NEW PROJECT LISTED & VERIFIED] "${project.title}" by ${uploader.name || uploader.email}`;
-
-    const html = `
-      <div style="font-family: Arial, sans-serif; background: #030712; color: #f1f5f9; padding: 24px; border-radius: 12px; max-width: 600px; margin: auto; border: 1px solid ${isSuspicious ? '#ef4444' : '#06b6d4'};">
-        <h2 style="color: ${isSuspicious ? '#ef4444' : '#22d3ee'}; margin-top: 0;">
-          ${isSuspicious ? '🚨 ANTI-PLAGIARISM SHIELD WARNING' : '✅ PROJECTXIA VERIFIED PROJECT LISTING'}
-        </h2>
-        <p style="color: #94a3b8; font-size: 13px;">Automated Code Originality & Vault Governance Notification</p>
-        <hr style="border-color: #1e293b; margin: 16px 0;" />
-
-        <div style="background: #0f172a; padding: 16px; border-radius: 8px; border-left: 4px solid ${isSuspicious ? '#ef4444' : '#10b981'};">
-          <p><strong>Project Title:</strong> ${project.title}</p>
-          <p><strong>Category:</strong> ${project.category}</p>
-          <p><strong>Price:</strong> ₹${project.price?.toLocaleString('en-IN')}</p>
-          <p><strong>Uploader:</strong> ${uploader.name || 'Creator'} (${uploader.email})</p>
-          <p><strong>Uploader ID:</strong> ${uploader.id || uploader._id}</p>
-          <p><strong>GitHub URL:</strong> ${project.githubUrl || 'N/A'}</p>
-          <p><strong>Originality Trust Score:</strong> ${project.trustScore}%</p>
-          <p><strong>Calculated Plagiarism:</strong> ${project.plagiarismScore}%</p>
-          <p><strong>IP Address:</strong> ${req.ip || '127.0.0.1'}</p>
-          <p><strong>Timestamp:</strong> ${new Date().toISOString()}</p>
-        </div>
-
-        ${isSuspicious ? `
-          <div style="margin-top: 16px; background: #450a0a; border: 1px solid #dc2626; padding: 14px; border-radius: 8px; color: #fca5a5;">
-            <h4 style="margin-top: 0; color: #f87171;">⚠️ Suspicion & Plagiarism Flags Detected:</h4>
-            <ul style="margin: 0; padding-left: 20px;">
-              ${flags.map(f => `<li>${f}</li>`).join('')}
-            </ul>
-            <p style="font-size: 12px; margin-top: 8px;">Action: Project flagged and dispatched to theprojectxia@gmail.com for review.</p>
-          </div>
-        ` : ''}
-
-        <div style="margin-top: 20px; font-size: 11px; color: #64748b; text-align: center;">
-          ProjectXia Vault Protection • Zero-Trust Code Originality Engine
-        </div>
-      </div>
-    `;
-
-    await transporter.sendMail({
-      from: `"ProjectXia Vault Security" <${process.env.GMAIL_USER}>`,
-      to: 'theprojectxia@gmail.com',
-      subject,
-      html,
-    });
-    console.log(`[Project Security Alert]: Email successfully dispatched to theprojectxia@gmail.com for "${project.title}"`);
   } catch (err) {
     console.warn('[Project Notification Warning]:', err.message);
   }

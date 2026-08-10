@@ -263,21 +263,32 @@ const UploadProjectPage = () => {
     <div className="relative min-h-screen pt-8 pb-24 overflow-hidden">
       <AuroraBackground />
 
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-6">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-5 font-sans">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/40 backdrop-blur-md shadow-neon-cyan">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/40 backdrop-blur-md shadow-neon-cyan font-mono text-xs">
             <Shield className="w-4 h-4 text-cyan-400" />
-            <span className="font-mono font-bold text-xs text-cyan-300">
-              PROJECTXIA GLOBAL SELLER HUB • VERIFIED LAUNCH STANDARD
+            <span className="font-bold text-cyan-300">
+              PROJECTXIA SELLER VAULT • MONETIZE YOUR CODE
             </span>
           </div>
 
           <h1 className="text-3xl sm:text-4xl font-display font-black text-white">
             List Your Project for Sale
           </h1>
-          <p className="text-xs sm:text-sm font-mono text-slate-400 max-w-xl mx-auto">
-            Quick 2-step listing. Set your fixed price, upload screenshots & working video walkthrough. Verified original by AI Shield™.
+          <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
+            Quick 2-step listing. Set your fixed price in INR (₹), upload screenshots & demo video. Verified original by AI Shield™.
+          </p>
+        </div>
+
+        {/* Plain-English Seller Guide for Innovators */}
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/60 via-slate-900/80 to-cyan-950/60 border border-emerald-500/30 text-xs text-slate-300 shadow-xl space-y-1">
+          <p className="font-bold text-white flex items-center gap-2 text-sm">
+            <span className="p-1 rounded bg-emerald-500/20 text-emerald-300">💰</span>
+            <span>What is this page for? (Seller Guide)</span>
+          </p>
+          <p className="text-slate-300 text-xs leading-relaxed">
+            If you built an original engineering final-year project, thesis, or IoT prototype, this page allows you to list it on our marketplace. Buyers can purchase verified access, and you will receive direct revenue per sale.
           </p>
         </div>
 
@@ -287,7 +298,7 @@ const UploadProjectPage = () => {
             className={`p-3 rounded-2xl border text-center transition-all ${
               currentStep === 1
                 ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 font-bold shadow-neon-cyan'
-                : 'bg-emerald-950/40 border-emerald-500/40 text-emerald-400'
+                : 'bg-emerald-950/40 border-emerald-500/40 text-emerald-400 font-bold'
             }`}
           >
             Step 1: Project Details & Price
@@ -296,7 +307,7 @@ const UploadProjectPage = () => {
             className={`p-3 rounded-2xl border text-center transition-all ${
               currentStep === 2
                 ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 font-bold shadow-neon-cyan'
-                : 'bg-gray-900/60 border-slate-800 text-slate-500'
+                : 'bg-gray-900/60 border-slate-800 text-slate-400'
             }`}
           >
             Step 2: Media, Video & AI Verification

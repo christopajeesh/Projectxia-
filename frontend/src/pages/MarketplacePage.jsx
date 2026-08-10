@@ -131,7 +131,7 @@ const MarketplacePage = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header Title */}
-        <div className="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
             <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
               <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
@@ -140,7 +140,7 @@ const MarketplacePage = () => {
             <h1 className="text-3xl sm:text-4xl font-display font-black text-white mt-1">
               Explore Verified Engineering Projects
             </h1>
-            <p className="text-xs font-mono text-slate-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
               Browse authentic hardware, software, and IoT projects with verified video walkthroughs, schematics, and clean source code.
             </p>
           </div>
@@ -158,6 +158,26 @@ const MarketplacePage = () => {
             <span className="text-xs font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-500/30 px-3 py-1.5 rounded-xl">
               {projects.length} Original Projects
             </span>
+          </div>
+        </div>
+
+        {/* Plain-English Page Purpose & How It Works Banner for Visitors */}
+        <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-cyan-950/60 via-slate-900/80 to-purple-950/60 border border-cyan-500/30 text-xs text-slate-300 shadow-xl">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="space-y-1">
+              <p className="font-bold text-white flex items-center gap-2 text-sm">
+                <span className="p-1 rounded bg-cyan-500/20 text-cyan-300">💡</span>
+                <span>What is this page for? (Marketplace Guide)</span>
+              </p>
+              <p className="text-slate-300 text-xs">
+                This page lists <strong>complete, working engineering projects</strong> built by students and researchers. Every project includes <strong>working video demos, verified source code, architecture schematics, and direct chat with the creator</strong> for custom adjustments.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-slate-300 shrink-0">
+              <span className="px-2.5 py-1 rounded-lg bg-black/40 border border-cyan-500/30 text-cyan-300">✓ Video Demos</span>
+              <span className="px-2.5 py-1 rounded-lg bg-black/40 border border-purple-500/30 text-purple-300">✓ Full Source Code</span>
+              <span className="px-2.5 py-1 rounded-lg bg-black/40 border border-emerald-500/30 text-emerald-300">✓ Direct Creator Chat</span>
+            </div>
           </div>
         </div>
 

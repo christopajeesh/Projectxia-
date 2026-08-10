@@ -15,6 +15,7 @@ import {
   FileCode,
   ShieldCheck,
   Check,
+  HelpCircle,
 } from 'lucide-react';
 import AuroraBackground from '../components/ui/AuroraBackground';
 import { useSound } from '../context/SoundContext';
@@ -80,33 +81,44 @@ const AiShieldPage = () => {
   };
 
   return (
-    <div className="relative min-h-screen pt-8 pb-24 overflow-hidden font-mono text-xs">
+    <div className="relative min-h-screen pt-8 pb-24 overflow-hidden font-sans">
       <AuroraBackground />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-950/60 border border-purple-500/40 backdrop-blur-md shadow-neon-purple">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-950/60 border border-purple-500/40 backdrop-blur-md shadow-neon-purple text-xs font-mono">
             <Sparkles className="w-4 h-4 text-purple-400" />
             <span className="font-bold text-purple-300">
-              PROJECTXIA AST CODE & PLAGIARISM ENGINE
+              PROJECTXIA AST CODE & PLAGIARISM SHIELD
             </span>
           </div>
 
           <h1 className="text-3xl sm:text-5xl font-display font-black text-white">
             AI Code Plagiarism & Security Auditor
           </h1>
-          <p className="text-slate-400 max-w-2xl mx-auto">
-            Static Abstract Syntax Tree (AST) parsing, token fingerprinting, zero hardcoded secret detection, and IEEE originality indexing.
+          <p className="text-slate-300 text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed">
+            Deep Abstract Syntax Tree (AST) scanning, token fingerprinting, zero hardcoded secret detection, and IEEE originality indexing.
+          </p>
+        </div>
+
+        {/* Plain English Guide Banner for Visitors */}
+        <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/60 via-slate-900/80 to-cyan-950/60 border border-purple-500/30 text-xs text-slate-300 shadow-xl space-y-1">
+          <p className="font-bold text-white flex items-center gap-2 text-sm">
+            <HelpCircle className="w-4 h-4 text-purple-300 shrink-0" />
+            <span>What is this page for? (Plagiarism Shield Guide)</span>
+          </p>
+          <p className="text-slate-300 text-xs leading-relaxed">
+            Use this tool to test your source code or project documentation before publishing or submitting to your college/university. It analyzes your code structure, checks against academic and open-source repositories to detect cloned code, ensures zero hardcoded passwords or API keys, and generates an official <strong>IEEE Originality Certificate</strong>.
           </p>
         </div>
 
         {/* Code Input & File Drop Area */}
         <div className="p-6 sm:p-8 rounded-3xl bg-gray-950/90 border border-purple-500/40 backdrop-blur-2xl shadow-2xl space-y-5">
           <form onSubmit={handleScan} className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
-                <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">
+                <label className="text-xs text-slate-300 font-bold block mb-1.5">
                   Source Filename:
                 </label>
                 <input
@@ -114,18 +126,18 @@ const AiShieldPage = () => {
                   required
                   value={fileName}
                   onChange={(e) => setFileName(e.target.value)}
-                  className="w-full bg-black/80 border border-slate-700 focus:border-purple-400 rounded-xl px-3 py-2 text-white focus:outline-none"
+                  className="w-full bg-black/80 border border-slate-700 focus:border-purple-400 rounded-xl px-3.5 py-2.5 text-white text-xs font-mono focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">
+                <label className="text-xs text-slate-300 font-bold block mb-1.5">
                   Tech Stack / Language:
                 </label>
                 <select
                   value={language}
                   onChange={(e) => setLanguage(e.target.value)}
-                  className="w-full bg-black/80 border border-slate-700 focus:border-purple-400 rounded-xl px-3 py-2 text-white focus:outline-none"
+                  className="w-full bg-black/80 border border-slate-700 focus:border-purple-400 rounded-xl px-3.5 py-2.5 text-white text-xs font-mono focus:outline-none cursor-pointer"
                 >
                   <option value="C++ / Embedded IoT">C++ / Embedded IoT (ESP32 / Arduino)</option>
                   <option value="Python / PyTorch & AI">Python / PyTorch & AI</option>
@@ -137,7 +149,7 @@ const AiShieldPage = () => {
             </div>
 
             <div>
-              <label className="text-[10px] text-slate-400 uppercase font-bold block mb-1">
+              <label className="text-xs text-slate-300 font-bold block mb-1.5">
                 Paste Source Code / Firmware Snippet:
               </label>
               <textarea
@@ -145,17 +157,17 @@ const AiShieldPage = () => {
                 required
                 value={codeSnippet}
                 onChange={(e) => setCodeSnippet(e.target.value)}
-                className="w-full bg-black/90 border border-slate-700 focus:border-purple-400 rounded-xl p-3 text-cyan-300 font-mono focus:outline-none"
+                className="w-full bg-black/90 border border-slate-700 focus:border-purple-400 rounded-xl p-3 text-cyan-300 font-mono text-xs focus:outline-none leading-relaxed"
               />
             </div>
 
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-4 rounded-xl bg-gradient-to-r from-purple-500 via-pink-600 to-cyan-500 hover:from-purple-400 hover:to-cyan-400 text-black font-display font-black text-xs flex items-center justify-center gap-2 shadow-xl shadow-purple-500/25 transition-all hover:scale-102 cursor-pointer disabled:opacity-50"
+              className="w-full py-3.5 rounded-xl bg-gradient-to-r from-purple-500 via-pink-600 to-cyan-500 hover:from-purple-400 hover:to-cyan-400 text-black font-display font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xl shadow-purple-500/25 transition-all hover:scale-102 cursor-pointer disabled:opacity-50"
             >
               <Shield className="w-4 h-4" />
-              <span>{loading ? 'Performing Deep AST AST-Token Scan...' : '⚡ Run Zero-Trust Plagiarism & Vulnerability Scan'}</span>
+              <span>{loading ? 'Performing Deep AST Token Scan...' : '⚡ Run Zero-Trust Plagiarism & Vulnerability Scan'}</span>
             </button>
           </form>
 
@@ -164,7 +176,7 @@ const AiShieldPage = () => {
             <motion.div
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
-              className="p-6 rounded-2xl bg-gray-900/90 border border-cyan-500/40 space-y-4"
+              className="p-6 rounded-2xl bg-gray-900/90 border border-cyan-500/40 space-y-4 font-mono text-xs"
             >
               <div className="flex items-center justify-between border-b border-slate-800 pb-3">
                 <div className="flex items-center gap-2">
@@ -180,22 +192,22 @@ const AiShieldPage = () => {
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div className="p-3 rounded-xl bg-black/60 border border-slate-800">
-                  <span className="text-slate-400 block">Clean Score:</span>
+                  <span className="text-slate-400 block text-[11px]">Clean Score:</span>
                   <span className="text-emerald-400 font-bold text-base">{scanResult.cleanCodeScore}%</span>
                 </div>
 
                 <div className="p-3 rounded-xl bg-black/60 border border-slate-800">
-                  <span className="text-slate-400 block">Plagiarism Index:</span>
+                  <span className="text-slate-400 block text-[11px]">Plagiarism Index:</span>
                   <span className="text-cyan-300 font-bold text-base">{scanResult.plagiarismPercentage}%</span>
                 </div>
 
                 <div className="p-3 rounded-xl bg-black/60 border border-slate-800">
-                  <span className="text-slate-400 block">Lines of Code:</span>
+                  <span className="text-slate-400 block text-[11px]">Lines of Code:</span>
                   <span className="text-white font-bold text-base">{scanResult.linesOfCode}</span>
                 </div>
 
                 <div className="p-3 rounded-xl bg-black/60 border border-slate-800">
-                  <span className="text-slate-400 block">Secret Leaks:</span>
+                  <span className="text-slate-400 block text-[11px]">Secret Leaks:</span>
                   <span className="text-emerald-400 font-bold text-base">0 Leaks</span>
                 </div>
               </div>
