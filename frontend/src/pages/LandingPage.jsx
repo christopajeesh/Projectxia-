@@ -215,12 +215,12 @@ const LandingPage = () => {
   };
 
   const departments = [
-    { name: 'Computer Science (CSE / IT)', count: '65+ Projects', icon: Code, desc: 'Web apps, AI/ML, Cloud & Cyber Security' },
-    { name: 'Electronics & Comm (ECE)', count: '38+ Projects', icon: Cpu, desc: 'IoT, LoRaWAN, ESP32, VLSI & Signal Processing' },
-    { name: 'Electrical Engineering (EEE)', count: '24+ Projects', icon: Zap, desc: 'EV charging, Solar microgrids & Power systems' },
-    { name: 'Mechanical & Robotics', count: '19+ Projects', icon: Settings, desc: 'ROS2 robotics, 3D CAD models & Rover setups' },
-    { name: 'Artificial Intelligence & DS', count: '42+ Projects', icon: Sparkles, desc: 'Deep learning, Edge vision & LLM pipelines' },
-    { name: 'Blockchain & zk-SNARK', count: '18+ Projects', icon: Layers, desc: 'Smart contracts, Escrow protocols & Web3 dApps' },
+    { name: 'Computer Science (CSE / IT)', focus: 'Web, AI/ML & Cloud', icon: Code, desc: 'Full-stack applications, machine learning models, cloud APIs & cyber security systems' },
+    { name: 'Electronics & Comm (ECE)', focus: 'IoT, VLSI & Embedded', icon: Cpu, desc: 'Microcontroller firmware, ESP32, LoRaWAN wireless nodes & signal processing' },
+    { name: 'Electrical Engineering (EEE)', focus: 'EV & Power Systems', icon: Zap, desc: 'Electric vehicle charging, battery management, solar microgrids & smart grid telemetry' },
+    { name: 'Mechanical & Robotics', focus: 'ROS2 & 3D CAD', icon: Settings, desc: 'Autonomous rovers, robotic arms, SolidWorks CAD modeling & kinematics simulations' },
+    { name: 'Artificial Intelligence & DS', focus: 'Deep Learning & LLMs', icon: Sparkles, desc: 'Computer vision, neural networks, LLM agents & big data analytics pipelines' },
+    { name: 'Blockchain & Web3', focus: 'Smart Contracts & dApps', icon: Layers, desc: 'Verified Solidity smart contracts, decentralized storage & Web3 security protocols' },
   ];
 
   const faqs = [
@@ -523,124 +523,6 @@ const LandingPage = () => {
                   </div>
                 </div>
               </div>
-
-              {isAuthenticated ? (
-                /* Authenticated Innovator Status Box */
-                <div className="w-full rounded-3xl p-5 bg-gray-950/90 border border-cyan-500/40 backdrop-blur-2xl shadow-2xl space-y-3">
-                  <div className="flex items-center gap-3.5">
-                    <img
-                      src={user?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user?.name || user?.email || 'User')}&backgroundColor=080e1e,101f4e&textColor=00f0ff`}
-                      alt=""
-                      className="w-12 h-12 rounded-2xl object-cover border-2 border-cyan-400 shadow-lg bg-gray-900"
-                    />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="text-base font-display font-bold text-white">
-                          {user?.name || user?.email?.split('@')?.[0] || 'Innovator'}
-                        </h3>
-                        <UserCheck className="w-4 h-4 text-cyan-400" />
-                      </div>
-                      <p className="text-[11px] font-mono text-cyan-400">
-                        {String(user?.role || 'member').toUpperCase()} • {user?.email || 'Logged In'}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-2 text-xs font-mono pt-1">
-                    <button
-                      onClick={() => navigate('/marketplace')}
-                      className="py-2.5 px-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold text-center transition-all cursor-pointer shadow-lg shadow-cyan-500/20"
-                    >
-                      Browse Projects
-                    </button>
-                    <button
-                      onClick={() => navigate('/profile')}
-                      className="py-2.5 px-3 rounded-xl bg-gray-900 border border-cyan-500/30 text-cyan-300 font-bold text-center hover:bg-slate-800 transition-all cursor-pointer"
-                    >
-                      My Profile
-                    </button>
-                    <button
-                      onClick={() => navigate('/upload')}
-                      className="py-2.5 px-3 rounded-xl bg-purple-500/20 border border-purple-500/40 text-purple-300 font-bold text-center hover:bg-purple-500/30 transition-all cursor-pointer"
-                    >
-                      Sell Project
-                    </button>
-                    <button
-                      onClick={() => navigate('/ai-shield')}
-                      className="py-2.5 px-3 rounded-xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 font-bold text-center hover:bg-emerald-500/30 transition-all cursor-pointer"
-                    >
-                      Plagiarism Check
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                /* Landing Page Direct Fast Login Card */
-                <div className="w-full rounded-3xl p-5 bg-gray-950/95 border border-cyan-500/40 backdrop-blur-2xl shadow-2xl space-y-3.5">
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-2.5">
-                    <div className="flex items-center gap-2">
-                      <Lock className="w-4 h-4 text-cyan-400" />
-                      <span className="text-xs font-mono font-bold text-white uppercase">
-                        Instant Member Access
-                      </span>
-                    </div>
-                    <span className="text-[10px] font-mono text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-500/30">
-                      1-Click Unlocked
-                    </span>
-                  </div>
-
-                  {/* Inline Email / Password Form */}
-                  <form onSubmit={handleInlineLogin} className="space-y-2 text-xs font-mono">
-                    <div>
-                      <input
-                        type="email"
-                        required
-                        value={inlineEmail}
-                        onChange={(e) => setInlineEmail(e.target.value)}
-                        placeholder="Enter your email id"
-                        className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3 py-2 text-white focus:outline-none"
-                      />
-                    </div>
-                    <div>
-                      <input
-                        type="password"
-                        required
-                        value={inlinePassword}
-                        onChange={(e) => setInlinePassword(e.target.value)}
-                        placeholder="Password"
-                        className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3 py-2 text-white focus:outline-none"
-                      />
-                    </div>
-
-                    <button
-                      type="submit"
-                      disabled={inlineLoading}
-                      className="w-full py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-black font-display font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-md shadow-cyan-500/20 cursor-pointer disabled:opacity-50"
-                    >
-                      {inlineLoading ? 'Authenticating...' : 'Sign In with Email & Password'}
-                    </button>
-
-                    <div className="flex justify-between items-center pt-1 text-[10px]">
-                      <button
-                        type="button"
-                        onClick={() => openAuthModal('register')}
-                        className="text-cyan-400 font-bold hover:underline cursor-pointer"
-                      >
-                        Create Account
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          playClick();
-                          openAuthModal('forgot');
-                        }}
-                        className="text-slate-400 hover:text-cyan-300 hover:underline cursor-pointer"
-                      >
-                        Forgot Password?
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -1044,7 +926,9 @@ const LandingPage = () => {
                     </div>
                     <div>
                       <h4 className="font-display font-bold text-base text-white">{dept.name}</h4>
-                      <span className="text-xs font-mono text-cyan-400">{dept.count}</span>
+                      <span className="text-[11px] font-mono font-medium px-2 py-0.5 rounded-full bg-cyan-950/80 text-cyan-300 border border-cyan-500/30">
+                        {dept.focus}
+                      </span>
                     </div>
                   </div>
                   <p className="text-xs font-mono text-slate-400">{dept.desc}</p>
