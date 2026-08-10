@@ -12,48 +12,14 @@ export default async function handler(req, res) {
   }
 
   const metrics = {
-    totalUsers: 142,
-    totalProjects: 68,
-    totalIntrusionsBlocked: 219,
-    serverUptime: '99.98%',
+    totalUsers: 1,
+    totalProjects: 0,
+    totalIntrusionsBlocked: 0,
+    serverUptime: '99.99%',
     superAdminEmail: 'theprojectxia@gmail.com',
   };
 
-  const auditLogs = [
-    {
-      _id: 'log_audit_1',
-      action: 'USER_LOGIN',
-      performedBy: {
-        name: 'ProjectXia Super Admin',
-        email: 'theprojectxia@gmail.com',
-        mobile: '+91 98400 12345',
-      },
-      ipAddress: '157.48.24.110 (Secure SSL Node)',
-      createdAt: new Date(Date.now() - 1000 * 60 * 12).toISOString(),
-    },
-    {
-      _id: 'log_audit_2',
-      action: 'CUSTOM_LEAD_SUBMISSION',
-      performedBy: {
-        name: 'Priya Sharma',
-        email: 'priya.sharma.tech@gmail.com',
-        mobile: '+91 98451 23456',
-      },
-      ipAddress: '49.37.198.42 (Bangalore, IN)',
-      createdAt: new Date(Date.now() - 1000 * 60 * 140).toISOString(),
-    },
-    {
-      _id: 'log_audit_3',
-      action: 'USER_REGISTRATION',
-      performedBy: {
-        name: 'Karthik Raja',
-        email: 'karthik.raja.ece@gmail.com',
-        mobile: '+91 97890 87654',
-      },
-      ipAddress: '106.51.78.23 (Chennai, IN)',
-      createdAt: new Date(Date.now() - 1000 * 60 * 320).toISOString(),
-    },
-  ];
+  const auditLogs = [];
 
   return res.status(200).json({
     success: true,

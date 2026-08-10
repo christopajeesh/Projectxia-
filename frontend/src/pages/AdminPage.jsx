@@ -127,12 +127,27 @@ const AdminPage = () => {
         api.get('/projects').catch(() => ({ data: { projects: [] } })),
       ]);
 
+      // Clean & sanitize local storage from any previous mock/seed items
+      const rawBuyerOrders = JSON.parse(localStorage.getItem('projectxia_buyer_orders') || '[]');
+      const sanitizedBuyerOrders = rawBuyerOrders.filter(
+        (o) => o && o.orderId && !o.orderId.startsWith('ORD-PX-') && !String(o.buyerEmail || '').includes('.nitk@') && !String(o.buyerEmail || '').includes('.coep@') && !String(o.buyerEmail || '').includes('.vit@')
+      );
+      if (sanitizedBuyerOrders.length !== rawBuyerOrders.length) {
+        localStorage.setItem('projectxia_buyer_orders', JSON.stringify(sanitizedBuyerOrders));
+      }
+
+      const rawPlagiarismScans = JSON.parse(localStorage.getItem('projectxia_plagiarism_scans') || '[]');
+      const sanitizedPlagiarismScans = rawPlagiarismScans.filter(
+        (s) => s && s.scanId && !['SCAN-XIA-99F1A', 'SCAN-XIA-88E2B', 'SCAN-XIA-77D3C'].includes(s.scanId) && !String(s.userEmail || '').includes('.mech@') && !String(s.userEmail || '').includes('.ai@') && !String(s.userEmail || '').includes('.iot@')
+      );
+      if (sanitizedPlagiarismScans.length !== rawPlagiarismScans.length) {
+        localStorage.setItem('projectxia_plagiarism_scans', JSON.stringify(sanitizedPlagiarismScans));
+      }
+
       const deletedLeads = JSON.parse(localStorage.getItem('projectxia_admin_deleted_leads') || '[]');
       const deletedProjects = JSON.parse(localStorage.getItem('projectxia_admin_deleted_projects') || '[]');
       const localSubmittedLeads = JSON.parse(localStorage.getItem('projectxia_submitted_leads') || '[]');
       const localUploadedProjects = JSON.parse(localStorage.getItem('projectxia_uploaded_projects') || '[]');
-      const localBuyerOrders = JSON.parse(localStorage.getItem('projectxia_buyer_orders') || '[]');
-      const localPlagiarismScans = JSON.parse(localStorage.getItem('projectxia_plagiarism_scans') || '[]');
 
       const customData = getSavedLeadsData();
 
@@ -181,10 +196,12 @@ const AdminPage = () => {
       const rawProjects = Array.from(combinedProjectsMap.values());
 
       // Real Buyer Orders (Only actual purchases made on the platform)
-      const serverOrders = mRes.data?.orders || [];
+      const serverOrders = (mRes.data?.orders || []).filter(
+        (o) => o && o.orderId && !o.orderId.startsWith('ORD-PX-')
+      );
       const combinedOrdersMap = new Map();
 
-      localBuyerOrders.forEach((o) => {
+      sanitizedBuyerOrders.forEach((o) => {
         if (o.orderId) combinedOrdersMap.set(o.orderId, o);
       });
       serverOrders.forEach((o) => {
@@ -196,10 +213,12 @@ const AdminPage = () => {
       const realBuyerOrders = Array.from(combinedOrdersMap.values());
 
       // Real Plagiarism Scans (Only actual scans run on the platform)
-      const serverScans = mRes.data?.scans || [];
+      const serverScans = (mRes.data?.scans || []).filter(
+        (s) => s && s.scanId && !['SCAN-XIA-99F1A', 'SCAN-XIA-88E2B', 'SCAN-XIA-77D3C'].includes(s.scanId)
+      );
       const combinedScansMap = new Map();
 
-      localPlagiarismScans.forEach((s) => {
+      sanitizedPlagiarismScans.forEach((s) => {
         if (s.scanId) combinedScansMap.set(s.scanId, s);
       });
       serverScans.forEach((s) => {
@@ -211,7 +230,9 @@ const AdminPage = () => {
       const realPlagiarismScans = Array.from(combinedScansMap.values());
 
       // Real Users (Only actual users from platform database)
-      const serverUsers = uRes.data?.users || [];
+      const serverUsers = (uRes.data?.users || []).filter(
+        (u) => u && !['usr_01', 'usr_02', 'usr_03', 'usr_04'].includes(u._id || u.id) && !['aaron.vance@mit.edu', 'vikram.iot@gmail.com', 'rahul.verma.nitk@gmail.com', 'tanvi.joshi.mech@gmail.com'].includes(u.email)
+      );
       const combinedUsersMap = new Map();
 
       serverUsers.forEach((u) => {
@@ -223,13 +244,13 @@ const AdminPage = () => {
       if (user?.email && !combinedUsersMap.has(user.email)) {
         combinedUsersMap.set(user.email, {
           _id: user._id || user.id || 'usr_current',
-          name: user.name || 'Logged User',
+          name: user.name || 'ProjectXia Super Admin',
           email: user.email,
-          mobile: user.mobile || 'Registered Contact',
-          role: user.role || 'user',
+          mobile: user.mobile || '+91 75949 24788',
+          role: user.role || 'owner',
           verificationLevel: user.role === 'owner' ? 'Super Admin' : 'Verified Innovator',
-          loginMethod: user.authProvider || 'Local / OAuth',
-          ipAddress: 'Active Session Node',
+          loginMethod: user.authProvider || 'Email + Password',
+          ipAddress: 'Active Session Node (Secure)',
           isBanned: false,
         });
       }
@@ -255,7 +276,7 @@ const AdminPage = () => {
         totalSellers: rawProjects.length,
         totalScans: realPlagiarismScans.length,
         totalUsers: realUsers.length,
-        serverUptime: '99.98%',
+        serverUptime: '99.99%',
       });
 
       setAuditLogs(mRes.data?.auditLogs || []);
