@@ -308,35 +308,50 @@ const LandingPage = () => {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.6, delay: 0.2 }}
-                className="flex flex-wrap items-center justify-center lg:justify-start gap-4 pt-2"
+                className="flex flex-wrap items-center justify-center lg:justify-start gap-3 pt-2"
               >
+                {/* 1. Explore Projects */}
                 <button
                   type="button"
                   onClick={() => handleProtectedNavigation('/marketplace', 'Please log in or register to explore verified engineering projects.')}
-                  className="px-7 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-black font-display font-black text-sm shadow-xl shadow-cyan-500/25 flex items-center gap-2 transition-all hover:scale-105 cursor-pointer"
+                  className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-black font-display font-black text-sm shadow-xl shadow-cyan-500/25 flex items-center gap-2 transition-all hover:scale-105 cursor-pointer"
                 >
+                  <Code className="w-4 h-4 text-black shrink-0" />
                   <span>Explore Projects</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <ArrowRight className="w-4 h-4 text-black shrink-0" />
                 </button>
 
+                {/* 2. Plagiarism Checker */}
+                <button
+                  type="button"
+                  onClick={() => handleProtectedNavigation('/ai-shield', 'Please log in or register to run AI Plagiarism & Code Integrity scans.')}
+                  className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-purple-950 via-indigo-900 to-purple-900 hover:from-purple-900 hover:to-indigo-800 border-2 border-purple-400/80 text-purple-200 hover:text-white font-display font-bold text-sm flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-purple-900/40 cursor-pointer"
+                >
+                  <Shield className="w-4 h-4 text-purple-400 shrink-0" />
+                  <span>Plagiarism Checker</span>
+                </button>
+
+                {/* 3. Build My Idea */}
                 <button
                   type="button"
                   onClick={() => {
                     playSuccess();
                     setIsDevModalOpen(true);
                   }}
-                  className="px-7 py-3.5 rounded-xl bg-purple-950/70 hover:bg-purple-900/70 border border-purple-500/40 backdrop-blur-md text-purple-200 font-display font-bold text-sm flex items-center gap-2 transition-all hover:scale-105 shadow-neon-purple cursor-pointer"
+                  className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-purple-950/80 to-slate-900 hover:from-amber-500/30 hover:to-purple-900 border border-amber-400/60 backdrop-blur-md text-amber-200 hover:text-white font-display font-bold text-sm flex items-center gap-2 transition-all hover:scale-105 shadow-md cursor-pointer"
                 >
-                  <Code className="w-4 h-4 text-purple-400" />
-                  <span>Build My Idea (Custom Team)</span>
+                  <Lightbulb className="w-4 h-4 text-amber-300 animate-pulse shrink-0" />
+                  <span>Build My Idea (Custom)</span>
                 </button>
 
+                {/* 4. Sell a Project */}
                 <button
                   type="button"
                   onClick={() => handleProtectedNavigation('/upload', 'Please log in or register to upload and monetize your project.')}
-                  className="px-5 py-3.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 text-slate-200 font-mono text-xs transition-all cursor-pointer"
+                  className="px-5 py-3.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/40 text-emerald-300 font-display font-bold text-xs transition-all hover:scale-105 cursor-pointer flex items-center gap-1.5"
                 >
-                  + Sell a Project
+                  <UploadCloud className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>+ Sell a Project</span>
                 </button>
               </motion.div>
 
