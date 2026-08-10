@@ -373,10 +373,10 @@ const LandingPage = () => {
                     <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 group-hover:bg-emerald-400 group-hover:text-black transition-colors">
                       <UploadCloud className="w-4 h-4" />
                     </div>
-                    <span className="font-display font-bold text-xs text-white group-hover:text-emerald-300">2. Sell Your Code</span>
+                    <span className="font-display font-bold text-xs text-white group-hover:text-emerald-300">2. Sell Your Project</span>
                   </div>
                   <p className="text-[11px] text-slate-300 leading-snug">
-                    Monetize your original software with direct payouts.
+                    Monetize your original projects & code with direct payouts.
                   </p>
                 </div>
 
