@@ -182,7 +182,7 @@ const Navbar = () => {
 
             {/* Desktop Navigation Tabs (Clear Plain-English Titles & Sub-Explainers) */}
             <nav className="hidden md:flex items-center gap-1.5 lg:gap-2">
-              {/* Tab 1: Browse Projects */}
+              {/* Tab 1: Buy Projects */}
               <button
                 type="button"
                 onClick={() => {
@@ -203,12 +203,43 @@ const Navbar = () => {
                   <Code className="w-4 h-4" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-display font-extrabold text-xs leading-tight">Browse Projects</span>
-                  <span className="text-[10px] font-sans text-slate-400 group-hover:text-slate-300 leading-none">Source Code & Videos</span>
+                  <span className="font-display font-extrabold text-xs leading-tight">Buy Projects</span>
+                  <span className="text-[10px] font-sans text-slate-400 group-hover:text-slate-300 leading-none">Code & 4K Videos</span>
                 </div>
               </button>
 
-              {/* Tab 2: Plagiarism Check */}
+              {/* Tab 2: Sell Your Project */}
+              <button
+                type="button"
+                onClick={() => {
+                  playClick();
+                  if (!isAuthenticated) {
+                    openAuthModal('login', 'Please log in or register to publish and sell your engineering project.');
+                  } else {
+                    navigate('/upload');
+                  }
+                }}
+                className={`group px-3 py-2 rounded-xl transition-all cursor-pointer text-left flex items-center gap-2 border ${
+                  location.pathname === '/upload'
+                    ? 'bg-emerald-500/25 border-emerald-400/60 shadow-lg text-emerald-300'
+                    : 'bg-emerald-950/40 hover:bg-emerald-900/60 border-emerald-500/30 hover:border-emerald-400 text-slate-200 hover:text-white'
+                }`}
+              >
+                <div className="p-1.5 rounded-lg bg-emerald-400 text-black">
+                  <UploadCloud className="w-4 h-4" />
+                </div>
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-1">
+                    <span className="font-display font-black text-xs text-emerald-300 leading-tight">Sell Project</span>
+                    <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-400 text-black font-extrabold">
+                      EARN
+                    </span>
+                  </div>
+                  <span className="text-[10px] font-sans text-emerald-400/80 leading-none">Monetize Your Code</span>
+                </div>
+              </button>
+
+              {/* Tab 3: Plagiarism Check */}
               <button
                 type="button"
                 onClick={() => {
@@ -234,7 +265,7 @@ const Navbar = () => {
                 </div>
               </button>
 
-              {/* Tab 3: Build Custom Software */}
+              {/* Tab 4: Build Custom Software */}
               <button
                 type="button"
                 onClick={() => {
@@ -254,32 +285,6 @@ const Navbar = () => {
                     </span>
                   </div>
                   <span className="text-[10px] font-sans text-slate-400 group-hover:text-slate-300 leading-none">Hire Our Engineers</span>
-                </div>
-              </button>
-
-              {/* Tab 4: Sell Your Project */}
-              <button
-                type="button"
-                onClick={() => {
-                  playClick();
-                  if (!isAuthenticated) {
-                    openAuthModal('login', 'Please log in or register to publish and sell your engineering project.');
-                  } else {
-                    navigate('/upload');
-                  }
-                }}
-                className={`group px-3 py-2 rounded-xl transition-all cursor-pointer text-left flex items-center gap-2 border ${
-                  location.pathname === '/upload'
-                    ? 'bg-emerald-500/25 border-emerald-400/60 shadow-lg text-emerald-300'
-                    : 'bg-emerald-950/40 hover:bg-emerald-900/60 border-emerald-500/30 hover:border-emerald-400 text-slate-200 hover:text-white'
-                }`}
-              >
-                <div className="p-1.5 rounded-lg bg-emerald-400 text-black">
-                  <UploadCloud className="w-4 h-4" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-display font-black text-xs text-emerald-300 leading-tight">Sell Your Project</span>
-                  <span className="text-[10px] font-sans text-emerald-400/80 leading-none">Earn Money on Code</span>
                 </div>
               </button>
             </nav>

@@ -39,8 +39,6 @@ import ThreeDCanvas from '../components/ui/ThreeDCanvas';
 import TrustScoreBadge from '../components/ui/TrustScoreBadge';
 import VideoPlayerModal from '../components/ui/VideoPlayerModal';
 import ArchitecturePeekModal from '../components/ui/ArchitecturePeekModal';
-import Interactive3DViewer from '../components/ui/Interactive3DViewer';
-import LiveCyberTerminal from '../components/ui/LiveCyberTerminal';
 import CustomSoftwareRequestModal from '../components/ui/CustomSoftwareRequestModal';
 import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
@@ -342,29 +340,173 @@ const LandingPage = () => {
                 </button>
               </motion.div>
 
-              {/* Pillars Highlight Bar */}
-              <div className="grid grid-cols-2 gap-2 pt-2 text-xs font-mono text-slate-300">
-                <div className="p-3 rounded-2xl bg-gray-900/70 border border-slate-800 flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>Working 4K Video & Fixed Price</span>
+              {/* 4 Pillars Quick Overview Cards */}
+              <div className="grid grid-cols-2 gap-3 pt-3">
+                <div
+                  onClick={() => handleProtectedNavigation('/marketplace', 'Please log in or register to explore verified engineering projects.')}
+                  className="p-3.5 rounded-2xl bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/30 hover:border-cyan-400 transition-all cursor-pointer group shadow-lg"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-400 group-hover:bg-cyan-400 group-hover:text-black transition-colors">
+                      <Code className="w-4 h-4" />
+                    </div>
+                    <span className="font-display font-bold text-xs text-white group-hover:text-cyan-300">1. Buy Projects</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-snug">
+                    Verified source code, circuits & 4K video walkthroughs.
+                  </p>
                 </div>
-                <div className="p-3 rounded-2xl bg-gray-900/70 border border-slate-800 flex items-center gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-purple-400 shrink-0" />
-                  <span>Plagiarism Checker Passed</span>
-                </div>
-              </div>
 
-              {/* Live Embedded Engineering Terminal */}
-              <div className="pt-2">
-                <LiveCyberTerminal />
+                <div
+                  onClick={() => handleProtectedNavigation('/upload', 'Please log in or register to upload and monetize your project.')}
+                  className="p-3.5 rounded-2xl bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/30 hover:border-emerald-400 transition-all cursor-pointer group shadow-lg"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 group-hover:bg-emerald-400 group-hover:text-black transition-colors">
+                      <UploadCloud className="w-4 h-4" />
+                    </div>
+                    <span className="font-display font-bold text-xs text-white group-hover:text-emerald-300">2. Sell Your Code</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-snug">
+                    Monetize your original software with direct payouts.
+                  </p>
+                </div>
+
+                <div
+                  onClick={() => handleProtectedNavigation('/ai-shield', 'Please log in or register to run AI Plagiarism & Code Integrity scans.')}
+                  className="p-3.5 rounded-2xl bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/30 hover:border-purple-400 transition-all cursor-pointer group shadow-lg"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-400 group-hover:bg-purple-400 group-hover:text-black transition-colors">
+                      <Shield className="w-4 h-4" />
+                    </div>
+                    <span className="font-display font-bold text-xs text-white group-hover:text-purple-300">3. Plagiarism Check</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-snug">
+                    Scan code & IEEE thesis reports for originality score.
+                  </p>
+                </div>
+
+                <div
+                  onClick={() => {
+                    playSuccess();
+                    setIsDevModalOpen(true);
+                  }}
+                  className="p-3.5 rounded-2xl bg-gradient-to-r from-purple-950/60 to-blue-950/60 hover:from-purple-900/80 hover:to-blue-900/80 border border-purple-500/40 hover:border-purple-300 transition-all cursor-pointer group shadow-lg"
+                >
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="p-1.5 rounded-lg bg-amber-400/20 text-amber-300 group-hover:bg-amber-400 group-hover:text-black transition-colors">
+                      <Lightbulb className="w-4 h-4" />
+                    </div>
+                    <span className="font-display font-bold text-xs text-white group-hover:text-amber-300">4. Build Custom</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-snug">
+                    Hire our in-house engineers with 12h callback.
+                  </p>
+                </div>
               </div>
             </div>
 
-            {/* RIGHT COLUMN: 3D INTERACTIVE HARDWARE VIEWER & FAST AUTH WIDGET */}
+            {/* RIGHT COLUMN: 4 CORE PILLARS SHOWCASE & ACCESS CARD */}
             <div className="lg:col-span-5 relative flex flex-col items-center justify-center space-y-4">
-              {/* Interactive 3D Model & Hardware Circuit Inspector */}
-              <div className="w-full">
-                <Interactive3DViewer projectTitle="ESP32-S3 Neural Vision & Edge AI Node" />
+              {/* Core Pillars Feature Showcase Card */}
+              <div className="w-full rounded-3xl p-6 bg-gradient-to-b from-gray-900/90 via-gray-950/95 to-black border-2 border-cyan-500/30 backdrop-blur-2xl shadow-2xl space-y-4">
+                <div className="flex items-center justify-between border-b border-cyan-500/20 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <div className="p-2 rounded-xl bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                      <Layers className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className="font-display font-black text-sm text-white">
+                        PROJECTXIA CORE SERVICES
+                      </h3>
+                      <p className="text-[10px] text-slate-400">
+                        Everything you need in one engineering hub
+                      </p>
+                    </div>
+                  </div>
+                  <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-950 text-cyan-400 border border-cyan-500/30 font-bold">
+                    VERIFIED
+                  </span>
+                </div>
+
+                <div className="space-y-2.5 text-xs">
+                  {/* Item 1 */}
+                  <div
+                    onClick={() => handleProtectedNavigation('/marketplace', 'Please log in or register to explore verified engineering projects.')}
+                    className="p-3 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-cyan-400/50 flex items-center justify-between transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-cyan-950/80 text-cyan-400">
+                        <Code className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-white group-hover:text-cyan-300 block">Buy Verified Projects</span>
+                        <span className="text-[10px] text-slate-400">Full source code, circuit diagrams & 4K demo videos</span>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-cyan-400 group-hover:translate-x-1 transition-transform" />
+                  </div>
+
+                  {/* Item 2 */}
+                  <div
+                    onClick={() => handleProtectedNavigation('/upload', 'Please log in or register to upload and monetize your project.')}
+                    className="p-3 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-emerald-400/50 flex items-center justify-between transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-emerald-950/80 text-emerald-400">
+                        <UploadCloud className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-white group-hover:text-emerald-300 block">Sell Your Project</span>
+                        <span className="text-[10px] text-slate-400">Upload and monetize your original code with payouts</span>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-emerald-400 group-hover:translate-x-1 transition-transform" />
+                  </div>
+
+                  {/* Item 3 */}
+                  <div
+                    onClick={() => handleProtectedNavigation('/ai-shield', 'Please log in or register to run AI Plagiarism & Code Integrity scans.')}
+                    className="p-3 rounded-2xl bg-slate-900/80 hover:bg-slate-800/90 border border-slate-800 hover:border-purple-400/50 flex items-center justify-between transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-purple-950/80 text-purple-400">
+                        <Shield className="w-4 h-4" />
+                      </div>
+                      <div>
+                        <span className="font-bold text-white group-hover:text-purple-300 block">Plagiarism & Code Check</span>
+                        <span className="text-[10px] text-slate-400">Detect code copy, security bugs & thesis originality</span>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" />
+                  </div>
+
+                  {/* Item 4 */}
+                  <div
+                    onClick={() => {
+                      playSuccess();
+                      setIsDevModalOpen(true);
+                    }}
+                    className="p-3 rounded-2xl bg-gradient-to-r from-purple-950/70 to-indigo-950/70 hover:from-purple-900/90 hover:to-indigo-900/90 border border-purple-500/40 hover:border-purple-300 flex items-center justify-between transition-all cursor-pointer group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 rounded-xl bg-amber-400/20 text-amber-300">
+                        <Lightbulb className="w-4 h-4 animate-pulse" />
+                      </div>
+                      <div>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-bold text-white group-hover:text-amber-300">Build Custom Software</span>
+                          <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-amber-400 text-black font-extrabold">
+                            12H CALLBACK
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-400">Hire our senior developers to build from scratch</span>
+                      </div>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-amber-300 group-hover:translate-x-1 transition-transform" />
+                  </div>
+                </div>
               </div>
 
               {isAuthenticated ? (
