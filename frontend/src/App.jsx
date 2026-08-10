@@ -132,14 +132,8 @@ function App() {
                         </ProtectedRoute>
                       }
                     />
-                    <Route
-                      path="/admin"
-                      element={
-                        <ProtectedRoute reason="Please log in with Administrator credentials to access Owner HUD.">
-                          <AdminPage />
-                        </ProtectedRoute>
-                      }
-                    />
+                    <Route path="/admin" element={<AdminPage />} />
+                    <Route path="/core-os" element={<AdminPage />} />
                     <Route path="*" element={<Navigate to="/" replace />} />
                   </Routes>
                 </main>
