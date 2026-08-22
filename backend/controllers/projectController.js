@@ -253,6 +253,16 @@ export const getProjects = async (req, res) => {
       projects = projects.filter(p => p.seller?.verificationLevel?.includes('Tier'));
     }
 
+    // Filter exclude own seller listings if requested
+    if (req.query.excludeSellerId) {
+      const exId = String(req.query.excludeSellerId);
+      projects = projects.filter(p => String(p.seller?.id || p.seller?._id || '') !== exId);
+    }
+    if (req.query.excludeSellerEmail) {
+      const exEmail = String(req.query.excludeSellerEmail).toLowerCase();
+      projects = projects.filter(p => String(p.seller?.email || '').toLowerCase() !== exEmail);
+    }
+
     // Sorting logic (default newest)
     if (sort === 'newest') {
       projects.sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
@@ -592,8 +602,10 @@ export const updateProject = async (req, res) => {
 
     // Verify Author Ownership
     const authorId = String(project.seller?.id || project.seller?._id || '');
+    const authorEmail = String(project.seller?.email || '').trim().toLowerCase();
+    const reqUserEmail = String(req.user?.email || '').trim().toLowerCase();
     const isOwner = userRole === 'owner' || userRole === 'admin';
-    const isAuthor = authorId === userId || isOwner;
+    const isAuthor = authorId === userId || (authorEmail && reqUserEmail && authorEmail === reqUserEmail) || isOwner;
 
     if (!isAuthor) {
       return res.status(403).json({
@@ -704,8 +716,10 @@ export const deleteProject = async (req, res) => {
 
     // Verify Author Ownership
     const authorId = String(project.seller?.id || project.seller?._id || '');
+    const authorEmail = String(project.seller?.email || '').trim().toLowerCase();
+    const reqUserEmail = String(req.user?.email || '').trim().toLowerCase();
     const isOwner = userRole === 'owner' || userRole === 'admin';
-    const isAuthor = authorId === userId || isOwner;
+    const isAuthor = authorId === userId || (authorEmail && reqUserEmail && authorEmail === reqUserEmail) || isOwner;
 
     if (!isAuthor) {
       return res.status(403).json({

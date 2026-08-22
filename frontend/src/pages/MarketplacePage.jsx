@@ -22,12 +22,15 @@ import {
   Share2,
   Handshake,
   PlusCircle,
+  Sliders,
+  Eye,
+  CheckCircle2,
 } from 'lucide-react';
 import VideoPlayerModal from '../components/ui/VideoPlayerModal';
 import ArchitecturePeekModal from '../components/ui/ArchitecturePeekModal';
 import ShareProjectModal from '../components/ui/ShareProjectModal';
 import DealOfferModal from '../components/ui/DealOfferModal';
-import AuroraBackground from '../components/ui/AuroraBackground';
+import EditSellOrderModal from '../components/ui/EditSellOrderModal';
 import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -39,6 +42,7 @@ const MarketplacePage = () => {
   const { user, isAuthenticated, openAuthModal } = useAuth();
   const [activeShareProject, setActiveShareProject] = useState(null);
   const [activeDealProject, setActiveDealProject] = useState(null);
+  const [activeEditProject, setActiveEditProject] = useState(null);
 
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -52,6 +56,7 @@ const MarketplacePage = () => {
   const [maxPrice, setMaxPrice] = useState(25000);
   const [sortBy, setSortBy] = useState('newest');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
+  const [hideOwnListings, setHideOwnListings] = useState(false);
 
   const departments = [
     'All Departments',
@@ -72,13 +77,28 @@ const MarketplacePage = () => {
     { id: 'Hardware Only', label: 'PCB Schematics & CAD', icon: Zap },
   ];
 
+  const isUserOwnProject = (project) => {
+    if (!user || !project) return false;
+    const userId = String(user._id || user.id || '').trim();
+    const userEmail = String(user.email || '').trim().toLowerCase();
+
+    const sellerId = String(
+      project.seller?.id || project.seller?._id || project.authorId || project.userId || ''
+    ).trim();
+    const sellerEmail = String(project.seller?.email || project.authorEmail || '').trim().toLowerCase();
+
+    if (userId && sellerId && userId === sellerId) return true;
+    if (userEmail && sellerEmail && userEmail === sellerEmail) return true;
+    return false;
+  };
+
   useEffect(() => {
     fetchMarketplaceProjects();
     window.addEventListener('storage', fetchMarketplaceProjects);
     return () => {
       window.removeEventListener('storage', fetchMarketplaceProjects);
     };
-  }, [selectedCategory, sortBy, verifiedOnly, deliveryType]);
+  }, [selectedCategory, sortBy, verifiedOnly, deliveryType, hideOwnListings]);
 
   const fetchMarketplaceProjects = async () => {
     try {
@@ -121,6 +141,9 @@ const MarketplacePage = () => {
       if (selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Departments') {
         fetchedList = fetchedList.filter((p) => (p.category || '').toLowerCase().includes(selectedCategory.toLowerCase().slice(0, 5)));
       }
+      if (hideOwnListings && user) {
+        fetchedList = fetchedList.filter((p) => !isUserOwnProject(p));
+      }
 
       setProjects(fetchedList);
     } catch (e) {
@@ -139,27 +162,12 @@ const MarketplacePage = () => {
 
   return (
     <div className="relative min-h-screen pt-8 pb-24 overflow-hidden">
-      <AuroraBackground theme="cyan" className="opacity-75" />
-
-      {/* Ambient Visual Background Layer */}
-      <div className="absolute inset-0 z-0 pointer-events-none opacity-30 overflow-hidden">
-        <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-full h-full object-cover filter blur-[1px] scale-105"
-          src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-with-charts-and-data-31911-large.mp4"
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-[#030712]/30 via-transparent to-[#030712]/60" />
-      </div>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Header Title */}
         <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
           <div>
-            <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-widest flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
+            <span className="text-xs font-mono font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
               ProjectXia Marketplace
             </span>
             <h1 className="text-3xl sm:text-4xl font-display font-black text-white mt-1">
@@ -174,55 +182,55 @@ const MarketplacePage = () => {
             <Link
               to="/upload"
               onClick={playClick}
-              className="px-4 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-display font-bold text-xs shadow-lg shadow-cyan-500/25 cursor-pointer flex items-center gap-1.5 transition-all"
+              className="px-5 py-2.5 rounded-full bg-[#00ffaa] hover:bg-[#33ffbb] text-black font-display font-bold text-xs shadow-[0_0_15px_rgba(0,255,170,0.3)] cursor-pointer flex items-center gap-1.5 transition-all"
             >
-              <PlusCircle className="w-4 h-4" />
-              <span>List Original Project</span>
+              <PlusCircle className="w-4 h-4 text-black" />
+              <span>+ List Original Project</span>
             </Link>
 
-            <span className="text-xs font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-500/30 px-3 py-1.5 rounded-xl">
-              {projects.length} Original Projects
+            <span className="text-xs font-mono text-[#00ffaa] bg-black/60 border border-[#00ffaa]/30 px-3.5 py-2 rounded-full">
+              {projects.length} Projects Live
             </span>
           </div>
         </div>
 
-        {/* Plain-English Page Purpose & How It Works Banner for Visitors */}
-        <div className="mb-6 p-4 rounded-2xl bg-gradient-to-r from-cyan-950/60 via-slate-900/80 to-purple-950/60 border border-cyan-500/30 text-xs text-slate-300 shadow-xl">
+        {/* Page Purpose & How It Works Banner for Visitors */}
+        <div className="mb-6 p-5 rounded-3xl page-purpose-banner text-xs text-neutral-300 shadow-xl">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
             <div className="space-y-1">
               <p className="font-bold text-white flex items-center gap-2 text-sm">
-                <span className="p-1 rounded bg-cyan-500/20 text-cyan-300">💡</span>
+                <span className="p-1 rounded bg-[#00ffaa]/20 text-[#00ffaa]">💡</span>
                 <span>What is this page for? (Marketplace Guide)</span>
               </p>
-              <p className="text-slate-300 text-xs">
-                This page lists <strong>complete, working engineering projects</strong> built by students and researchers. Every project includes <strong>working video demos, verified source code, architecture schematics, and direct chat with the creator</strong> for custom adjustments.
+              <p className="text-neutral-300 text-xs">
+                This page lists <strong>complete, working engineering projects</strong> built by students and researchers. Every project includes <strong>working video demos, verified source code, architecture schematics, and direct chat with the creator</strong>.
               </p>
             </div>
-            <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-slate-300 shrink-0">
-              <span className="px-2.5 py-1 rounded-lg bg-black/40 border border-cyan-500/30 text-cyan-300">✓ Video Demos</span>
-              <span className="px-2.5 py-1 rounded-lg bg-black/40 border border-purple-500/30 text-purple-300">✓ Full Source Code</span>
-              <span className="px-2.5 py-1 rounded-lg bg-black/40 border border-emerald-500/30 text-emerald-300">✓ Direct Creator Chat</span>
+            <div className="flex flex-wrap items-center gap-2 text-[11px] font-mono text-neutral-300 shrink-0">
+              <span className="px-3 py-1 rounded-full bg-black/50 border border-[#00ffaa]/30 text-[#00ffaa]">✓ Video Demos</span>
+              <span className="px-3 py-1 rounded-full bg-black/50 border border-purple-500/30 text-purple-300">✓ Full Source Code</span>
+              <span className="px-3 py-1 rounded-full bg-black/50 border border-emerald-500/30 text-emerald-300">✓ Direct Creator Chat</span>
             </div>
           </div>
         </div>
 
         {/* Filter & Search Dashboard */}
-        <div className="mb-8 p-6 rounded-3xl bg-gray-950/90 border border-cyan-500/30 backdrop-blur-2xl shadow-2xl space-y-5">
+        <div className="mb-8 p-6 rounded-3xl bg-white/[0.02] border border-white/10 backdrop-blur-2xl shadow-2xl space-y-5">
           <form onSubmit={handleSearchSubmit} className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-cyan-400" />
+              <Search className="absolute left-4 top-3.5 w-4 h-4 text-[#00ffaa]" />
               <input
                 type="text"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Search by keyword, IEEE topic, hardware board (ESP32, STM32, ROS2), or framework (PyTorch, React)..."
-                className="w-full bg-gray-900/90 border border-slate-800 focus:border-cyan-400 rounded-2xl pl-10 pr-4 py-3 text-xs text-white font-mono placeholder:text-slate-500 focus:outline-none"
+                className="w-full bg-black/60 border border-white/10 focus:border-[#00ffaa] rounded-full pl-11 pr-4 py-3 text-xs text-white font-mono placeholder:text-neutral-500 focus:outline-none"
               />
             </div>
 
             <button
               type="submit"
-              className="px-6 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-black font-display font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 cursor-pointer transition-all"
+              className="px-7 py-3 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-display font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(99,102,241,0.3)] cursor-pointer transition-all"
             >
               <Search className="w-4 h-4" />
               <span>Search Blueprints</span>
@@ -273,9 +281,9 @@ const MarketplacePage = () => {
             ))}
           </div>
 
-          {/* Filters Bar: Sort & Max Price */}
+          {/* Filters Bar: Sort & Max Price & Own Listings */}
           <div className="flex flex-wrap items-center justify-between gap-4 pt-3 border-t border-slate-800/80 text-xs font-mono">
-            <div className="flex items-center gap-4 text-slate-400">
+            <div className="flex flex-wrap items-center gap-4 text-slate-400">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
@@ -285,6 +293,21 @@ const MarketplacePage = () => {
                 />
                 <span className="text-white font-bold">100% Plagiarism & Code-Audited Only</span>
               </label>
+
+              {user && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={hideOwnListings}
+                    onChange={(e) => {
+                      playClick();
+                      setHideOwnListings(e.target.checked);
+                    }}
+                    className="rounded border-slate-700 bg-gray-900 text-purple-400 focus:ring-0"
+                  />
+                  <span className="text-purple-300 font-bold">Hide My Own Listings (Exclude items I posted)</span>
+                </label>
+              )}
             </div>
 
             <div className="flex items-center gap-3 text-slate-400">
@@ -324,166 +347,235 @@ const MarketplacePage = () => {
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {projects.map((project) => (
-              <motion.div
-                key={project._id}
-                whileHover={{ y: -6 }}
-                className="rounded-3xl bg-gray-950/90 border border-cyan-500/25 overflow-hidden backdrop-blur-xl flex flex-col justify-between shadow-xl shadow-black/80 group transition-all"
-              >
-                <div>
-                  {/* Thumbnail & Video Trigger */}
-                  <div className="relative aspect-video overflow-hidden bg-gray-900">
-                    <img
-                      src={project.screenshots?.[0] || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&auto=format&fit=crop&q=80'}
-                      alt={project.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
+            {projects.map((project, index) => {
+              const isOwnListing = isUserOwnProject(project);
 
-                    <button
-                      onClick={() => {
-                        playClick();
-                        setActiveVideoModal(project);
-                      }}
-                      className="absolute inset-0 m-auto w-11 h-11 rounded-full bg-cyan-500/85 hover:bg-cyan-400 text-black flex items-center justify-center shadow-lg transition-transform hover:scale-110 cursor-pointer"
-                    >
-                      <Play className="w-4 h-4 fill-current ml-0.5" />
-                    </button>
-                  </div>
+              return (
+                <motion.div
+                  key={project._id || project.id}
+                  initial={{ opacity: 0, y: 25 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.4, delay: index * 0.05 }}
+                  whileHover={{ y: -6 }}
+                  className={`rounded-3xl bg-white/[0.02] border overflow-hidden backdrop-blur-2xl flex flex-col justify-between shadow-2xl group transition-all duration-300 ${
+                    isOwnListing
+                      ? 'border-purple-500/50 shadow-[0_0_25px_rgba(168,85,247,0.2)]'
+                      : 'border-white/10 hover:border-[#00ffaa]/50 hover:shadow-[0_0_30px_rgba(0,255,170,0.2)]'
+                  }`}
+                >
+                  <div>
+                    {/* Thumbnail & Video Trigger */}
+                    <div className="relative aspect-video overflow-hidden bg-black/40">
+                      <img
+                        src={project.screenshots?.[0] || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&auto=format&fit=crop&q=80'}
+                        alt={project.title}
+                        loading="lazy"
+                        decoding="async"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
 
-                  {/* Body Content */}
-                  <div className="p-5 space-y-3">
-                    <div className="flex items-center justify-between text-[11px] font-mono">
-                      <span className="text-cyan-400 bg-cyan-950/60 px-2 py-0.5 rounded border border-cyan-500/30 font-bold truncate max-w-[200px]">
-                        {project.category}
-                      </span>
-                      <div className="flex items-center gap-1 text-yellow-400 font-bold">
-                        <Star className="w-3.5 h-3.5 fill-current" />
-                        <span>{project.rating || 4.9}</span>
-                      </div>
+                      {/* Author Ownership Badge */}
+                      {isOwnListing && (
+                        <div className="absolute top-3 left-3 bg-purple-600 text-white font-display font-bold text-[10px] uppercase px-3 py-1 rounded-full shadow-lg border border-purple-400/40 flex items-center gap-1 z-10">
+                          <span>👑 Your Sell Order</span>
+                        </div>
+                      )}
+
+                      <button
+                        onClick={() => {
+                          playClick();
+                          setActiveVideoModal(project);
+                        }}
+                        className="absolute inset-0 m-auto w-12 h-12 rounded-full bg-[#00ffaa] text-black flex items-center justify-center shadow-[0_0_20px_rgba(0,255,170,0.4)] transition-transform hover:scale-110 cursor-pointer"
+                      >
+                        <Play className="w-5 h-5 fill-current ml-0.5" />
+                      </button>
                     </div>
 
-                    <h3 className="font-display font-bold text-base text-white line-clamp-2 leading-snug group-hover:text-cyan-300 transition-colors">
-                      {project.title}
-                    </h3>
+                    {/* Body Content */}
+                    <div className="p-5 space-y-3">
+                      <div className="flex items-center justify-between text-[11px] font-mono">
+                        <span className="text-[#00ffaa] bg-black/50 px-2.5 py-1 rounded-full border border-[#00ffaa]/30 font-bold truncate max-w-[200px]">
+                          {project.category}
+                        </span>
+                        <div className="flex items-center gap-1 text-amber-400 font-bold">
+                          <Star className="w-3.5 h-3.5 fill-current" />
+                          <span>{project.rating || 4.9}</span>
+                        </div>
+                      </div>
 
-                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
-                      {project.tagline || project.description}
-                    </p>
+                      <h3 className="font-display font-bold text-base text-white line-clamp-2 leading-snug group-hover:text-[#00ffaa] transition-colors">
+                        {project.title}
+                      </h3>
 
-                    {/* Tech & Hardware Stack Pills */}
-                    <div className="flex flex-wrap gap-1 pt-1">
-                      {project.techStack?.slice(0, 4).map((tech, idx) => (
-                        <span
-                          key={idx}
-                          className="text-[10px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-300 border border-white/10"
+                      <p className="text-xs text-neutral-400 line-clamp-2 leading-relaxed font-sans">
+                        {project.tagline || project.description}
+                      </p>
+
+                      {/* Tech & Hardware Stack Pills */}
+                      <div className="flex flex-wrap gap-1 pt-1">
+                        {project.techStack?.slice(0, 4).map((tech, idx) => (
+                          <span
+                            key={idx}
+                            className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-white/5 text-neutral-300 border border-white/10"
+                          >
+                            {tech}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Footer Bar: Negotiable Price + Make Offer / Edit Sell */}
+                  <div className="p-5 pt-3 border-t border-white/10 mt-3 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <span className="text-[10px] font-mono text-neutral-400 block">Asking Budget:</span>
+                        <div className="flex items-center gap-1.5">
+                          <p className="font-display font-black text-xl text-[#00ffaa]">
+                            ₹{Number(project.price || 0).toLocaleString('en-IN')}
+                          </p>
+                          {isOwnListing ? (
+                            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold">
+                              Your Active Sell
+                            </span>
+                          ) : (
+                            <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-[#00ffaa]/10 text-[#00ffaa] border border-[#00ffaa]/30">
+                              Negotiable
+                            </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            playClick();
+                            setActiveShareProject(project);
+                          }}
+                          className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-slate-300 hover:text-cyan-300 transition-colors cursor-pointer"
+                          title="Share Showcase Link"
                         >
-                          {tech}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
+                          <Share2 className="w-4 h-4" />
+                        </button>
 
-                {/* Footer Bar: Negotiable Price + Make Offer + Chat with Seller */}
-                <div className="p-5 pt-0 border-t border-slate-900 mt-3 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="text-[10px] font-mono text-slate-500 block">Asking Budget:</span>
-                      <div className="flex items-center gap-1.5">
-                        <p className="font-display font-black text-lg text-emerald-400">
-                          ₹{Number(project.price || 0).toLocaleString('en-IN')}
-                        </p>
-                        <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                          Negotiable
-                        </span>
+                        <Link
+                          to={`/projects/${project._id || project.id}`}
+                          onClick={playClick}
+                          className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-mono text-slate-200 transition-colors"
+                        >
+                          View Specs →
+                        </Link>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
+                    {/* Peer-to-Peer Showcase Actions vs Author Management */}
+                    <div className="space-y-2 pt-1 font-mono text-xs">
                       <button
                         type="button"
                         onClick={() => {
                           playClick();
-                          setActiveShareProject(project);
+                          setActivePeekProject(project);
                         }}
-                        className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-slate-300 hover:text-cyan-300 transition-colors cursor-pointer"
-                        title="Share Showcase Link"
+                        className="w-full py-2 rounded-xl bg-purple-950/50 hover:bg-purple-900/60 border border-purple-500/30 text-purple-300 font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                       >
-                        <Share2 className="w-4 h-4" />
+                        <Terminal className="w-3.5 h-3.5 text-purple-400" />
+                        <span>⚡ Peek Architecture & Circuit BOM</span>
                       </button>
 
-                      <Link
-                        to={`/projects/${project._id}`}
-                        onClick={playClick}
-                        className="px-3.5 py-1.5 rounded-xl bg-white/5 hover:bg-white/10 border border-white/15 text-xs font-mono text-slate-200 transition-colors"
-                      >
-                        View Specs →
-                      </Link>
+                      {isOwnListing ? (
+                        /* AUTHOR CONTROLS: Quick Adjust Sell Price & Manage Specs */
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              playClick();
+                              setActiveEditProject(project);
+                            }}
+                            className="py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 hover:opacity-95 text-black font-display font-black flex items-center justify-center gap-1.5 transition-all shadow-md shadow-cyan-500/20 cursor-pointer"
+                          >
+                            <Sliders className="w-3.5 h-3.5" />
+                            <span>✏️ Adjust Price / Edit</span>
+                          </button>
+
+                          <Link
+                            to={`/projects/${project._id || project.id}`}
+                            onClick={playClick}
+                            className="py-2.5 rounded-xl bg-purple-950/60 hover:bg-purple-900/80 border border-purple-500/40 text-purple-300 font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md text-center"
+                          >
+                            <Eye className="w-3.5 h-3.5 text-purple-400" />
+                            <span>Manage Listing</span>
+                          </Link>
+                        </div>
+                      ) : (
+                        /* BUYER CONTROLS: Propose Deal & Direct Creator Chat */
+                        <div className="grid grid-cols-2 gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              playClick();
+                              setActiveDealProject(project);
+                            }}
+                            className="py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:opacity-95 text-black font-display font-black flex items-center justify-center gap-1.5 transition-all shadow-md shadow-emerald-500/20 cursor-pointer"
+                          >
+                            <Handshake className="w-3.5 h-3.5 fill-current" />
+                            <span>🤝 Propose Deal</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => {
+                              playClick();
+                              if (!isAuthenticated) {
+                                openAuthModal('login', 'Please log in or register to chat directly with verified project creators.');
+                                return;
+                              }
+                              navigate('/chat', {
+                                state: {
+                                  creatorId: project.seller?.id || 'verified_seller',
+                                  creatorName: project.seller?.name || 'Verified Innovator',
+                                  creatorAvatar: project.seller?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(project.seller?.name || 'Seller')}&backgroundColor=080e1e,101f4e&textColor=00f0ff`,
+                                  projectContext: {
+                                    projectId: project._id || project.id,
+                                    title: project.title,
+                                    price: project.price,
+                                    category: project.category,
+                                  },
+                                },
+                              });
+                            }}
+                            className="py-2.5 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-500/40 text-emerald-300 font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md shadow-emerald-950/20"
+                          >
+                            <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
+                            <span>💬 Chat / Negotiate</span>
+                          </button>
+                        </div>
+                      )}
                     </div>
                   </div>
-
-                  {/* Peer-to-Peer Showcase Actions */}
-                  <div className="space-y-2 pt-1 font-mono text-xs">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        playClick();
-                        setActivePeekProject(project);
-                      }}
-                      className="w-full py-2 rounded-xl bg-purple-950/50 hover:bg-purple-900/60 border border-purple-500/30 text-purple-300 font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                    >
-                      <Terminal className="w-3.5 h-3.5 text-purple-400" />
-                      <span>⚡ Peek Architecture & Circuit BOM</span>
-                    </button>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          playClick();
-                          setActiveDealProject(project);
-                        }}
-                        className="py-2.5 rounded-xl bg-gradient-to-r from-emerald-500 via-teal-500 to-cyan-500 hover:opacity-95 text-black font-display font-black flex items-center justify-center gap-1.5 transition-all shadow-md shadow-emerald-500/20 cursor-pointer"
-                      >
-                        <Handshake className="w-3.5 h-3.5 fill-current" />
-                        <span>🤝 Propose Deal</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => {
-                          playClick();
-                          if (!isAuthenticated) {
-                            openAuthModal('login', 'Please log in or register to chat directly with verified project creators.');
-                            return;
-                          }
-                          navigate('/chat', {
-                            state: {
-                              creatorId: project.seller?.id || 'verified_seller',
-                              creatorName: project.seller?.name || 'Verified Innovator',
-                              creatorAvatar: project.seller?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(project.seller?.name || 'Seller')}&backgroundColor=080e1e,101f4e&textColor=00f0ff`,
-                              projectContext: {
-                                projectId: project._id,
-                                title: project.title,
-                                price: project.price,
-                                category: project.category,
-                              },
-                            },
-                          });
-                        }}
-                        className="py-2.5 rounded-xl bg-emerald-950/60 hover:bg-emerald-900/80 border border-emerald-500/40 text-emerald-300 font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-md shadow-emerald-950/20"
-                      >
-                        <MessageSquare className="w-3.5 h-3.5 text-emerald-400" />
-                        <span>💬 Chat / Negotiate</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              );
+            })}
           </div>
         )}
       </div>
+
+      {/* Edit Sell Order & Price Adjuster Modal */}
+      {activeEditProject && (
+        <EditSellOrderModal
+          isOpen={!!activeEditProject}
+          project={activeEditProject}
+          onClose={() => setActiveEditProject(null)}
+          onProjectUpdated={(updatedProject) => {
+            setProjects((prev) =>
+              prev.map((p) =>
+                (p._id || p.id) === (updatedProject._id || updatedProject.id) ? updatedProject : p
+              )
+            );
+          }}
+        />
+      )}
 
       {/* Deal Offer Negotiation Modal (Direct human-to-human P2P) */}
       {activeDealProject && (
@@ -498,7 +590,7 @@ const MarketplacePage = () => {
                 creatorName: activeDealProject.seller?.name || 'Verified Innovator',
                 creatorAvatar: activeDealProject.seller?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(activeDealProject.seller?.name || 'Seller')}&backgroundColor=080e1e,101f4e&textColor=00f0ff`,
                 projectContext: {
-                  projectId: activeDealProject._id,
+                  projectId: activeDealProject._id || activeDealProject.id,
                   title: activeDealProject.title,
                   price: offerData.offerPrice,
                   customRequirements: offerData.customRequirements,

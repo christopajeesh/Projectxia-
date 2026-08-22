@@ -124,170 +124,110 @@ const Navbar = () => {
 
   return (
     <>
-      <header className="sticky top-0 z-40 w-full border-b border-cyan-500/20 bg-gray-950/90 backdrop-blur-2xl shadow-xl shadow-black/60">
-        {/* Top Helper & Explainer Bar */}
-        <div className="hidden sm:flex items-center justify-between px-4 sm:px-8 py-1.5 bg-gradient-to-r from-gray-950 via-cyan-950/40 to-gray-950 border-b border-cyan-500/15 text-[11px] font-sans">
-          <div className="flex items-center gap-3">
-            <span className="flex items-center gap-1.5 text-cyan-400 font-bold font-mono">
-              <Activity className="w-3 h-3 animate-pulse text-cyan-400" />
-              <span>PROJECTXIA LIVE HUB</span>
-            </span>
-            <span className="text-slate-700">|</span>
-            <span className="text-slate-300 font-medium">
-              Verified Engineering Projects, In-House Custom Builds & AI Plagiarism Defense
-            </span>
-          </div>
+      <header className="sticky top-4 z-50 w-full px-4 sm:px-6 pointer-events-none font-sans">
+        <div className="max-w-5xl mx-auto rounded-full bg-[#050508]/80 border border-white/15 backdrop-blur-3xl shadow-[0_10px_35px_rgba(0,0,0,0.8),0_0_20px_rgba(0,255,170,0.15)] hover:border-[#00ffaa]/40 px-6 py-2.5 flex items-center justify-between pointer-events-auto transition-all duration-300">
+          
+          {/* BRAND LOGO */}
+          <Link
+            to="/"
+            onClick={playClick}
+            className="flex items-center gap-2.5 group cursor-pointer shrink-0"
+            title="ProjectXia Home"
+          >
+            <div className="relative p-2 rounded-full bg-gradient-to-tr from-indigo-600 to-[#00ffaa] text-black shadow-[0_0_15px_rgba(0,255,170,0.3)] group-hover:scale-105 transition-all">
+              <Shield className="w-4.5 h-4.5 text-black" />
+            </div>
+            <div className="flex flex-col">
+              <span className="font-display font-black text-base sm:text-xl tracking-tight text-white leading-none">
+                PROJECT<span className="text-[#00ffaa]">XIA</span>
+              </span>
+              <span className="text-[9px] font-mono text-slate-400 mt-0.5 hidden xs:flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#00ffaa] animate-ping" />
+                <span>LIVE HUB</span>
+              </span>
+            </div>
+          </Link>
 
-          <div className="flex items-center gap-4">
+          {/* Desktop Navigation Tabs (Sleek Floating Pills) */}
+          <nav className="hidden md:flex items-center gap-1 sm:gap-1.5">
+            {/* Tab 1: Buy Projects */}
             <button
+              type="button"
               onClick={() => {
                 playClick();
-                setShowGuideModal(true);
+                if (!isAuthenticated) {
+                  openAuthModal('login', 'Please log in or register to explore verified engineering projects.');
+                } else {
+                  navigate('/marketplace');
+                }
               }}
-              className="flex items-center gap-1.5 text-cyan-300 hover:text-cyan-100 transition-all cursor-pointer bg-cyan-950/70 hover:bg-cyan-900/80 px-2.5 py-0.5 rounded-lg border border-cyan-400/40 font-medium text-[11px] shadow-sm hover:scale-105"
+              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer flex items-center gap-1.5 text-xs font-medium border ${
+                location.pathname === '/marketplace'
+                  ? 'bg-indigo-600 border-indigo-400 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)]'
+                  : 'bg-white/[0.03] hover:bg-white/10 border-white/10 text-neutral-300 hover:text-white'
+              }`}
             >
-              <HelpCircle className="w-3.5 h-3.5 text-cyan-400" />
-              <span>What is each tab for? (Tabs Guide)</span>
+              <Code className="w-3.5 h-3.5" />
+              <span>Buy Projects</span>
             </button>
-            <span className="flex items-center gap-1.5 text-[10px] font-mono text-emerald-400">
-              <span className={`w-1.5 h-1.5 rounded-full ${isConnected ? 'bg-emerald-400 animate-ping' : 'bg-emerald-400'}`} />
-              <span>ENGINE ACTIVE</span>
-            </span>
-          </div>
-        </div>
 
-        <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-20 gap-2">
-            
-            {/* BRAND LOGO */}
-            <Link
-              to="/"
-              onClick={playClick}
-              className="flex items-center gap-2.5 group cursor-pointer shrink-0"
-              title="ProjectXia Home"
+            {/* Tab 2: Sell Your Project */}
+            <button
+              type="button"
+              onClick={() => {
+                playClick();
+                if (!isAuthenticated) {
+                  openAuthModal('login', 'Please log in or register to publish and sell your engineering project.');
+                } else {
+                  navigate('/upload');
+                }
+              }}
+              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer flex items-center gap-1.5 text-xs font-medium border ${
+                location.pathname === '/upload'
+                  ? 'bg-[#00ffaa] border-[#00ffaa] text-black font-bold shadow-[0_0_15px_rgba(0,255,170,0.4)]'
+                  : 'bg-white/[0.03] hover:bg-white/10 border-white/10 text-neutral-300 hover:text-white'
+              }`}
             >
-              <div className="relative p-2.5 rounded-2xl bg-gradient-to-tr from-cyan-500 via-blue-600 to-purple-600 border border-cyan-400 shadow-neon-cyan group-hover:scale-105 transition-all">
-                <Shield className="w-5 h-5 text-black" />
-                <Sparkles className="absolute -top-1 -right-1 w-3 h-3 text-cyan-200 animate-spin" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-display font-black text-lg sm:text-2xl tracking-tight text-white leading-none">
-                  PROJECT<span className="text-cyan-400">XIA</span>
-                </span>
-                <span className="text-[10px] font-mono text-slate-400 mt-0.5 hidden xs:block tracking-wider uppercase">
-                  Engineering Hub
-                </span>
-              </div>
-            </Link>
+              <UploadCloud className="w-3.5 h-3.5" />
+              <span>Sell Project</span>
+              <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-black/40 text-[#00ffaa] font-bold">
+                EARN
+              </span>
+            </button>
 
-            {/* Desktop Navigation Tabs (Clear Plain-English Titles & Sub-Explainers) */}
-            <nav className="hidden md:flex items-center gap-1.5 lg:gap-2">
-              {/* Tab 1: Buy Projects */}
-              <button
-                type="button"
-                onClick={() => {
-                  playClick();
-                  if (!isAuthenticated) {
-                    openAuthModal('login', 'Please log in or register to explore and download verified engineering projects.');
-                  } else {
-                    navigate('/marketplace');
-                  }
-                }}
-                className={`group px-3 py-2 rounded-xl transition-all cursor-pointer text-left flex items-center gap-2 border ${
-                  location.pathname === '/marketplace'
-                    ? 'bg-cyan-500/20 border-cyan-400/60 shadow-neon-cyan text-cyan-300'
-                    : 'bg-slate-900/60 hover:bg-slate-800/80 border-slate-800/90 hover:border-cyan-500/40 text-slate-200 hover:text-white'
-                }`}
-              >
-                <div className={`p-1.5 rounded-lg ${location.pathname === '/marketplace' ? 'bg-cyan-400 text-black' : 'bg-cyan-950/60 text-cyan-400 group-hover:bg-cyan-500/20'}`}>
-                  <Code className="w-4 h-4" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-display font-extrabold text-xs leading-tight">Buy Projects</span>
-                  <span className="text-[10px] font-sans text-slate-400 group-hover:text-slate-300 leading-none">Code & 4K Videos</span>
-                </div>
-              </button>
+            {/* Tab 3: Plagiarism Check */}
+            <button
+              type="button"
+              onClick={() => {
+                playClick();
+                if (!isAuthenticated) {
+                  openAuthModal('login', 'Please log in or register to run AI Plagiarism scans.');
+                } else {
+                  navigate('/ai-shield');
+                }
+              }}
+              className={`px-3.5 py-1.5 rounded-full transition-all cursor-pointer flex items-center gap-1.5 text-xs font-medium border ${
+                location.pathname === '/ai-shield'
+                  ? 'bg-purple-600 border-purple-400 text-white shadow-[0_0_15px_rgba(168,85,247,0.4)]'
+                  : 'bg-white/[0.03] hover:bg-white/10 border-white/10 text-neutral-300 hover:text-white'
+              }`}
+            >
+              <Shield className="w-3.5 h-3.5" />
+              <span>Plagiarism Check</span>
+            </button>
 
-              {/* Tab 2: Sell Your Project */}
-              <button
-                type="button"
-                onClick={() => {
-                  playClick();
-                  if (!isAuthenticated) {
-                    openAuthModal('login', 'Please log in or register to publish and sell your engineering project.');
-                  } else {
-                    navigate('/upload');
-                  }
-                }}
-                className={`group px-3 py-2 rounded-xl transition-all cursor-pointer text-left flex items-center gap-2 border ${
-                  location.pathname === '/upload'
-                    ? 'bg-emerald-500/25 border-emerald-400/60 shadow-lg text-emerald-300'
-                    : 'bg-emerald-950/40 hover:bg-emerald-900/60 border-emerald-500/30 hover:border-emerald-400 text-slate-200 hover:text-white'
-                }`}
-              >
-                <div className="p-1.5 rounded-lg bg-emerald-400 text-black">
-                  <UploadCloud className="w-4 h-4" />
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1">
-                    <span className="font-display font-black text-xs text-emerald-300 leading-tight">Sell Project</span>
-                    <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-emerald-400 text-black font-extrabold">
-                      EARN
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-sans text-emerald-400/80 leading-none">Monetize Your Code</span>
-                </div>
-              </button>
-
-              {/* Tab 3: Plagiarism Check */}
-              <button
-                type="button"
-                onClick={() => {
-                  playClick();
-                  if (!isAuthenticated) {
-                    openAuthModal('login', 'Please log in or register to run AI Plagiarism & Code Integrity scans.');
-                  } else {
-                    navigate('/ai-shield');
-                  }
-                }}
-                className={`group px-3 py-2 rounded-xl transition-all cursor-pointer text-left flex items-center gap-2 border ${
-                  location.pathname === '/ai-shield'
-                    ? 'bg-purple-500/20 border-purple-400/60 shadow-lg text-purple-300'
-                    : 'bg-slate-900/60 hover:bg-slate-800/80 border-slate-800/90 hover:border-purple-500/40 text-slate-200 hover:text-white'
-                }`}
-              >
-                <div className={`p-1.5 rounded-lg ${location.pathname === '/ai-shield' ? 'bg-purple-400 text-black' : 'bg-purple-950/60 text-purple-400 group-hover:bg-purple-500/20'}`}>
-                  <Shield className="w-4 h-4" />
-                </div>
-                <div className="flex flex-col">
-                  <span className="font-display font-extrabold text-xs leading-tight">Plagiarism Check</span>
-                  <span className="text-[10px] font-sans text-slate-400 group-hover:text-slate-300 leading-none">Scan Code & Thesis</span>
-                </div>
-              </button>
-
-              {/* Tab 4: Build Custom Software */}
-              <button
-                type="button"
-                onClick={() => {
-                  playClick();
-                  setIsCustomModalOpen(true);
-                }}
-                className="group px-3 py-2 rounded-xl transition-all cursor-pointer text-left flex items-center gap-2 bg-gradient-to-r from-purple-950/60 via-indigo-950/70 to-slate-900/80 border border-purple-500/40 hover:border-purple-400 shadow-md hover:scale-[1.02]"
-              >
-                <div className="p-1.5 rounded-lg bg-amber-400/20 text-amber-300 group-hover:bg-amber-400 group-hover:text-black transition-colors">
-                  <Lightbulb className="w-4 h-4 animate-pulse" />
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1">
-                    <span className="font-display font-extrabold text-xs text-purple-200 group-hover:text-white leading-tight">Build Custom</span>
-                    <span className="text-[9px] font-mono px-1 py-0.2 rounded bg-gradient-to-r from-amber-400 to-purple-400 text-black font-extrabold">
-                      DEV TEAM
-                    </span>
-                  </div>
-                  <span className="text-[10px] font-sans text-slate-400 group-hover:text-slate-300 leading-none">Hire Our Engineers</span>
-                </div>
-              </button>
-            </nav>
+            {/* Tab 4: Build Custom Software */}
+            <button
+              type="button"
+              onClick={() => {
+                playClick();
+                setIsCustomModalOpen(true);
+              }}
+              className="px-3.5 py-1.5 rounded-full transition-all cursor-pointer flex items-center gap-1.5 text-xs font-medium bg-white/[0.03] hover:bg-white/10 border border-white/10 text-neutral-200 hover:text-white"
+            >
+              <Lightbulb className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+            </button>
+          </nav>
 
             {/* Right Action Cluster: Chat, Audio & Account */}
             <div className="flex items-center gap-1.5 sm:gap-2.5">
@@ -427,89 +367,9 @@ const Navbar = () => {
                   </div>
                 </div>
               )}
-
-              {/* Mobile Hamburger Menu */}
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden p-2 rounded-xl bg-slate-900/90 border border-slate-800 text-slate-200"
-              >
-                {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
-              </button>
             </div>
           </div>
-        </div>
-
-        {/* Mobile Dropdown Menu */}
-        {mobileMenuOpen && (
-          <div className="md:hidden px-4 pt-3 pb-6 bg-gray-950/98 border-b border-cyan-500/25 space-y-2.5">
-            <div className="flex items-center justify-between pb-2 border-b border-slate-800">
-              <span className="text-[11px] font-mono text-cyan-400 font-bold">NAVIGATION MENU</span>
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setShowGuideModal(true);
-                }}
-                className="text-[10px] text-cyan-300 underline font-medium"
-              >
-                What do these tabs do?
-              </button>
-            </div>
-
-            {navLinks.map((link) => {
-              const Icon = link.icon;
-              return (
-                <button
-                  key={link.name}
-                  onClick={(e) => handleNavClick(link, e)}
-                  className={`w-full flex items-center justify-between p-3 rounded-2xl text-left transition-all ${
-                    link.isSpecialAction
-                      ? 'bg-gradient-to-r from-purple-950/80 to-slate-900 border border-purple-500/50 text-white'
-                      : link.isHighlight
-                      ? 'bg-emerald-950/50 border border-emerald-500/40 text-white'
-                      : 'bg-slate-900/80 border border-slate-800 text-slate-200'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-xl bg-black/40 text-cyan-400">
-                      <Icon className="w-4 h-4" />
-                    </div>
-                    <div>
-                      <span className="block font-display font-extrabold text-sm text-white">{link.name}</span>
-                      <span className="text-xs text-slate-400">{link.subtitle}</span>
-                    </div>
-                  </div>
-                  {link.badge && (
-                    <span className="text-[9px] font-mono px-2 py-0.5 rounded-full bg-cyan-400 text-black font-extrabold">
-                      {link.badge}
-                    </span>
-                  )}
-                </button>
-              );
-            })}
-
-            {!isAuthenticated ? (
-              <button
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  openAuthModal('login');
-                }}
-                className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-purple-600 text-black font-display font-black text-xs flex items-center justify-center gap-2 shadow-xl shadow-cyan-500/25 mt-2"
-              >
-                <LogIn className="w-4 h-4" />
-                <span>Login / Register</span>
-              </button>
-            ) : (
-              <button
-                onClick={handleLogout}
-                className="w-full py-3.5 rounded-2xl bg-rose-950/60 border border-rose-500/40 text-rose-300 font-display font-bold text-xs flex items-center justify-center gap-2 mt-2"
-              >
-                <LogOut className="w-4 h-4" />
-                <span>Logout</span>
-              </button>
-            )}
-          </div>
-        )}
-      </header>
+        </header>
 
       {/* Interactive Tabs Guide Modal for Common People */}
       {showGuideModal && (

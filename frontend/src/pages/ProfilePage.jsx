@@ -12,12 +12,13 @@ import {
   Sparkles,
   Upload,
   Camera,
-  Save,
-  LogOut,
   Code,
   ExternalLink,
+  Sliders,
+  DollarSign,
+  Trash2,
 } from 'lucide-react';
-import AuroraBackground from '../components/ui/AuroraBackground';
+import EditSellOrderModal from '../components/ui/EditSellOrderModal';
 import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -33,6 +34,7 @@ const ProfilePage = () => {
   const [saveMsg, setSaveMsg] = useState('');
   const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [statsData, setStatsData] = useState(null);
+  const [activeEditProject, setActiveEditProject] = useState(null);
 
   const [formData, setFormData] = useState({
     name: user?.name || '',
@@ -181,8 +183,6 @@ const ProfilePage = () => {
 
   return (
     <div className="relative min-h-screen pt-8 pb-24 font-mono text-xs">
-      <AuroraBackground />
-
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-6">
         {saveMsg && (
           <div className="p-3 rounded-2xl bg-emerald-500/20 border border-emerald-400 text-emerald-300 text-center font-bold font-display text-sm animate-pulse">
@@ -489,21 +489,71 @@ const ProfilePage = () => {
               <p className="text-[11px] text-slate-500">Upload your source code & schematics to start monetizing on ProjectXia.</p>
             </div>
           ) : (
-            statsData?.uploadedProjects?.map((p) => (
-              <div key={p?._id || p?.id} className="p-4 rounded-2xl bg-gray-900 border border-slate-800 flex items-center justify-between">
-                <div>
-                  <h4 className="font-display font-bold text-sm text-white">{p?.title}</h4>
-                  <span className="text-[10px] text-emerald-400">Security Audit: {p?.securityScanStatus || 'Passed 100%'}</span>
+            <div className="space-y-3">
+              {statsData?.uploadedProjects?.map((p) => (
+                <div
+                  key={p?._id || p?.id}
+                  className="p-4 sm:p-5 rounded-2xl bg-gray-900/90 border border-slate-800 hover:border-cyan-500/30 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all"
+                >
+                  <div className="space-y-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="font-display font-bold text-sm text-white">{p?.title}</h4>
+                      <span className="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold">
+                        ₹{Number(p?.price || 0).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3 text-[10px] text-slate-400">
+                      <span className="text-cyan-400">{p?.category || 'Engineering'}</span>
+                      <span>•</span>
+                      <span className="text-emerald-400">Security Audit: {p?.securityScanStatus || 'Passed 100%'}</span>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        playClick();
+                        setActiveEditProject(p);
+                      }}
+                      className="px-3.5 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-emerald-400 hover:opacity-95 text-black font-display font-bold text-xs flex items-center gap-1.5 transition-all shadow-md shadow-cyan-500/15 cursor-pointer"
+                    >
+                      <Sliders className="w-3.5 h-3.5" />
+                      <span>Adjust Price / Edit</span>
+                    </button>
+
+                    <Link
+                      to={`/projects/${p?._id || p?.id}`}
+                      className="px-3 py-2 rounded-xl bg-white/5 hover:bg-white/10 border border-slate-800 text-xs text-slate-300 hover:text-white flex items-center gap-1 transition-all"
+                    >
+                      <span>View</span>
+                      <ExternalLink className="w-3 h-3" />
+                    </Link>
+                  </div>
                 </div>
-                <Link to={`/projects/${p?._id || p?.id}`} className="text-xs text-cyan-400 hover:underline flex items-center gap-1">
-                  <span>View Project</span>
-                  <ExternalLink className="w-3 h-3" />
-                </Link>
-              </div>
-            ))
+              ))}
+            </div>
           )}
         </div>
       </div>
+
+      {/* Edit Sell Order & Price Adjuster Modal */}
+      {activeEditProject && (
+        <EditSellOrderModal
+          isOpen={!!activeEditProject}
+          project={activeEditProject}
+          onClose={() => setActiveEditProject(null)}
+          onProjectUpdated={(updatedProject) => {
+            setStatsData((prev) => {
+              if (!prev) return prev;
+              const updatedList = (prev.uploadedProjects || []).map((p) =>
+                (p._id || p.id) === (updatedProject._id || updatedProject.id) ? updatedProject : p
+              );
+              return { ...prev, uploadedProjects: updatedList };
+            });
+          }}
+        />
+      )}
     </div>
   );
 };

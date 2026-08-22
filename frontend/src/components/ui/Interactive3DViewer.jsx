@@ -32,7 +32,7 @@ const Interactive3DViewer = ({ projectTitle = 'ESP32-S3 AI Vision Neural Node', 
     let angleY = 0.6;
     let angleZ = 0.1;
 
-    // Mouse drag rotation
+    // Mouse & Touch drag rotation
     let isDragging = false;
     let lastMouseX = 0;
     let lastMouseY = 0;
@@ -57,9 +57,34 @@ const Interactive3DViewer = ({ projectTitle = 'ESP32-S3 AI Vision Neural Node', 
       isDragging = false;
     };
 
+    const onTouchStart = (e) => {
+      if (e.touches.length === 1) {
+        isDragging = true;
+        lastMouseX = e.touches[0].clientX;
+        lastMouseY = e.touches[0].clientY;
+      }
+    };
+
+    const onTouchMove = (e) => {
+      if (!isDragging || e.touches.length !== 1) return;
+      const deltaX = e.touches[0].clientX - lastMouseX;
+      const deltaY = e.touches[0].clientY - lastMouseY;
+      angleY += deltaX * 0.008;
+      angleX += deltaY * 0.008;
+      lastMouseX = e.touches[0].clientX;
+      lastMouseY = e.touches[0].clientY;
+    };
+
+    const onTouchEnd = () => {
+      isDragging = false;
+    };
+
     canvas.addEventListener('mousedown', onMouseDown);
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
+    canvas.addEventListener('touchstart', onTouchStart, { passive: true });
+    window.addEventListener('touchmove', onTouchMove, { passive: true });
+    window.addEventListener('touchend', onTouchEnd);
 
     // 3D PCB Board Definition
     const pcbWidth = 180;
@@ -269,6 +294,9 @@ const Interactive3DViewer = ({ projectTitle = 'ESP32-S3 AI Vision Neural Node', 
       canvas.removeEventListener('mousedown', onMouseDown);
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
+      canvas.removeEventListener('touchstart', onTouchStart);
+      window.removeEventListener('touchmove', onTouchMove);
+      window.removeEventListener('touchend', onTouchEnd);
       cancelAnimationFrame(animationFrameId);
     };
   }, [rotationSpeed, isRotating, renderMode, zoom]);

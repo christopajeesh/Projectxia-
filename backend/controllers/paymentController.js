@@ -1,8 +1,35 @@
 import crypto from 'crypto';
+import Project from '../models/Project.js';
+import { memoryStore } from '../seed/seedData.js';
 
 // In-memory transactions store for instant testing & persistence
 export const transactionStore = {
   orders: [],
+};
+
+// Helper: Check if buyer is attempting to purchase their own listed project
+const checkSelfPurchase = async (projectId, buyerEmail, reqUser) => {
+  if (!projectId) return false;
+  let project = null;
+  try {
+    project = await Project.findById(projectId);
+  } catch (e) {
+    project = null;
+  }
+  if (!project) {
+    project = (memoryStore.projects || []).find(p => String(p._id) === String(projectId) || p.slug === projectId);
+  }
+
+  if (project && project.seller) {
+    const sellerId = String(project.seller.id || project.seller._id || '').trim();
+    const sellerEmail = String(project.seller.email || '').trim().toLowerCase();
+    const reqBuyerEmail = String(buyerEmail || reqUser?.email || '').trim().toLowerCase();
+    const reqBuyerId = String(reqUser?._id || reqUser?.id || '').trim();
+
+    if (reqBuyerId && sellerId && reqBuyerId === sellerId) return true;
+    if (reqBuyerEmail && sellerEmail && reqBuyerEmail === sellerEmail) return true;
+  }
+  return false;
 };
 
 // @desc    Create Razorpay Order with 10% Platform Commission Split
@@ -10,6 +37,15 @@ export const transactionStore = {
 export const createRazorpayOrder = async (req, res) => {
   try {
     const { amount, currency = 'INR', projectId, projectTitle, buyerEmail, buyerName } = req.body;
+
+    // Self-Purchase Check
+    const isSelfBuy = await checkSelfPurchase(projectId, buyerEmail, req.user);
+    if (isSelfBuy) {
+      return res.status(400).json({
+        success: false,
+        message: 'Self-purchase prohibited: Creators cannot purchase their own listed sell orders.',
+      });
+    }
 
     const baseAmount = Number(amount) || 2999;
     const platformFee = 99; // ₹99 verification & escrow shield fee
@@ -135,6 +171,15 @@ export const verifyRazorpayPayment = async (req, res) => {
 export const createStripeSession = async (req, res) => {
   try {
     const { projectId, projectTitle, priceInUSD = 49, buyerEmail } = req.body;
+
+    // Self-Purchase Check
+    const isSelfBuy = await checkSelfPurchase(projectId, buyerEmail, req.user);
+    if (isSelfBuy) {
+      return res.status(400).json({
+        success: false,
+        message: 'Self-purchase prohibited: Creators cannot purchase their own listed sell orders.',
+      });
+    }
 
     const sessionId = `cs_test_${crypto.randomBytes(16).toString('hex')}`;
     const sessionUrl = `https://checkout.stripe.com/c/pay/${sessionId}`;

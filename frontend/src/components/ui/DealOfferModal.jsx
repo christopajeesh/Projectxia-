@@ -25,6 +25,19 @@ const DealOfferModal = ({ isOpen, onClose, project, onOfferSubmitted }) => {
       return;
     }
 
+    // Prevent submitting deal to own project
+    if (user && project.seller) {
+      const userId = String(user._id || user.id || '').trim();
+      const userEmail = String(user.email || '').trim().toLowerCase();
+      const sellerId = String(project.seller.id || project.seller._id || '').trim();
+      const sellerEmail = String(project.seller.email || '').trim().toLowerCase();
+
+      if ((userId && sellerId && userId === sellerId) || (userEmail && sellerEmail && userEmail === sellerEmail)) {
+        alert('You cannot propose a deal on your own listed project.');
+        return;
+      }
+    }
+
     playSuccess();
     confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
     setSubmitted(true);

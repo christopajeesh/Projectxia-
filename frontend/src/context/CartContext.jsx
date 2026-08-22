@@ -7,7 +7,7 @@ const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
   const { playClick, playSuccess } = useSound();
-  const { isAuthenticated, openAuthModal } = useAuth();
+  const { user, isAuthenticated, openAuthModal } = useAuth();
 
   const [cart, setCart] = useState(() => {
     const saved = localStorage.getItem('projectxia_cart');
@@ -24,8 +24,23 @@ export const CartProvider = ({ children }) => {
 
   const addToCart = (project, openDrawer = true) => {
     playClick();
+    if (!project) return;
+
+    // Prevent self-purchasing
+    if (user && project.seller) {
+      const userId = String(user._id || user.id || '').trim();
+      const userEmail = String(user.email || '').trim().toLowerCase();
+      const sellerId = String(project.seller.id || project.seller._id || '').trim();
+      const sellerEmail = String(project.seller.email || '').trim().toLowerCase();
+
+      if ((userId && sellerId && userId === sellerId) || (userEmail && sellerEmail && userEmail === sellerEmail)) {
+        alert('Self-purchase prohibited: You cannot purchase your own listed project / sell order.');
+        return;
+      }
+    }
+
     setCart((prev) => {
-      const exists = prev.find((item) => item._id === project._id);
+      const exists = prev.find((item) => (item._id || item.id) === (project._id || project.id));
       if (exists) return prev;
       return [...prev, { ...project, addedAt: new Date() }];
     });

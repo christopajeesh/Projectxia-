@@ -21,7 +21,6 @@ import {
 import TermsModal from './TermsModal';
 import { useAuth } from '../../context/AuthContext';
 import { useSound } from '../../context/SoundContext';
-import AuroraBackground from './AuroraBackground';
 import confetti from 'canvas-confetti';
 
 const getPasswordStrength = (pass) => {
@@ -328,11 +327,9 @@ const AuthModal = () => {
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
           onClick={closeAuthModal}
-          className="fixed inset-0 bg-slate-950/70 backdrop-blur-md cursor-pointer overflow-hidden"
+          className="fixed inset-0 bg-slate-950/80 backdrop-blur-md cursor-pointer overflow-hidden"
         >
-          <div className="absolute inset-0 pointer-events-none opacity-60">
-            <AuroraBackground theme="cyan" />
-          </div>
+          <div className="absolute inset-0 pointer-events-none opacity-40 cyber-mobile-mesh" />
         </motion.div>
 
         {/* Main Modal Card */}
@@ -340,23 +337,23 @@ const AuthModal = () => {
           initial={{ scale: 0.95, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          className="relative w-full max-w-md bg-[#050b14]/95 backdrop-blur-2xl border-2 border-cyan-500/60 rounded-3xl overflow-hidden shadow-2xl shadow-cyan-500/50 z-10 text-left max-h-[94vh] overflow-y-auto text-slate-100 ring-1 ring-cyan-400/40 font-sans"
+          className="relative w-full max-w-md bg-[#050508]/95 backdrop-blur-2xl border border-white/10 rounded-3xl overflow-hidden shadow-2xl shadow-black z-10 text-left max-h-[94vh] overflow-y-auto text-neutral-200 font-sans"
         >
           {/* Modal Header */}
-          <div className="p-5 border-b border-cyan-500/30 bg-gradient-to-r from-gray-950/90 via-cyan-950/50 to-gray-950/90 flex items-center justify-between">
+          <div className="p-5 border-b border-white/10 bg-black/60 flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-cyan-500/10 border border-cyan-500/40 text-cyan-400">
+              <div className="p-2 rounded-full bg-[#00ffaa]/10 border border-[#00ffaa]/30 text-[#00ffaa]">
                 {authType === 'forgot' ? (
-                  <KeyRound className="w-5 h-5 text-cyan-300 animate-pulse" />
+                  <KeyRound className="w-5 h-5 text-[#00ffaa] animate-pulse" />
                 ) : (
-                  <Shield className="w-5 h-5 animate-pulse" />
+                  <Shield className="w-5 h-5 animate-pulse text-[#00ffaa]" />
                 )}
               </div>
               <div>
                 <h3 className="text-base font-display font-black text-white tracking-wide">
-                  PROJECT<span className="text-cyan-400">XIA</span>
+                  PROJECT<span className="text-[#00ffaa]">XIA</span>
                 </h3>
-                <p className="text-[11px] text-slate-400">
+                <p className="text-[11px] text-neutral-400 font-mono">
                   {authType === 'signin' && 'Sign in to your account'}
                   {authType === 'register' && 'Create your account'}
                   {authType === 'forgot' && 'Password recovery'}
@@ -369,7 +366,7 @@ const AuthModal = () => {
                 playClick();
                 closeAuthModal();
               }}
-              className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+              className="p-2 rounded-full bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white transition-colors cursor-pointer"
             >
               <X className="w-5 h-5" />
             </button>
@@ -377,8 +374,8 @@ const AuthModal = () => {
 
           {/* Optional Protected Route Banner */}
           {authPromptReason && authType !== 'forgot' && (
-            <div className="px-5 py-2.5 bg-cyan-950/50 border-b border-cyan-500/20 text-[11px] text-cyan-300 flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+            <div className="px-5 py-2.5 bg-black/40 border-b border-white/10 text-[11px] text-[#00ffaa] font-mono flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-[#00ffaa] shrink-0" />
               <span>{authPromptReason}</span>
             </div>
           )}
@@ -387,7 +384,7 @@ const AuthModal = () => {
             {/* Top Mode Tabs (Sign In vs Create Account) */}
             {authType !== 'forgot' ? (
               <>
-                <div className="grid grid-cols-2 p-1 rounded-2xl bg-gray-900/90 border border-slate-800 text-xs font-display font-bold">
+                <div className="grid grid-cols-2 p-1 rounded-full bg-black/60 border border-white/10 text-xs font-display font-bold">
                   <button
                     type="button"
                     onClick={() => {
@@ -397,10 +394,10 @@ const AuthModal = () => {
                       setErrorMsg('');
                       setStatusMsg('');
                     }}
-                    className={`py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    className={`py-2 rounded-full flex items-center justify-center gap-2 transition-all cursor-pointer ${
                       authType === 'signin'
-                        ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/30'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-indigo-600 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)]'
+                        : 'text-neutral-400 hover:text-white'
                     }`}
                   >
                     <LogIn className="w-4 h-4" />
@@ -416,10 +413,10 @@ const AuthModal = () => {
                       setErrorMsg('');
                       setStatusMsg('');
                     }}
-                    className={`py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all cursor-pointer ${
+                    className={`py-2 rounded-full flex items-center justify-center gap-2 transition-all cursor-pointer ${
                       authType === 'register'
-                        ? 'bg-cyan-500 text-black shadow-lg shadow-cyan-500/30'
-                        : 'text-slate-400 hover:text-white'
+                        ? 'bg-indigo-600 text-white shadow-[0_0_15px_rgba(99,102,241,0.4)]'
+                        : 'text-neutral-400 hover:text-white'
                     }`}
                   >
                     <UserPlus className="w-4 h-4" />

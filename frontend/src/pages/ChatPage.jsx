@@ -20,7 +20,6 @@ import {
   Play,
   Volume2,
 } from 'lucide-react';
-import AuroraBackground from '../components/ui/AuroraBackground';
 import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
 import { useSocket } from '../context/SocketContext';
@@ -199,8 +198,6 @@ const ChatPage = () => {
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex flex-col pt-4 pb-12">
-      <AuroraBackground />
-
       <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex-1 flex flex-col relative z-10">
         {/* WhatsApp Cyber Chat Interface */}
         <div className="flex-1 grid grid-cols-1 md:grid-cols-12 rounded-3xl bg-[#0b141a]/95 border border-[#00a884]/30 backdrop-blur-2xl overflow-hidden shadow-2xl min-h-[640px]">

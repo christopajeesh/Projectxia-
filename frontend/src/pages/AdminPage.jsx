@@ -41,7 +41,6 @@ import {
   FileCode,
   ShieldCheck,
 } from 'lucide-react';
-import AuroraBackground from '../components/ui/AuroraBackground';
 import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -480,8 +479,6 @@ const AdminPage = () => {
   if (user?.email?.toLowerCase() !== 'theprojectxia@gmail.com') {
     return (
       <div className="relative min-h-[90vh] flex items-center justify-center p-4 font-mono text-xs">
-        <AuroraBackground />
-        
         <div className="relative z-10 max-w-md w-full p-7 sm:p-9 rounded-3xl bg-gray-950/95 border-2 border-cyan-500/40 text-center space-y-6 shadow-2xl shadow-cyan-500/20 backdrop-blur-3xl">
           <div className="flex items-center justify-between border-b border-slate-800 pb-3">
             <div className="flex items-center gap-2">
@@ -585,8 +582,6 @@ const AdminPage = () => {
 
   return (
     <div className="relative min-h-screen pt-8 pb-24 overflow-hidden font-mono text-xs">
-      <AuroraBackground />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-6">
         {/* Header HUD */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-cyan-500/25 pb-6">

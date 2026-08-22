@@ -33,10 +33,8 @@ import {
   UploadCloud,
   FileCode2,
   HelpCircle,
+  ExternalLink,
 } from 'lucide-react';
-import AuroraBackground from '../components/ui/AuroraBackground';
-import CyberParticles from '../components/ui/CyberParticles';
-import ThreeDCanvas from '../components/ui/ThreeDCanvas';
 import TrustScoreBadge from '../components/ui/TrustScoreBadge';
 import VideoPlayerModal from '../components/ui/VideoPlayerModal';
 import ArchitecturePeekModal from '../components/ui/ArchitecturePeekModal';
@@ -238,50 +236,35 @@ const LandingPage = () => {
 
   return (
     <div className="relative min-h-screen overflow-hidden">
-      <AuroraBackground theme="cyan" className="opacity-80" />
-      <CyberParticles />
-
       {/* 3D VIDEO & PARTICLES HERO SECTION WITH INTEGRATED AUTH CARD */}
       <section className="relative pt-10 pb-20 lg:pt-16 lg:pb-28 overflow-hidden">
-        {/* Background Ambient Video Layer */}
-        <div className="absolute inset-0 z-0 pointer-events-none opacity-35 overflow-hidden">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover filter blur-[1px] scale-105"
-            src="https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-with-charts-and-data-31911-large.mp4"
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-[#030712]/30 via-transparent to-[#030712]/50" />
-        </div>
 
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
-          <div className="text-center max-w-4xl mx-auto space-y-7">
-            {/* Ultra-Futuristic Shimmer Badge */}
+          <div className="text-center max-w-4xl mx-auto space-y-8">
+            {/* Pixellon Shimmer Pill Badge */}
             <motion.div
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-gradient-to-r from-cyan-950/80 via-purple-950/60 to-cyan-950/80 border border-cyan-400/50 backdrop-blur-xl shadow-neon-cyan"
+              className="inline-flex items-center gap-2.5 px-5 py-2.5 rounded-full bg-[#050508]/90 border border-[#00ffaa]/50 backdrop-blur-3xl shadow-[0_0_25px_rgba(0,255,170,0.3)] hover:border-[#00ffaa] hover:shadow-[0_0_35px_rgba(0,255,170,0.5)] transition-all duration-300 cursor-pointer"
             >
-              <div className="p-1 rounded-full bg-cyan-500/20 text-cyan-300">
+              <div className="p-1 rounded-full bg-[#00ffaa]/20 text-[#00ffaa] shadow-[0_0_10px_rgba(0,255,170,0.5)]">
                 <Sparkles className="w-3.5 h-3.5 animate-spin" />
               </div>
-              <span className="text-xs font-mono font-bold text-cyan-300 tracking-wider uppercase">
-                ⚡ Next-Gen Engineering Ecosystem • All Departments
+              <span className="text-xs font-mono font-bold text-[#00ffaa] tracking-wider uppercase">
+                ⚡ NEXT-GEN ENGINEERING ECOSYSTEM • LIVE HUB
               </span>
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping ml-1" />
+              <span className="h-2.5 w-2.5 rounded-full bg-[#00ffaa] animate-ping ml-1" />
             </motion.div>
 
-            {/* Main Headline with High-End Syne Typography */}
+            {/* Main Headline */}
             <motion.h1
               initial={{ opacity: 0, scale: 0.96 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.6 }}
-              className="text-4xl sm:text-6xl lg:text-7xl font-display font-black tracking-tight text-white leading-[1.08]"
+              className="text-4xl sm:text-6xl lg:text-8xl font-display font-black tracking-tight text-white leading-[1.05]"
             >
-              Where Engineering Innovators <br />
-              <span className="text-gradient-cyan">Buy, Sell & Build Genuine Projects</span>
+              Where Innovators <br />
+              <span className="text-gradient-pixellon">Buy, Sell & Build Real Code</span>
             </motion.h1>
 
             {/* Mission Statement */}
@@ -289,76 +272,63 @@ const LandingPage = () => {
               initial={{ opacity: 0, y: 15 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
-              className="text-base sm:text-lg text-slate-300 font-sans leading-relaxed max-w-3xl mx-auto"
+              className="text-base sm:text-lg text-neutral-300 font-sans leading-relaxed max-w-3xl mx-auto"
             >
-              The verified ecosystem for engineering students, creators, and researchers across <strong className="text-cyan-300 font-bold">CSE, ECE, EEE, Mech, AI, and IoT</strong>. Complete source code, circuit schematics, 4K video walkthroughs, built-in code originality check, and our dedicated custom engineering team.
+              The verified ecosystem for engineering students, creators, and researchers across <strong className="text-[#00ffaa] font-bold">CSE, ECE, EEE, Mech, AI, and IoT</strong>. Verified video walkthroughs, schematics, built-in code originality audit, and direct creator chat.
             </motion.p>
 
-            {/* CTA Action Buttons with Auth Gates */}
+            {/* CTA Action Buttons (Rounded Pills) */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
-              className="flex flex-wrap items-center justify-center gap-3 pt-2"
+              className="flex flex-wrap items-center justify-center gap-4 pt-2"
             >
               {/* 1. Explore Projects */}
               <button
                 type="button"
                 onClick={() => handleProtectedNavigation('/marketplace', 'Please log in or register to explore verified engineering projects.')}
-                className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-cyan-500 via-blue-600 to-purple-600 hover:from-cyan-400 hover:to-purple-500 text-black font-display font-black text-sm shadow-xl shadow-cyan-500/25 flex items-center gap-2 transition-all hover:scale-105 cursor-pointer"
+                className="px-8 py-4 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white font-display font-bold text-sm shadow-[0_0_25px_rgba(99,102,241,0.4)] flex items-center gap-2.5 transition-all hover:scale-105 cursor-pointer"
               >
-                <Code className="w-4 h-4 text-black shrink-0" />
+                <Code className="w-4 h-4 shrink-0" />
                 <span>Explore Projects</span>
-                <ArrowRight className="w-4 h-4 text-black shrink-0" />
+                <ArrowRight className="w-4 h-4 shrink-0" />
               </button>
 
-              {/* 2. Plagiarism Checker */}
+              {/* 2. Sell Project */}
+              <button
+                type="button"
+                onClick={() => handleProtectedNavigation('/upload', 'Please log in or register to upload and monetize your project.')}
+                className="px-8 py-4 rounded-full bg-[#00ffaa] hover:bg-[#33ffbb] text-black font-display font-bold text-sm shadow-[0_0_25px_rgba(0,255,170,0.4)] flex items-center gap-2 transition-all hover:scale-105 cursor-pointer"
+              >
+                <UploadCloud className="w-4 h-4 text-black shrink-0" />
+                <span>+ Sell a Project</span>
+              </button>
+
+              {/* 3. Plagiarism Checker */}
               <button
                 type="button"
                 onClick={() => handleProtectedNavigation('/ai-shield', 'Please log in or register to run AI Plagiarism & Code Integrity scans.')}
-                className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-purple-950 via-indigo-900 to-purple-900 hover:from-purple-900 hover:to-indigo-800 border-2 border-purple-400/80 text-purple-200 hover:text-white font-display font-bold text-sm flex items-center gap-2 transition-all hover:scale-105 shadow-lg shadow-purple-900/40 cursor-pointer"
+                className="px-7 py-4 rounded-full bg-white/[0.04] hover:bg-white/10 border border-white/15 text-neutral-200 font-display font-semibold text-sm flex items-center gap-2 transition-all hover:scale-105 cursor-pointer"
               >
                 <Shield className="w-4 h-4 text-purple-400 shrink-0" />
                 <span>Plagiarism Checker</span>
               </button>
-
-              {/* 3. Build My Idea */}
-              <button
-                type="button"
-                onClick={() => {
-                  playSuccess();
-                  setIsDevModalOpen(true);
-                }}
-                className="px-6 py-3.5 rounded-xl bg-gradient-to-r from-amber-500/20 via-purple-950/80 to-slate-900 hover:from-amber-500/30 hover:to-purple-900 border border-amber-400/60 backdrop-blur-md text-amber-200 hover:text-white font-display font-bold text-sm flex items-center gap-2 transition-all hover:scale-105 shadow-md cursor-pointer"
-              >
-                <Lightbulb className="w-4 h-4 text-amber-300 animate-pulse shrink-0" />
-                <span>Build My Idea (Custom)</span>
-              </button>
-
-              {/* 4. Sell a Project */}
-              <button
-                type="button"
-                onClick={() => handleProtectedNavigation('/upload', 'Please log in or register to upload and monetize your project.')}
-                className="px-5 py-3.5 rounded-xl bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/40 text-emerald-300 font-display font-bold text-xs transition-all hover:scale-105 cursor-pointer flex items-center gap-1.5"
-              >
-                <UploadCloud className="w-4 h-4 text-emerald-400 shrink-0" />
-                <span>+ Sell a Project</span>
-              </button>
             </motion.div>
 
             {/* 4 Pillars Quick Overview Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5 pt-4 text-left">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-6 text-left">
               <div
                 onClick={() => handleProtectedNavigation('/marketplace', 'Please log in or register to explore verified engineering projects.')}
-                className="p-4 rounded-2xl bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/30 hover:border-cyan-400 transition-all cursor-pointer group shadow-lg"
+                className="p-5 rounded-3xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/10 hover:border-indigo-500/40 hover:shadow-[0_0_25px_rgba(99,102,241,0.15)] transition-all duration-300 cursor-pointer group"
               >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <div className="p-1.5 rounded-lg bg-cyan-500/20 text-cyan-400 group-hover:bg-cyan-400 group-hover:text-black transition-colors">
+                <div className="flex items-center gap-2.5 mb-2">
+                  <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                     <Code className="w-4 h-4" />
                   </div>
-                  <span className="font-display font-bold text-xs text-white group-hover:text-cyan-300">1. Buy Projects</span>
+                  <span className="font-display font-bold text-xs text-white group-hover:text-indigo-300">1. Buy Projects</span>
                 </div>
-                <p className="text-[11px] text-slate-300 leading-snug">
+                <p className="text-xs text-neutral-400 leading-relaxed">
                   Verified source code, circuits & 4K video walkthroughs.
                 </p>
               </div>
@@ -415,61 +385,132 @@ const LandingPage = () => {
         </div>
       </section>
 
+      {/* ANIMATED INFINITE GLASS MARQUEE RIBBON (Tech Stack & Real-Time Pulse) */}
+      <div className="py-5 relative z-10 overflow-hidden border-y border-white/15 bg-white/[0.02] backdrop-blur-3xl">
+        <div className="flex gap-8 whitespace-nowrap animate-marquee select-none">
+          <div className="flex items-center gap-8 shrink-0">
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2 shadow-[0_0_15px_rgba(0,255,170,0.15)]">
+              <span className="w-2 h-2 rounded-full bg-[#00ffaa] animate-ping" />
+              React 18 & Vite 5 Engine
+            </span>
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              Framer Motion 3D Physics
+            </span>
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
+              <Shield className="w-3.5 h-3.5 text-[#00ffaa]" />
+              Python AST Plagiarism Protection
+            </span>
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
+              <Zap className="w-3.5 h-3.5 text-amber-400" />
+              Lenis Smooth Momentum Scroll
+            </span>
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
+              <Cpu className="w-3.5 h-3.5 text-purple-400" />
+              IoT ESP32 & LoRa Wireless
+            </span>
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
+              <Lock className="w-3.5 h-3.5 text-cyan-400" />
+              Tamper-Proof Code Encryption
+            </span>
+          </div>
+          {/* Duplicate set for seamless infinite loop */}
+          <div className="flex items-center gap-8 shrink-0">
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2 shadow-[0_0_15px_rgba(0,255,170,0.15)]">
+              <span className="w-2 h-2 rounded-full bg-[#00ffaa] animate-ping" />
+              React 18 & Vite 5 Engine
+            </span>
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+              Framer Motion 3D Physics
+            </span>
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
+              <Shield className="w-3.5 h-3.5 text-[#00ffaa]" />
+              Python AST Plagiarism Protection
+            </span>
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
+              <Zap className="w-3.5 h-3.5 text-amber-400" />
+              Lenis Smooth Momentum Scroll
+            </span>
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
+              <Cpu className="w-3.5 h-3.5 text-purple-400" />
+              IoT ESP32 & LoRa Wireless
+            </span>
+            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
+              <Lock className="w-3.5 h-3.5 text-cyan-400" />
+              Tamper-Proof Code Encryption
+            </span>
+          </div>
+        </div>
+      </div>
+
       {/* ================================================================= */}
       {/* NEW USER & CUSTOMER GUIDE: 4 CORE PLATFORM PILLARS EXPLAINED    */}
       {/* ================================================================= */}
-      <section id="how-it-works" className="py-20 relative z-10 border-b border-cyan-500/20 bg-gradient-to-b from-transparent via-cyan-950/20 to-transparent">
+      <section id="how-it-works" className="py-20 sm:py-28 relative z-10 border-b border-white/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
           {/* Section Header */}
-          <div className="text-center max-w-3xl mx-auto mb-14 space-y-3">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-cyan-500/15 border border-cyan-500/30 text-cyan-300 text-xs font-mono font-bold tracking-wider uppercase shadow-lg shadow-cyan-500/10">
-              <Sparkles className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
-              <span>New Customer Guide • How ProjectXia Works</span>
+          <motion.div
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="text-center max-w-3xl mx-auto mb-14 space-y-4"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.03] border border-[#00ffaa]/30 text-[#00ffaa] text-xs font-mono font-bold tracking-wider uppercase shadow-[0_0_15px_rgba(0,255,170,0.15)]">
+              <Sparkles className="w-3.5 h-3.5 text-[#00ffaa] animate-spin" />
+              <span>Customer Guide • How ProjectXia Works</span>
             </div>
-            <h2 className="text-3xl sm:text-5xl font-display font-black text-white tracking-tight">
-              Simple Ways to Build, Buy & Sell
+            <h2 className="text-3xl sm:text-6xl font-display font-black text-white tracking-tight leading-tight">
+              Simple Ways to <span className="text-gradient-pixellon">Build, Buy & Sell</span>
             </h2>
-            <p className="text-xs sm:text-sm font-mono text-slate-300 leading-relaxed">
-              New to ProjectXia? Whether you want to <strong className="text-cyan-300">download tested pre-built projects</strong>, hire our <strong className="text-purple-300">in-house team to build your custom software/hardware idea</strong>, or <strong className="text-emerald-300">sell your own code</strong>, here is how each feature works:
+            <p className="text-xs sm:text-sm font-sans text-neutral-300 leading-relaxed">
+              New to ProjectXia? Whether you want to <strong className="text-[#00ffaa]">download tested pre-built projects</strong>, hire our <strong className="text-indigo-400">in-house team to build your custom software/hardware idea</strong>, or <strong className="text-purple-400">sell your own code</strong>, here is how each feature works:
             </p>
-          </div>
+          </motion.div>
 
           {/* 4 Pillar Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
             {/* CARD 1: EXPLORE & BUY MARKETPLACE PROJECTS */}
-            <div className="relative group rounded-3xl p-6 bg-gradient-to-b from-gray-950 via-slate-900/90 to-gray-950 border border-cyan-500/30 hover:border-cyan-400/80 transition-all duration-300 flex flex-col justify-between shadow-2xl hover:shadow-cyan-500/20 hover:-translate-y-1">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.1 }}
+              className="relative group rounded-3xl p-6 bg-white/[0.02] border border-white/10 hover:border-indigo-500/50 transition-all duration-300 flex flex-col justify-between shadow-2xl hover:shadow-[0_0_30px_rgba(99,102,241,0.2)] hover:-translate-y-2"
+            >
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="p-3 rounded-2xl bg-cyan-500/20 text-cyan-400 border border-cyan-500/40">
+                  <div className="p-3 rounded-2xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/30">
                     <ShoppingCart className="w-6 h-6" />
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-[10px] font-mono font-bold uppercase">
+                  <span className="px-3 py-1 rounded-full bg-indigo-500/10 text-indigo-300 border border-indigo-500/30 text-[10px] font-mono font-bold uppercase">
                     1. Buy Projects
                   </span>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-display font-black text-white group-hover:text-cyan-300 transition-colors">
+                  <h3 className="text-lg font-display font-black text-white group-hover:text-indigo-300 transition-colors">
                     Explore & Buy Marketplace
                   </h3>
-                  <p className="text-xs font-mono text-slate-300 mt-2 leading-relaxed">
-                    Browse thousands of complete, tested engineering projects across <span className="text-cyan-300 font-bold">CSE, ECE, EEE, Mech, AI/ML, and IoT</span>.
+                  <p className="text-xs font-sans text-neutral-400 mt-2 leading-relaxed">
+                    Browse thousands of complete, tested engineering projects across <span className="text-[#00ffaa] font-bold">CSE, ECE, EEE, Mech, AI/ML, and IoT</span>.
                   </p>
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-slate-800 text-[11px] font-mono text-slate-300">
+                <div className="space-y-2 pt-2 border-t border-white/10 text-[11px] font-sans text-neutral-300">
                   <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00ffaa] shrink-0 mt-0.5" />
                     <span>Full source code, circuit diagrams & KiCAD files</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00ffaa] shrink-0 mt-0.5" />
                     <span>Working 4K demo video preview for every project</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00ffaa] shrink-0 mt-0.5" />
                     <span>Instant download with complete setup runbook</span>
                   </div>
                 </div>
@@ -485,16 +526,22 @@ const LandingPage = () => {
                   <ArrowRight className="w-3.5 h-3.5" />
                 </button>
               </div>
-            </div>
+            </motion.div>
 
             {/* CARD 2: CUSTOM SOFTWARE BUILD */}
-            <div className="relative group rounded-3xl p-6 bg-gradient-to-b from-gray-950 via-purple-950/40 to-gray-950 border border-purple-500/40 hover:border-purple-400/80 transition-all duration-300 flex flex-col justify-between shadow-2xl hover:shadow-purple-500/20 hover:-translate-y-1">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="relative group rounded-3xl p-6 bg-white/[0.02] border border-white/10 hover:border-purple-500/50 transition-all duration-300 flex flex-col justify-between shadow-2xl hover:shadow-[0_0_30px_rgba(168,85,247,0.2)] hover:-translate-y-2"
+            >
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="p-3 rounded-2xl bg-purple-500/20 text-purple-400 border border-purple-500/40">
+                  <div className="p-3 rounded-2xl bg-purple-500/10 text-purple-400 border border-purple-500/30">
                     <Lightbulb className="w-6 h-6 text-amber-300" />
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30 text-[10px] font-mono font-bold uppercase">
+                  <span className="px-3 py-1 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/30 text-[10px] font-mono font-bold uppercase">
                     2. In-House Team
                   </span>
                 </div>
@@ -503,12 +550,12 @@ const LandingPage = () => {
                   <h3 className="text-lg font-display font-black text-white group-hover:text-purple-300 transition-colors">
                     Build Custom Software
                   </h3>
-                  <p className="text-xs font-mono text-slate-300 mt-2 leading-relaxed">
+                  <p className="text-xs font-sans text-neutral-400 mt-2 leading-relaxed">
                     Have a unique idea, thesis, or startup MVP? Our <span className="text-purple-300 font-bold">In-House Engineering Team</span> will build and deliver it for you.
                   </p>
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-slate-800 text-[11px] font-mono text-slate-300">
+                <div className="space-y-2 pt-2 border-t border-white/10 text-[11px] font-sans text-neutral-300">
                   <div className="flex items-start gap-2">
                     <CheckCircle2 className="w-3.5 h-3.5 text-purple-400 shrink-0 mt-0.5" />
                     <span>Direct engineering consultation with ProjectXia developers</span>
@@ -531,46 +578,52 @@ const LandingPage = () => {
                     playSuccess();
                     setIsDevModalOpen(true);
                   }}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-display font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-purple-600/30 transition-all cursor-pointer"
+                  className="w-full py-3 rounded-full bg-purple-600 hover:bg-purple-500 text-white font-display font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all cursor-pointer"
                 >
                   <Lightbulb className="w-3.5 h-3.5 text-amber-300" />
                   <span>Build My Project Idea →</span>
                 </button>
               </div>
-            </div>
+            </motion.div>
 
             {/* CARD 3: SELL PROJECTS & MONETIZE */}
-            <div className="relative group rounded-3xl p-6 bg-gradient-to-b from-gray-950 via-emerald-950/30 to-gray-950 border border-emerald-500/30 hover:border-emerald-400/80 transition-all duration-300 flex flex-col justify-between shadow-2xl hover:shadow-emerald-500/20 hover:-translate-y-1">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.3 }}
+              className="relative group rounded-3xl p-6 bg-white/[0.02] border border-white/10 hover:border-[#00ffaa]/50 transition-all duration-300 flex flex-col justify-between shadow-2xl hover:shadow-[0_0_30px_rgba(0,255,170,0.2)] hover:-translate-y-2"
+            >
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="p-3 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/40">
+                  <div className="p-3 rounded-2xl bg-[#00ffaa]/10 text-[#00ffaa] border border-[#00ffaa]/30">
                     <UploadCloud className="w-6 h-6" />
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold uppercase">
+                  <span className="px-3 py-1 rounded-full bg-[#00ffaa]/10 text-[#00ffaa] border border-[#00ffaa]/30 text-[10px] font-mono font-bold uppercase">
                     3. Sell & Earn
                   </span>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-display font-black text-white group-hover:text-emerald-300 transition-colors">
+                  <h3 className="text-lg font-display font-black text-white group-hover:text-[#00ffaa] transition-colors">
                     Sell Projects & Monetize Code
                   </h3>
-                  <p className="text-xs font-mono text-slate-300 mt-2 leading-relaxed">
+                  <p className="text-xs font-sans text-neutral-400 mt-2 leading-relaxed">
                     Are you an engineer, developer, or creator? Turn your completed hardware or software projects into recurring income.
                   </p>
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-slate-800 text-[11px] font-mono text-slate-300">
+                <div className="space-y-2 pt-2 border-t border-white/10 text-[11px] font-sans text-neutral-300">
                   <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00ffaa] shrink-0 mt-0.5" />
                     <span>Set your own price in INR (₹) per download</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00ffaa] shrink-0 mt-0.5" />
                     <span>Direct bank/UPI payouts on verified sales</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400 shrink-0 mt-0.5" />
+                    <CheckCircle2 className="w-3.5 h-3.5 text-[#00ffaa] shrink-0 mt-0.5" />
                     <span>Built-in piracy & tamper protection</span>
                   </div>
                 </div>
@@ -579,48 +632,54 @@ const LandingPage = () => {
               <div className="pt-6">
                 <button
                   type="button"
-                  onClick={() => handleProtectedNavigation('/upload', 'Please log in to upload and monetize your engineering project.')}
-                  className="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-black font-display font-bold text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 transition-all cursor-pointer"
+                  onClick={() => handleProtectedNavigation('/upload', 'Please log in or register to publish and sell your engineering project.')}
+                  className="w-full py-3 rounded-full bg-[#00ffaa] hover:bg-[#33ffbb] text-black font-display font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(0,255,170,0.3)] transition-all cursor-pointer"
                 >
-                  <span>Start Selling Projects</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <UploadCloud className="w-3.5 h-3.5 text-black" />
+                  <span>Start Selling Code →</span>
                 </button>
               </div>
-            </div>
+            </motion.div>
 
-            {/* CARD 4: AI PLAGIARISM & ORIGINALITY SHIELD */}
-            <div className="relative group rounded-3xl p-6 bg-gradient-to-b from-gray-950 via-blue-950/30 to-gray-950 border border-blue-500/30 hover:border-blue-400/80 transition-all duration-300 flex flex-col justify-between shadow-2xl hover:shadow-blue-500/20 hover:-translate-y-1">
+            {/* CARD 4: AI PLAGIARISM & CODE ORIGINALITY SCANNER */}
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: 0.4 }}
+              className="relative group rounded-3xl p-6 bg-white/[0.02] border border-white/10 hover:border-cyan-500/50 transition-all duration-300 flex flex-col justify-between shadow-2xl hover:shadow-[0_0_30px_rgba(6,182,212,0.2)] hover:-translate-y-2"
+            >
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
-                  <div className="p-3 rounded-2xl bg-blue-500/20 text-blue-400 border border-blue-500/40">
+                  <div className="p-3 rounded-2xl bg-cyan-500/10 text-cyan-400 border border-cyan-500/30">
                     <Shield className="w-6 h-6" />
                   </div>
-                  <span className="px-2.5 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/30 text-[10px] font-mono font-bold uppercase">
-                    4. Anti-Plagiarism
+                  <span className="px-3 py-1 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/30 text-[10px] font-mono font-bold uppercase">
+                    4. AI Plagiarism
                   </span>
                 </div>
 
                 <div>
-                  <h3 className="text-lg font-display font-black text-white group-hover:text-blue-300 transition-colors">
-                    Plagiarism & Integrity Shield
+                  <h3 className="text-lg font-display font-black text-white group-hover:text-cyan-300 transition-colors">
+                    AI Plagiarism & Originality
                   </h3>
-                  <p className="text-xs font-mono text-slate-300 mt-2 leading-relaxed">
-                    Every project on ProjectXia is verified through our AST code scanner to prevent copy-pasting and cloned GitHub boilerplate.
+                  <p className="text-xs font-sans text-neutral-400 mt-2 leading-relaxed">
+                    Verify code & IEEE report originality before final submission with our AI Trust Shield scanner.
                   </p>
                 </div>
 
-                <div className="space-y-2 pt-2 border-t border-slate-800 text-[11px] font-mono text-slate-300">
+                <div className="space-y-2 pt-2 border-t border-white/10 text-[11px] font-sans text-neutral-300">
                   <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
-                    <span>Deep AST syntax & web repository analysis</span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
+                    <span>Scans GitHub, StackOverflow & IEEE databases</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
-                    <span>IEEE standard originality certificate</span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
+                    <span>Instant PDF Originality Certificate download</span>
                   </div>
                   <div className="flex items-start gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />
-                    <span>Zero-backdoor malware safety scan</span>
+                    <CheckCircle2 className="w-3.5 h-3.5 text-cyan-400 shrink-0 mt-0.5" />
+                    <span>Security audit for secret keys & vulnerable dependencies</span>
                   </div>
                 </div>
               </div>
@@ -628,41 +687,214 @@ const LandingPage = () => {
               <div className="pt-6">
                 <button
                   type="button"
-                  onClick={() => handleProtectedNavigation('/ai-shield', 'Please log in to run deep AST plagiarism scans on your code.')}
-                  className="w-full py-3 rounded-xl bg-gray-900 hover:bg-slate-800 border border-blue-500/40 text-blue-300 font-display font-bold text-xs flex items-center justify-center gap-2 shadow-lg transition-all cursor-pointer"
+                  onClick={() => handleProtectedNavigation('/ai-shield', 'Please log in or register to run AI Plagiarism & Code Integrity scans.')}
+                  className="w-full py-3 rounded-full bg-cyan-600 hover:bg-cyan-500 text-white font-display font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(6,182,212,0.3)] transition-all cursor-pointer"
                 >
-                  <span>Scan Plagiarism</span>
-                  <ArrowRight className="w-3.5 h-3.5" />
+                  <Shield className="w-3.5 h-3.5" />
+                  <span>Run Plagiarism Scan →</span>
                 </button>
               </div>
-            </div>
-
+            </motion.div>
           </div>
-
         </div>
       </section>
 
-      {/* BUILT-IN PLAGIARISM CHECKER & SCAM SHIELD SECTION */}
-      <section className="py-16 relative z-10 border-y border-cyan-500/20 bg-gray-950/50 backdrop-blur-md">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="p-8 rounded-3xl bg-gradient-to-b from-gray-950/90 via-purple-950/20 to-gray-950/90 border border-purple-500/40 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
-            <div className="scanline-overlay absolute inset-0 pointer-events-none" />
+      {/* FEATURED REGISTRIES - HORIZONTAL SIDEWAYS CAROUSEL (Pixellon Selected Work) */}
+      <section className="py-20 relative z-10 overflow-hidden">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between mb-8 gap-4">
+            <div>
+              <span className="text-xs font-mono font-bold text-indigo-400 uppercase tracking-widest flex items-center gap-2">
+                <Sparkles className="w-3.5 h-3.5 text-[#00ffaa]" />
+                // FEATURED REGISTRIES
+              </span>
+              <h2 className="text-3xl sm:text-5xl font-display font-black text-white mt-1">
+                SELECTED WORK
+              </h2>
+            </div>
+            
+            {/* Scroll Navigation Control Buttons & Indicator */}
+            <div className="flex items-center gap-4">
+              <span className="text-xs font-mono text-neutral-400 hidden sm:inline-flex items-center gap-2">
+                <span>← Swipe / Scroll Sideways →</span>
+              </span>
 
-            <div className="flex flex-col md:flex-row items-center justify-between gap-6 mb-6">
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const el = document.getElementById('featured-track');
+                    if (el) el.scrollBy({ left: -380, behavior: 'smooth' });
+                  }}
+                  className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 text-white transition-all hover:scale-105 cursor-pointer"
+                  title="Scroll Left"
+                >
+                  <ChevronDown className="w-4 h-4 rotate-90 text-white" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const el = document.getElementById('featured-track');
+                    if (el) el.scrollBy({ left: 380, behavior: 'smooth' });
+                  }}
+                  className="p-2.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/15 text-white transition-all hover:scale-105 cursor-pointer"
+                  title="Scroll Right"
+                >
+                  <ChevronDown className="w-4 h-4 -rotate-90 text-white" />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Horizontal Sideways Scrollable Track with Smooth Glide Transition */}
+          <motion.div
+            initial={{ opacity: 0, x: 40 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, ease: [0.16, 1, 0.3, 1] }}
+            id="featured-track"
+            data-lenis-prevent
+            className="flex gap-6 overflow-x-auto pb-6 scrollbar-none snap-x snap-mandatory focus:outline-none scroll-smooth"
+          >
+            {/* Featured Card 1 */}
+            <motion.div
+              whileHover={{ y: -8, scale: 1.01 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="min-w-[320px] sm:min-w-[420px] max-w-[440px] p-6 rounded-3xl bg-white/[0.02] border border-white/15 hover:border-[#00ffaa] backdrop-blur-3xl transition-all duration-300 snap-start shadow-2xl flex flex-col justify-between group cursor-pointer hover:shadow-[0_0_35px_rgba(0,255,170,0.25)]"
+              onClick={() => handleProtectedNavigation('/marketplace', 'Please log in to view project details.')}
+            >
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs font-bold text-indigo-400 uppercase tracking-wider">PROJECT 01</span>
+                  <span className="px-3 py-1 rounded-full bg-[#00ffaa]/10 border border-[#00ffaa]/30 text-[#00ffaa] text-[10px] font-mono font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(0,255,170,0.2)]">ONGOING</span>
+                </div>
+
+                <div>
+                  <h3 className="text-2xl font-display font-black text-white group-hover:text-[#00ffaa] transition-colors">
+                    ProjectXia Core Engine
+                  </h3>
+                  <p className="text-xs sm:text-sm font-sans text-neutral-300 mt-2 leading-relaxed line-clamp-3">
+                    Full-stack verified software marketplace connecting engineering students and developers to verified source code, circuit diagrams, and live demo streams.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-300">React 18</span>
+                  <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-300">Node.js</span>
+                  <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-300">Firebase</span>
+                  <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-300">Tailwind</span>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-white/10 mt-6 flex items-center justify-between text-xs font-mono text-indigo-400 group-hover:text-[#00ffaa] transition-colors">
+                <span className="font-bold tracking-wider">LIVE_DEPLOY.EXE</span>
+                <ExternalLink className="w-4 h-4" />
+              </div>
+            </motion.div>
+
+            {/* Featured Card 2 */}
+            <motion.div
+              whileHover={{ y: -8, scale: 1.01 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="min-w-[320px] sm:min-w-[420px] max-w-[440px] p-6 rounded-3xl bg-white/[0.02] border border-white/15 hover:border-[#00ffaa] backdrop-blur-3xl transition-all duration-300 snap-start shadow-2xl flex flex-col justify-between group cursor-pointer hover:shadow-[0_0_35px_rgba(0,255,170,0.25)]"
+              onClick={() => handleProtectedNavigation('/ai-shield', 'Please log in to run AI Plagiarism scans.')}
+            >
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs font-bold text-indigo-400 uppercase tracking-wider">PROJECT 02</span>
+                  <span className="px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/30 text-indigo-300 text-[10px] font-mono font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(99,102,241,0.2)]">PRODUCTION</span>
+                </div>
+
+                <div>
+                  <h3 className="text-2xl font-display font-black text-white group-hover:text-[#00ffaa] transition-colors">
+                    AI Plagiarism & Code Shield
+                  </h3>
+                  <p className="text-xs sm:text-sm font-sans text-neutral-300 mt-2 leading-relaxed line-clamp-3">
+                    Deep AST structural code analyzer checking repository similarity against National Vulnerability Database and academic code archives.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-300">Python AST</span>
+                  <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-300">Gemini AI</span>
+                  <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-300">REST API</span>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-white/10 mt-6 flex items-center justify-between text-xs font-mono text-indigo-400 group-hover:text-[#00ffaa] transition-colors">
+                <span className="font-bold tracking-wider">LIVE_DEPLOY.EXE</span>
+                <ExternalLink className="w-4 h-4" />
+              </div>
+            </motion.div>
+
+            {/* Featured Card 3 */}
+            <motion.div
+              whileHover={{ y: -8, scale: 1.01 }}
+              transition={{ duration: 0.3, ease: [0.16, 1, 0.3, 1] }}
+              className="min-w-[320px] sm:min-w-[420px] max-w-[440px] p-6 rounded-3xl bg-white/[0.02] border border-white/15 hover:border-[#00ffaa] backdrop-blur-3xl transition-all duration-300 snap-start shadow-2xl flex flex-col justify-between group cursor-pointer hover:shadow-[0_0_35px_rgba(0,255,170,0.25)]"
+              onClick={() => handleProtectedNavigation('/marketplace', 'Please log in to view project details.')}
+            >
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="font-mono text-xs font-bold text-indigo-400 uppercase tracking-wider">PROJECT 03</span>
+                  <span className="px-3 py-1 rounded-full bg-[#00ffaa]/10 border border-[#00ffaa]/30 text-[#00ffaa] text-[10px] font-mono font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(0,255,170,0.2)]">VERIFIED</span>
+                </div>
+
+                <div>
+                  <h3 className="text-2xl font-display font-black text-white group-hover:text-[#00ffaa] transition-colors">
+                    IoT Smart Edge Gateway
+                  </h3>
+                  <p className="text-xs sm:text-sm font-sans text-neutral-300 mt-2 leading-relaxed line-clamp-3">
+                    ESP32 & LoRa long-range wireless sensor gateway with real-time MQTT telemetry streaming and interactive web dashboard analytics.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-300">ESP32 C++</span>
+                  <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-300">LoRaWAN</span>
+                  <span className="px-3 py-1 rounded-md bg-white/5 border border-white/10 text-[11px] font-mono text-neutral-300">MQTT</span>
+                </div>
+              </div>
+
+              <div className="pt-6 border-t border-white/10 mt-6 flex items-center justify-between text-xs font-mono text-indigo-400 group-hover:text-[#00ffaa] transition-colors">
+                <span className="font-bold tracking-wider">LIVE_DEPLOY.EXE</span>
+                <ExternalLink className="w-4 h-4" />
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Pixellon Scroll Track Indicator Line (Matches Screenshot) */}
+          <div className="w-full h-1 bg-white/10 rounded-full mt-4 overflow-hidden relative">
+            <div className="w-1/3 h-full bg-gradient-to-r from-indigo-500 to-[#00ffaa] rounded-full shadow-[0_0_10px_rgba(0,255,170,0.6)]" />
+          </div>
+        </div>
+      </section>
+
+      {/* LIVE AI PLAGIARISM CHECKER DEMO SANDBOX */}
+      <section className="py-16 relative z-10">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="p-6 sm:p-8 rounded-3xl bg-white/[0.02] border border-white/10 backdrop-blur-2xl shadow-2xl space-y-6"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-white/10 pb-4">
               <div>
                 <span className="text-xs font-mono font-bold text-purple-400 uppercase tracking-widest flex items-center gap-2">
-                  <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
+                  <Sparkles className="w-4 h-4 text-purple-400 animate-spin" />
                   Built-In Engineering Plagiarism & Originality Checker
                 </span>
                 <h3 className="text-2xl font-display font-black text-white mt-1">
                   Verify Abstract, Code & Hardware Originality
                 </h3>
-                <p className="text-xs font-mono text-slate-400 mt-1">
+                <p className="text-xs font-sans text-neutral-400 mt-1">
                   To prevent fake projects or plagiarism, every upload is scanned before publication.
                 </p>
               </div>
 
-              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-950/50 border border-emerald-500/40 text-emerald-400 text-xs font-mono">
+              <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#00ffaa]/10 border border-[#00ffaa]/30 text-[#00ffaa] text-xs font-mono">
                 <CheckCircle2 className="w-4 h-4" />
                 <span>NVD & Academic Repository DB</span>
               </div>
@@ -675,13 +907,13 @@ const LandingPage = () => {
                   value={scanInput}
                   onChange={(e) => setScanInput(e.target.value)}
                   placeholder="Paste GitHub repo link, project synopsis, or code snippet..."
-                  className="flex-1 bg-gray-900 border border-purple-500/30 focus:border-purple-400 rounded-xl px-4 py-3 text-sm text-white focus:outline-none font-mono"
+                  className="flex-1 bg-black/60 border border-white/10 focus:border-[#00ffaa] rounded-full px-5 py-3 text-xs text-white focus:outline-none font-mono"
                 />
                 <button
                   type="button"
                   onClick={handleSimulatedScan}
                   disabled={isScanning}
-                  className="px-6 py-3 rounded-xl bg-purple-500 hover:bg-purple-400 text-white font-display font-bold text-sm flex items-center justify-center gap-2 shadow-lg shadow-purple-500/30 transition-all cursor-pointer"
+                  className="px-7 py-3 rounded-full bg-purple-600 hover:bg-purple-500 text-white font-display font-bold text-xs flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(168,85,247,0.3)] transition-all cursor-pointer"
                 >
                   {isScanning ? (
                     <span className="font-mono text-xs">Deep AST Scanning...</span>
@@ -698,43 +930,49 @@ const LandingPage = () => {
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="p-4 rounded-xl bg-gray-900 border border-purple-500/40 grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-mono"
+                  className="p-5 rounded-2xl bg-black/60 border border-purple-500/40 grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-mono"
                 >
                   <div className="sm:col-span-2">
-                    <p className="text-slate-400">Shield Verdict:</p>
+                    <p className="text-neutral-400">Shield Verdict:</p>
                     <p className="text-purple-300 font-bold text-sm mt-0.5">{scanOutput.verdict}</p>
                   </div>
                   <div>
-                    <p className="text-slate-400">Originality Score:</p>
-                    <p className="text-emerald-400 font-bold text-lg">{scanOutput.trustScore}%</p>
+                    <p className="text-neutral-400">Originality Score:</p>
+                    <p className="text-[#00ffaa] font-bold text-lg">{scanOutput.trustScore}%</p>
                   </div>
                   <div>
-                    <p className="text-slate-400">Plagiarism Index:</p>
-                    <p className="text-cyan-400 font-bold text-lg">{scanOutput.plagiarism}</p>
+                    <p className="text-neutral-400">Plagiarism Index:</p>
+                    <p className="text-indigo-400 font-bold text-lg">{scanOutput.plagiarism}</p>
                   </div>
                 </motion.div>
               )}
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
       {/* PROJECTXIA IN-HOUSE CUSTOM DEVELOPMENT AGENCY SECTION */}
       <section className="py-20 relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="p-8 sm:p-12 rounded-3xl bg-gradient-to-r from-gray-950 via-cyan-950/30 to-purple-950/30 border border-cyan-500/40 backdrop-blur-2xl shadow-2xl relative overflow-hidden">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.5 }}
+            className="p-8 sm:p-12 rounded-3xl bg-white/[0.02] border border-white/10 backdrop-blur-2xl shadow-2xl relative overflow-hidden"
+          >
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
               <div className="lg:col-span-8 space-y-4">
-                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-cyan-500/20 text-cyan-300 text-xs font-mono font-bold border border-cyan-500/30">
+                <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#00ffaa]/10 text-[#00ffaa] text-xs font-mono font-bold border border-[#00ffaa]/30">
                   <Code className="w-3.5 h-3.5" />
                   <span>PROJECTXIA WEB & HARDWARE DEVELOPMENT TEAM</span>
                 </div>
 
-                <h2 className="text-3xl sm:text-4xl font-display font-black text-white">
-                  Have a Startup Idea or Need a Final Year Build? We Build It for You!
+                <h2 className="text-3xl sm:text-5xl font-display font-black text-white leading-tight">
+                  Have a Startup Idea or Need a Final Year Build? <span className="text-gradient-pixellon">We Build It for You!</span>
                 </h2>
 
-                <p className="text-xs sm:text-sm font-mono text-slate-300 leading-relaxed max-w-2xl">
+                <p className="text-xs sm:text-sm font-sans text-neutral-300 leading-relaxed max-w-2xl">
                   Don't have time to build or need custom guidance? Our in-house engineering team designs and develops custom web apps, mobile apps, IoT hardware setups, AI models, and robotics projects from scratch with complete runbook documentation and milestone video walkthroughs.
                 </p>
 
@@ -745,9 +983,9 @@ const LandingPage = () => {
                       playSuccess();
                       setIsDevModalOpen(true);
                     }}
-                    className="px-6 py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-display font-bold text-sm flex items-center gap-2 shadow-lg shadow-cyan-500/30 transition-all hover:scale-105 cursor-pointer"
+                    className="px-7 py-3.5 rounded-full bg-[#00ffaa] hover:bg-[#33ffbb] text-black font-display font-bold text-xs flex items-center gap-2 shadow-[0_0_20px_rgba(0,255,170,0.4)] transition-all hover:scale-105 cursor-pointer"
                   >
-                    <Lightbulb className="w-4 h-4" />
+                    <Lightbulb className="w-4 h-4 text-black" />
                     <span>Submit Your Idea or Request Topic Suggestions</span>
                   </button>
                 </div>
@@ -779,13 +1017,13 @@ const LandingPage = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </section>
 
 
       {/* FEATURED PROJECTS CATALOG */}
-      <section className="py-16 relative z-10 border-t border-cyan-500/20 bg-gray-950/40">
+      <section className="py-16 relative z-10 border-t border-cyan-500/20 bg-gray-950/40 content-auto">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-start md:items-end justify-between mb-10 gap-4">
             <div>
@@ -818,6 +1056,8 @@ const LandingPage = () => {
                     <img
                       src={project.screenshots?.[0] || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=800&auto=format&fit=crop&q=80'}
                       alt={project.title}
+                      loading="lazy"
+                      decoding="async"
                       className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
 
@@ -905,7 +1145,7 @@ const LandingPage = () => {
       )}
 
       {/* FAQS SECTION */}
-      <section className="py-20 relative z-10 border-t border-cyan-500/20 bg-gray-950/60">
+      <section className="py-20 relative z-10 border-t border-cyan-500/20 bg-gray-950/60 content-auto">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
             <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-widest">

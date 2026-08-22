@@ -25,13 +25,14 @@ import {
   X,
   Check,
   Upload,
+  Sliders,
 } from 'lucide-react';
 import VideoPlayerModal from '../components/ui/VideoPlayerModal';
 import LicenseModal from '../components/ui/LicenseModal';
 import ShareProjectModal from '../components/ui/ShareProjectModal';
 import DealOfferModal from '../components/ui/DealOfferModal';
+import EditSellOrderModal from '../components/ui/EditSellOrderModal';
 import TermsModal from '../components/ui/TermsModal';
-import AuroraBackground from '../components/ui/AuroraBackground';
 import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -223,8 +224,6 @@ const ProjectDetailPage = () => {
 
   return (
     <div className="relative min-h-screen pt-8 pb-24 overflow-hidden">
-      <AuroraBackground />
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
         {/* Top Breadcrumb & Actions */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 text-xs font-mono text-slate-400">
@@ -300,6 +299,8 @@ const ProjectDetailPage = () => {
               <img
                 src={project.screenshots?.[0] || 'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1000&auto=format&fit=crop&q=80'}
                 alt={project.title}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover group-hover:scale-102 transition-transform duration-500"
               />
 
@@ -368,9 +369,24 @@ const ProjectDetailPage = () => {
 
               {/* Author Notice vs Buyer Actions */}
               {isAuthor ? (
-                <div className="p-4 rounded-2xl bg-purple-950/40 border border-purple-500/40 text-center space-y-2 font-mono text-xs text-purple-300">
-                  <p className="font-bold text-white">You are the author of this project.</p>
-                  <p className="text-[11px] text-slate-400">Use the Edit or Delete buttons at the top to manage your listing.</p>
+                <div className="p-5 rounded-2xl bg-purple-950/40 border border-purple-500/40 text-center space-y-3 font-mono text-xs text-purple-300">
+                  <div className="flex items-center justify-center gap-1.5 text-white font-bold text-sm">
+                    <span>👑 Your Active Sell Order</span>
+                  </div>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    You are the creator of this blueprint. Buying or proposing deals on your own project is disabled.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playClick();
+                      setIsEditModalOpen(true);
+                    }}
+                    className="w-full py-3 rounded-xl bg-gradient-to-r from-cyan-500 via-teal-400 to-emerald-400 hover:opacity-95 text-black font-display font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-cyan-500/20 transition-all cursor-pointer"
+                  >
+                    <Sliders className="w-4 h-4" />
+                    <span>✏️ Adjust Price / Edit Sell Order</span>
+                  </button>
                 </div>
               ) : (
                 <div className="space-y-2.5 pt-2">
@@ -593,126 +609,16 @@ const ProjectDetailPage = () => {
         </div>
       </div>
 
-      {/* EDIT PROJECT MODAL (AUTHOR ONLY) */}
+      {/* EDIT SELL ORDER & PRICE ADJUSTMENT MODAL (AUTHOR ONLY) */}
       {isEditModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
-          <div className="bg-gray-950 border border-cyan-500/40 rounded-3xl p-6 sm:p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto space-y-5 shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-              <h3 className="text-lg font-display font-bold text-white flex items-center gap-2">
-                <Edit3 className="w-5 h-5 text-cyan-400" />
-                Edit Project Listing
-              </h3>
-              <button
-                type="button"
-                onClick={() => setIsEditModalOpen(false)}
-                className="text-slate-400 hover:text-white p-1"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            {editError && (
-              <div className="p-3 rounded-xl bg-rose-950/80 border border-rose-500/50 text-rose-300 font-mono text-xs">
-                {editError}
-              </div>
-            )}
-
-            <form onSubmit={handleEditSubmit} className="space-y-4 font-mono text-xs">
-              <div>
-                <label className="block text-slate-300 mb-1">Project Title:</label>
-                <input
-                  type="text"
-                  required
-                  value={editFormData.title}
-                  onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
-                  className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3 py-2 text-white text-xs focus:outline-none"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-slate-300 mb-1">Asking Price (₹ INR):</label>
-                  <input
-                    type="number"
-                    required
-                    value={editFormData.price}
-                    onChange={(e) => setEditFormData({ ...editFormData, price: e.target.value })}
-                    className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3 py-2 text-white text-xs focus:outline-none"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-slate-300 mb-1">Department / Category:</label>
-                  <input
-                    type="text"
-                    value={editFormData.category}
-                    onChange={(e) => setEditFormData({ ...editFormData, category: e.target.value })}
-                    className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3 py-2 text-white text-xs focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-slate-300 mb-1">Tagline:</label>
-                <input
-                  type="text"
-                  value={editFormData.tagline}
-                  onChange={(e) => setEditFormData({ ...editFormData, tagline: e.target.value })}
-                  className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3 py-2 text-white text-xs focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 mb-1">Description & Abstract:</label>
-                <textarea
-                  rows={4}
-                  required
-                  value={editFormData.description}
-                  onChange={(e) => setEditFormData({ ...editFormData, description: e.target.value })}
-                  className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl p-3 text-white text-xs focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 mb-1">Tech Stack (Comma Separated):</label>
-                <input
-                  type="text"
-                  value={editFormData.techStack}
-                  onChange={(e) => setEditFormData({ ...editFormData, techStack: e.target.value })}
-                  className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl px-3 py-2 text-white text-xs focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-slate-300 mb-1">Key Features (One per line):</label>
-                <textarea
-                  rows={3}
-                  value={editFormData.features}
-                  onChange={(e) => setEditFormData({ ...editFormData, features: e.target.value })}
-                  className="w-full bg-gray-900 border border-slate-800 focus:border-cyan-400 rounded-xl p-3 text-white text-xs focus:outline-none"
-                />
-              </div>
-
-              <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-800">
-                <button
-                  type="button"
-                  onClick={() => setIsEditModalOpen(false)}
-                  className="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/15 text-slate-300 cursor-pointer"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={editLoading}
-                  className="px-6 py-2 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-bold flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
-                >
-                  <Check className="w-4 h-4" />
-                  <span>{editLoading ? 'Saving...' : 'Save Changes'}</span>
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <EditSellOrderModal
+          isOpen={isEditModalOpen}
+          project={project}
+          onClose={() => setIsEditModalOpen(false)}
+          onProjectUpdated={(updatedProject) => {
+            setProject(updatedProject);
+          }}
+        />
       )}
 
       {/* DELETE CONFIRMATION MODAL (AUTHOR ONLY) */}

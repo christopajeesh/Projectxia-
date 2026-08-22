@@ -17,7 +17,6 @@ import {
   Check,
   HelpCircle,
 } from 'lucide-react';
-import AuroraBackground from '../components/ui/AuroraBackground';
 import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -96,14 +95,12 @@ const AiShieldPage = () => {
 
   return (
     <div className="relative min-h-screen pt-8 pb-24 overflow-hidden font-sans">
-      <AuroraBackground />
-
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-6">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-950/60 border border-purple-500/40 backdrop-blur-md shadow-neon-purple text-xs font-mono">
-            <Sparkles className="w-4 h-4 text-purple-400" />
-            <span className="font-bold text-purple-300">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/90 border border-violet-500/30 backdrop-blur-md shadow-md text-xs font-mono">
+            <Sparkles className="w-4 h-4 text-violet-400" />
+            <span className="font-bold text-violet-300">
               PROJECTXIA AST CODE & PLAGIARISM SHIELD
             </span>
           </div>
@@ -117,9 +114,9 @@ const AiShieldPage = () => {
         </div>
 
         {/* Plain English Guide Banner for Visitors */}
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/60 via-slate-900/80 to-cyan-950/60 border border-purple-500/30 text-xs text-slate-300 shadow-xl space-y-1">
+        <div className="p-4 rounded-2xl page-purpose-banner text-xs text-slate-300 shadow-lg space-y-1">
           <p className="font-bold text-white flex items-center gap-2 text-sm">
-            <HelpCircle className="w-4 h-4 text-purple-300 shrink-0" />
+            <HelpCircle className="w-4 h-4 text-violet-300 shrink-0" />
             <span>What is this page for? (Plagiarism Shield Guide)</span>
           </p>
           <p className="text-slate-300 text-xs leading-relaxed">
@@ -128,7 +125,7 @@ const AiShieldPage = () => {
         </div>
 
         {/* Code Input & File Drop Area */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-gray-950/90 border border-purple-500/40 backdrop-blur-2xl shadow-2xl space-y-5">
+        <div className="p-6 sm:p-8 rounded-3xl bg-[#0e1420]/90 border border-slate-800 backdrop-blur-xl shadow-2xl space-y-5">
           <form onSubmit={handleScan} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
               <div>
@@ -140,7 +137,7 @@ const AiShieldPage = () => {
                   required
                   value={fileName}
                   onChange={(e) => setFileName(e.target.value)}
-                  className="w-full bg-black/80 border border-slate-700 focus:border-purple-400 rounded-xl px-3.5 py-2.5 text-white text-xs font-mono focus:outline-none"
+                  className="w-full bg-slate-900/90 border border-slate-800 focus:border-violet-500 rounded-xl px-3.5 py-2.5 text-white text-xs font-mono focus:outline-none"
                 />
               </div>
 

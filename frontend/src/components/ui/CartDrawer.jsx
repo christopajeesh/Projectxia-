@@ -53,17 +53,17 @@ const CartDrawer = () => {
           transition={{ type: 'spring', damping: 26, stiffness: 220 }}
           className="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10"
         >
-          <div className="w-screen max-w-md bg-gray-950/95 border-l border-cyan-500/30 shadow-2xl shadow-cyan-950/50 flex flex-col backdrop-blur-2xl text-slate-100">
+          <div className="w-screen max-w-md bg-[#0e1420]/95 border-l border-slate-800 shadow-2xl shadow-black/80 flex flex-col backdrop-blur-2xl text-slate-100">
             {/* Drawer Header */}
-            <div className="p-6 border-b border-cyan-500/20 bg-gradient-to-r from-gray-950 via-cyan-950/40 to-gray-950 flex items-center justify-between">
+            <div className="p-6 border-b border-slate-800 bg-gradient-to-r from-obsidian-950 via-slate-900/60 to-obsidian-950 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-400">
+                <div className="p-2.5 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 text-indigo-400">
                   <ShoppingBag className="w-5 h-5" />
                 </div>
                 <div>
                   <h3 className="text-base font-display font-black text-white flex items-center gap-2">
                     <span>Engineering Cart</span>
-                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 border border-cyan-500/30">
+                    <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                       {cart.length} {cart.length === 1 ? 'Item' : 'Items'}
                     </span>
                   </h3>

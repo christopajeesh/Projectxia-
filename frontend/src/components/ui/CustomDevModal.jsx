@@ -17,7 +17,6 @@ import {
   Check,
 } from 'lucide-react';
 import { useSound } from '../../context/SoundContext';
-import AuroraBackground from './AuroraBackground';
 import confetti from 'canvas-confetti';
 import api from '../../services/api';
 
@@ -95,9 +94,7 @@ const CustomDevModal = ({ isOpen, onClose }) => {
           className="relative w-full max-w-2xl bg-gray-950 border border-purple-500/50 rounded-3xl overflow-hidden shadow-2xl shadow-purple-500/30 z-10 text-left p-6 sm:p-8 space-y-6 max-h-[92vh] overflow-y-auto text-slate-100"
         >
           {/* Inner Dialog Glow */}
-          <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden z-0">
-            <AuroraBackground theme="purple" />
-          </div>
+          <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden z-0 cyber-mobile-mesh" />
 
           <div className="relative z-10 space-y-5">
             {/* Header */}

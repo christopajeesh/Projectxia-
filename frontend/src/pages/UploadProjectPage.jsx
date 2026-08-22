@@ -26,7 +26,6 @@ import {
   FileArchive,
   RefreshCw,
 } from 'lucide-react';
-import AuroraBackground from '../components/ui/AuroraBackground';
 import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
@@ -279,14 +278,12 @@ const UploadProjectPage = () => {
 
   return (
     <div className="relative min-h-screen pt-8 pb-24 overflow-hidden">
-      <AuroraBackground />
-
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 space-y-5 font-sans">
         {/* Header */}
         <div className="text-center space-y-2">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-cyan-950/60 border border-cyan-500/40 backdrop-blur-md shadow-neon-cyan font-mono text-xs">
-            <Shield className="w-4 h-4 text-cyan-400" />
-            <span className="font-bold text-cyan-300">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-900/90 border border-indigo-500/30 backdrop-blur-md shadow-md font-mono text-xs">
+            <Shield className="w-4 h-4 text-indigo-400" />
+            <span className="font-bold text-indigo-300">
               PROJECTXIA SELLER VAULT • MONETIZE YOUR CODE
             </span>
           </div>
@@ -300,7 +297,7 @@ const UploadProjectPage = () => {
         </div>
 
         {/* Plain-English Seller Guide for Innovators */}
-        <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/60 via-slate-900/80 to-cyan-950/60 border border-emerald-500/30 text-xs text-slate-300 shadow-xl space-y-1">
+        <div className="p-4 rounded-2xl page-purpose-banner text-xs text-slate-300 shadow-lg space-y-1">
           <p className="font-bold text-white flex items-center gap-2 text-sm">
             <span className="p-1 rounded bg-emerald-500/20 text-emerald-300">💰</span>
             <span>What is this page for? (Seller Guide)</span>
@@ -315,7 +312,7 @@ const UploadProjectPage = () => {
           <div
             className={`p-3 rounded-2xl border text-center transition-all ${
               currentStep === 1
-                ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 font-bold shadow-neon-cyan'
+                ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300 font-bold shadow-md'
                 : 'bg-emerald-950/40 border-emerald-500/40 text-emerald-400 font-bold'
             }`}
           >
@@ -324,8 +321,8 @@ const UploadProjectPage = () => {
           <div
             className={`p-3 rounded-2xl border text-center transition-all ${
               currentStep === 2
-                ? 'bg-cyan-500/20 border-cyan-400 text-cyan-300 font-bold shadow-neon-cyan'
-                : 'bg-gray-900/60 border-slate-800 text-slate-400'
+                ? 'bg-indigo-600/20 border-indigo-500 text-indigo-300 font-bold shadow-md'
+                : 'bg-slate-900/60 border-slate-800 text-slate-400'
             }`}
           >
             Step 2: Media, Video & AI Verification
@@ -344,7 +341,7 @@ const UploadProjectPage = () => {
         )}
 
         {/* Streamlined Card Form */}
-        <div className="p-6 sm:p-8 rounded-3xl bg-gray-950/90 border border-cyan-500/30 backdrop-blur-2xl shadow-2xl space-y-6">
+        <div className="p-6 sm:p-8 rounded-3xl bg-[#0e1420]/90 border border-slate-800 backdrop-blur-xl shadow-2xl space-y-6">
           {/* ============================================================ */}
           {/* STEP 1: Project Overview & Pricing */}
           {/* ============================================================ */}

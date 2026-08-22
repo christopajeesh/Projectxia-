@@ -21,7 +21,6 @@ import {
 import { useCart } from '../../context/CartContext';
 import { useSound } from '../../context/SoundContext';
 import { useAuth } from '../../context/AuthContext';
-import AuroraBackground from './AuroraBackground';
 import LicenseModal from './LicenseModal';
 import api from '../../services/api';
 
@@ -157,9 +156,7 @@ const CheckoutModal = () => {
           className="relative w-full max-w-lg bg-gray-950 border border-cyan-500/50 rounded-3xl overflow-hidden shadow-2xl shadow-cyan-500/30 z-10 text-left max-h-[92vh] overflow-y-auto text-slate-100"
         >
           {/* Inner Ambient Glow */}
-          <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden z-0">
-            <AuroraBackground theme={purchasedOrder ? 'purple' : 'cyan'} />
-          </div>
+          <div className="absolute inset-0 pointer-events-none opacity-20 overflow-hidden z-0 cyber-mobile-mesh" />
 
           <div className="relative z-10">
             {/* Header */}
