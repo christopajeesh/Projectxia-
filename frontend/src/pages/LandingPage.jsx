@@ -385,65 +385,6 @@ const LandingPage = () => {
         </div>
       </section>
 
-      {/* ANIMATED INFINITE GLASS MARQUEE RIBBON (Tech Stack & Real-Time Pulse) */}
-      <div className="py-5 relative z-10 overflow-hidden border-y border-white/15 bg-white/[0.02] backdrop-blur-3xl">
-        <div className="flex gap-8 whitespace-nowrap animate-marquee select-none">
-          <div className="flex items-center gap-8 shrink-0">
-            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2 shadow-[0_0_15px_rgba(0,255,170,0.15)]">
-              <span className="w-2 h-2 rounded-full bg-[#00ffaa] animate-ping" />
-              React 18 & Vite 5 Engine
-            </span>
-            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-              Framer Motion 3D Physics
-            </span>
-            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
-              <Shield className="w-3.5 h-3.5 text-[#00ffaa]" />
-              Python AST Plagiarism Protection
-            </span>
-            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
-              Lenis Smooth Momentum Scroll
-            </span>
-            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
-              <Cpu className="w-3.5 h-3.5 text-purple-400" />
-              IoT ESP32 & LoRa Wireless
-            </span>
-            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
-              <Lock className="w-3.5 h-3.5 text-cyan-400" />
-              Tamper-Proof Code Encryption
-            </span>
-          </div>
-          {/* Duplicate set for seamless infinite loop */}
-          <div className="flex items-center gap-8 shrink-0">
-            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2 shadow-[0_0_15px_rgba(0,255,170,0.15)]">
-              <span className="w-2 h-2 rounded-full bg-[#00ffaa] animate-ping" />
-              React 18 & Vite 5 Engine
-            </span>
-            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
-              <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-              Framer Motion 3D Physics
-            </span>
-            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
-              <Shield className="w-3.5 h-3.5 text-[#00ffaa]" />
-              Python AST Plagiarism Protection
-            </span>
-            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
-              <Zap className="w-3.5 h-3.5 text-amber-400" />
-              Lenis Smooth Momentum Scroll
-            </span>
-            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
-              <Cpu className="w-3.5 h-3.5 text-purple-400" />
-              IoT ESP32 & LoRa Wireless
-            </span>
-            <span className="px-4 py-2 rounded-full bg-white/5 border border-white/15 text-xs font-mono text-neutral-200 flex items-center gap-2">
-              <Lock className="w-3.5 h-3.5 text-cyan-400" />
-              Tamper-Proof Code Encryption
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* ================================================================= */}
       {/* NEW USER & CUSTOMER GUIDE: 4 CORE PLATFORM PILLARS EXPLAINED    */}
       {/* ================================================================= */}
