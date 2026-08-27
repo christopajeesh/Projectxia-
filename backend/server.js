@@ -107,12 +107,12 @@ app.use(errorHandler);
 const PORT = process.env.PORT || 5000;
 
 if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
-  server.listen(PORT, () => {
+  server.listen(PORT, '0.0.0.0', () => {
     console.log(`
     ======================================================
     🚀 [ProjectXia Backend Engine] OPERATIONAL ON PORT ${PORT}
     🛡️ [Security Shield] Zero-Day & Plagiarism Defense ACTIVE
-    🌐 [Real-Time Gateway] Socket.IO Engine LISTENING
+    🌐 [Real-Time Gateway] Socket.IO Engine LISTENING (0.0.0.0:${PORT})
     ======================================================
     `);
   });

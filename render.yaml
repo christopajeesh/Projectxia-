@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: projectxia-platform
+    env: node
+    plan: free
+    buildCommand: npm run install:all && npm run build
+    startCommand: node backend/server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000

@@ -2,9 +2,11 @@ import mongoose from 'mongoose';
 import dns from 'dns';
 
 // Fix for Windows ISP DNS blocking MongoDB Atlas SRV lookups
-try {
-  dns.setServers(['8.8.8.8', '1.1.1.1']);
-} catch (e) {}
+if (process.platform === 'win32') {
+  try {
+    dns.setServers(['8.8.8.8', '1.1.1.1']);
+  } catch (e) {}
+}
 
 let isConnected = false;
 let useMemoryFallback = false;
