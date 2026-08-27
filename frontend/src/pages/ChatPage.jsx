@@ -340,11 +340,28 @@ const ChatPage = () => {
     setShowMenu(false);
   };
 
+  const handleDeleteConversation = async (convId, e) => {
+    if (e) e.stopPropagation();
+    if (!window.confirm('Permanently delete this chat conversation?')) return;
+    playClick();
+    try {
+      await api.delete(`/chat/conversations/${convId}`);
+      setConversations((prev) => prev.filter((c) => c._id !== convId));
+      if (activeConv?._id === convId) {
+        setActiveConv(null);
+        setMessages([]);
+      }
+      setShowMenu(false);
+    } catch (err) {
+      console.error('Delete error:', err);
+    }
+  };
+
   const getPartner = (conv) => {
     if (!conv) return { name: 'Dr. Priya Venkatesh', avatar: '' };
     const myId = user?._id || user?.id || 'user_001_buyer';
     const partner = conv.participants?.find((p) => p.userId !== myId) || conv.participants?.[0];
-    return partner || { name: 'Verified Creator', avatar: '' };
+    return partner || { name: 'Project Creator', avatar: '' };
   };
 
   const filteredConversations = conversations.filter((c) => {
@@ -414,7 +431,7 @@ const ChatPage = () => {
                       playClick();
                       setActiveConv(conv);
                     }}
-                    className={`p-3 rounded-2xl cursor-pointer transition-all flex items-center gap-3 ${
+                    className={`group p-3 rounded-2xl cursor-pointer transition-all flex items-center gap-3 relative ${
                       isSelected
                         ? 'bg-[#2a3942] border border-[#00a884]/40 shadow-md'
                         : 'hover:bg-[#202c33]/70'
@@ -429,7 +446,7 @@ const ChatPage = () => {
                       <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#00a884] border-2 border-[#111b21] rounded-full" />
                     </div>
 
-                    <div className="flex-1 min-w-0">
+                    <div className="flex-1 min-w-0 pr-6">
                       <div className="flex items-center justify-between">
                         <h4 className="font-display font-bold text-xs text-[#e9edef] truncate">{partner.name}</h4>
                         <span className="text-[10px] font-mono text-[#00a884] font-bold">Online</span>
@@ -443,6 +460,16 @@ const ChatPage = () => {
                         </span>
                       )}
                     </div>
+
+                    {/* DELETE CHAT BUTTON */}
+                    <button
+                      type="button"
+                      onClick={(e) => handleDeleteConversation(conv._id, e)}
+                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-all absolute right-2 top-3 cursor-pointer"
+                      title="Delete Chat Conversation"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
                   </div>
                 );
               })}
@@ -489,13 +516,20 @@ const ChatPage = () => {
                       </button>
 
                       {showMenu && (
-                        <div className="absolute right-0 top-11 w-44 bg-[#233138] border border-[#374248] rounded-2xl shadow-2xl py-2 z-50 text-xs font-mono text-[#e9edef]">
+                        <div className="absolute right-0 top-11 w-48 bg-[#233138] border border-[#374248] rounded-2xl shadow-2xl py-2 z-50 text-xs font-mono text-[#e9edef] space-y-1">
                           <button
                             onClick={refreshChatHistory}
                             className="w-full px-4 py-2 text-left hover:bg-[#111b21] flex items-center gap-2 text-[#00a884] cursor-pointer font-bold"
                           >
                             <Sparkles className="w-3.5 h-3.5" />
                             <span>Sync Chat History</span>
+                          </button>
+                          <button
+                            onClick={() => handleDeleteConversation(activeConv._id)}
+                            className="w-full px-4 py-2 text-left hover:bg-[#111b21] flex items-center gap-2 text-rose-400 cursor-pointer font-bold border-t border-[#374248]/50"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Delete Chat</span>
                           </button>
                         </div>
                       )}

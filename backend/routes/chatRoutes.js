@@ -5,12 +5,14 @@ import {
   sendMessage,
   reactMessage,
   markMessagesRead,
+  deleteConversation,
 } from '../controllers/chatController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
 router.get('/conversations', protect, getConversations);
+router.delete('/conversations/:id', protect, deleteConversation);
 router.get('/messages/:conversationId', protect, getMessages);
 router.post('/messages', protect, sendMessage);
 router.post('/messages/:id/react', protect, reactMessage);

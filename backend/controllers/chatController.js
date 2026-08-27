@@ -5,69 +5,16 @@ import { memoryStore } from '../seed/seedData.js';
 export const getConversations = async (req, res) => {
   try {
     const userId = req.user?._id || req.user?.id || 'user_001_buyer';
-    const userName = req.user?.name || 'Verified Innovator';
-    const userAvatar = req.user?.avatar || '';
+    const userEmail = (req.user?.email || '').toLowerCase();
 
     if (!memoryStore.conversations) {
       memoryStore.conversations = [];
     }
 
-    let userConvs = memoryStore.conversations.filter(c =>
-      c.participants.some(p => p.userId === userId || p.userId === 'user_001_buyer' || p.userId === 'user_admin_theprojectxia')
+    // Filter conversations where active user is a participant
+    const userConvs = memoryStore.conversations.filter(c =>
+      c.participants.some(p => p.userId === userId || (userEmail && p.email?.toLowerCase() === userEmail))
     );
-
-    // If user has no conversations yet, create a default active conversation with Senior Creator Dr. Priya
-    if (userConvs.length === 0) {
-      const defaultConvId = `conv_default_${userId}`;
-      const defaultConv = {
-        _id: defaultConvId,
-        participants: [
-          {
-            userId,
-            name: userName,
-            avatar: userAvatar,
-            role: 'user',
-            isOnline: true,
-          },
-          {
-            userId: 'user_002_creator',
-            name: 'Dr. Priya Venkatesh',
-            avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
-            role: 'creator',
-            isOnline: true,
-          },
-        ],
-        projectContext: {
-          title: 'Direct Creator Support & Negotiation',
-          price: 2999,
-        },
-        lastMessage: {
-          text: 'Welcome to ProjectXia! Direct creator chat & deal negotiation is active.',
-          createdAt: new Date(),
-        },
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
-
-      memoryStore.conversations.unshift(defaultConv);
-      userConvs = [defaultConv];
-
-      if (!memoryStore.messages) memoryStore.messages = [];
-      memoryStore.messages.push({
-        _id: `msg_welcome_${Date.now()}`,
-        conversationId: defaultConvId,
-        sender: {
-          id: 'user_002_creator',
-          name: 'Dr. Priya Venkatesh',
-          avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
-        },
-        receiverId: userId,
-        text: 'Hello! Welcome to ProjectXia. I am Dr. Priya Venkatesh, senior platform creator. Feel free to ask me technical questions or submit negotiation offers directly.',
-        messageType: 'text',
-        isRead: true,
-        createdAt: new Date(),
-      });
-    }
 
     res.json({
       success: true,
@@ -260,6 +207,28 @@ export const markMessagesRead = async (req, res) => {
     });
 
     res.json({ success: true, message: 'Conversation marked as read.' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @desc    Delete a conversation permanently
+// @route   DELETE /api/chat/conversations/:id
+export const deleteConversation = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (memoryStore.conversations) {
+      memoryStore.conversations = memoryStore.conversations.filter(c => c._id !== id);
+    }
+    if (memoryStore.messages) {
+      memoryStore.messages = memoryStore.messages.filter(m => m.conversationId !== id);
+    }
+
+    res.json({
+      success: true,
+      message: 'Conversation deleted successfully.',
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
