@@ -1,4 +1,6 @@
 import { memoryStore } from '../seed/seedData.js';
+import Message from '../models/Message.js';
+import Conversation from '../models/Conversation.js';
 
 // @desc    Get all conversations for the active user
 // @route   GET /api/chat/conversations
@@ -11,10 +13,31 @@ export const getConversations = async (req, res) => {
       memoryStore.conversations = [];
     }
 
-    // Filter conversations where active user is a participant
-    const userConvs = memoryStore.conversations.filter(c =>
+    let userConvs = memoryStore.conversations.filter(c =>
       c.participants.some(p => p.userId === userId || (userEmail && p.email?.toLowerCase() === userEmail))
     );
+
+    // Also fetch from MongoDB database if available
+    try {
+      const dbConvs = await Conversation.find({
+        $or: [
+          { 'participants.userId': userId },
+          { 'participants.email': userEmail }
+        ]
+      }).sort({ updatedAt: -1 }).lean();
+
+      if (dbConvs && dbConvs.length > 0) {
+        const mergedMap = new Map();
+        [...dbConvs, ...userConvs].forEach(c => {
+          if (!mergedMap.has(String(c._id))) {
+            mergedMap.set(String(c._id), c);
+          }
+        });
+        userConvs = Array.from(mergedMap.values());
+      }
+    } catch (dbErr) {
+      console.warn('MongoDB conversation query fallback to memoryStore:', dbErr.message);
+    }
 
     res.json({
       success: true,
@@ -32,26 +55,19 @@ export const getMessages = async (req, res) => {
     const { conversationId } = req.params;
     let messages = (memoryStore.messages || []).filter(m => m.conversationId === conversationId && !m.isDeleted);
 
-    // If empty, auto-generate welcome message for new conversation ID
-    if (messages.length === 0 && conversationId) {
-      const conv = (memoryStore.conversations || []).find(c => c._id === conversationId);
-      const seedMsg = {
-        _id: `msg_auto_${Date.now()}`,
-        conversationId,
-        sender: {
-          id: conv?.participants?.[1]?.userId || 'user_002_creator',
-          name: conv?.participants?.[1]?.name || 'Dr. Priya Venkatesh',
-          avatar: conv?.participants?.[1]?.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
-        },
-        receiverId: req.user?._id || req.user?.id || 'user_001_buyer',
-        text: conv?.lastMessage?.text || 'Direct project discussion initiated. Ask any questions or negotiate terms directly.',
-        messageType: 'text',
-        isRead: true,
-        createdAt: conv?.createdAt || new Date(),
-      };
-      if (!memoryStore.messages) memoryStore.messages = [];
-      memoryStore.messages.push(seedMsg);
-      messages = [seedMsg];
+    // Fetch from MongoDB database
+    try {
+      const dbMsgs = await Message.find({ conversationId, isDeleted: { $ne: true } }).sort({ createdAt: 1 }).lean();
+      if (dbMsgs && dbMsgs.length > 0) {
+        const msgMap = new Map();
+        [...messages, ...dbMsgs].forEach(m => {
+          const key = String(m._id || m.id);
+          msgMap.set(key, m);
+        });
+        messages = Array.from(msgMap.values());
+      }
+    } catch (dbErr) {
+      console.warn('MongoDB message query fallback to memoryStore:', dbErr.message);
     }
 
     res.json({
@@ -87,8 +103,8 @@ export const sendMessage = async (req, res) => {
 
     let targetConvId = conversationId || `conv_${Date.now()}`;
 
-    // If conversation does not exist, create one preserving targetConvId
-    let conversation = memoryStore.conversations.find(c => c._id === targetConvId);
+    // Update memoryStore conversation
+    let conversation = (memoryStore.conversations || []).find(c => c._id === targetConvId);
     if (!conversation) {
       conversation = {
         _id: targetConvId,
@@ -110,11 +126,7 @@ export const sendMessage = async (req, res) => {
             lastSeen: new Date(),
           },
         ],
-        projectContext: projectData || {
-          projectId: 'proj_001_neuromesh',
-          title: 'NeuroMesh AI: Autonomous Edge Vision',
-          price: 3999,
-        },
+        projectContext: projectData || null,
         lastMessage: {
           text: text || 'Sent an attachment',
           senderId: sender.id,
@@ -123,6 +135,7 @@ export const sendMessage = async (req, res) => {
         },
         unreadCount: {},
       };
+      if (!memoryStore.conversations) memoryStore.conversations = [];
       memoryStore.conversations.unshift(conversation);
     } else {
       conversation.lastMessage = {
@@ -150,7 +163,40 @@ export const sendMessage = async (req, res) => {
       createdAt: new Date(),
     };
 
+    if (!memoryStore.messages) memoryStore.messages = [];
     memoryStore.messages.push(newMessage);
+
+    // Save to MongoDB Database
+    try {
+      await Message.create({
+        _id: newMessage._id,
+        conversationId: targetConvId,
+        sender,
+        receiverId: newMessage.receiverId,
+        text: newMessage.text,
+        messageType: newMessage.messageType,
+        mediaUrl: newMessage.mediaUrl,
+        fileName: newMessage.fileName,
+        projectData: newMessage.projectData,
+        codeData: newMessage.codeData,
+        audioDuration: newMessage.audioDuration,
+        isRead: false,
+      });
+
+      await Conversation.findByIdAndUpdate(
+        targetConvId,
+        {
+          _id: targetConvId,
+          participants: conversation.participants,
+          projectContext: conversation.projectContext,
+          lastMessage: conversation.lastMessage,
+          updatedAt: new Date(),
+        },
+        { upsert: true, new: true }
+      );
+    } catch (dbErr) {
+      console.warn('MongoDB message insert fallback:', dbErr.message);
+    }
 
     res.status(201).json({
       success: true,
@@ -170,23 +216,35 @@ export const reactMessage = async (req, res) => {
     const { emoji } = req.body;
     const userId = req.user?._id || req.user?.id || 'user_001_buyer';
 
-    const message = memoryStore.messages.find(m => m._id === id);
-    if (!message) {
-      return res.status(404).json({ success: false, message: 'Message not found.' });
+    const message = (memoryStore.messages || []).find(m => m._id === id);
+    if (message) {
+      if (!message.reactions) message.reactions = [];
+      const existingIndex = message.reactions.findIndex(r => r.userId === userId && r.emoji === emoji);
+      if (existingIndex > -1) {
+        message.reactions.splice(existingIndex, 1);
+      } else {
+        message.reactions.push({ emoji, userId });
+      }
     }
 
-    if (!message.reactions) message.reactions = [];
-
-    const existingIndex = message.reactions.findIndex(r => r.userId === userId && r.emoji === emoji);
-    if (existingIndex > -1) {
-      message.reactions.splice(existingIndex, 1);
-    } else {
-      message.reactions.push({ emoji, userId });
+    try {
+      const dbMsg = await Message.findById(id);
+      if (dbMsg) {
+        const existingIndex = dbMsg.reactions.findIndex(r => r.userId === userId && r.emoji === emoji);
+        if (existingIndex > -1) {
+          dbMsg.reactions.splice(existingIndex, 1);
+        } else {
+          dbMsg.reactions.push({ emoji, userId });
+        }
+        await dbMsg.save();
+      }
+    } catch (dbErr) {
+      console.warn('MongoDB reaction update fallback:', dbErr.message);
     }
 
     res.json({
       success: true,
-      reactions: message.reactions,
+      reactions: message ? message.reactions : [],
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -206,6 +264,15 @@ export const markMessagesRead = async (req, res) => {
       }
     });
 
+    try {
+      await Message.updateMany(
+        { conversationId, isRead: false },
+        { $set: { isRead: true, readAt: new Date() } }
+      );
+    } catch (dbErr) {
+      console.warn('MongoDB mark read fallback:', dbErr.message);
+    }
+
     res.json({ success: true, message: 'Conversation marked as read.' });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -223,6 +290,13 @@ export const deleteConversation = async (req, res) => {
     }
     if (memoryStore.messages) {
       memoryStore.messages = memoryStore.messages.filter(m => m.conversationId !== id);
+    }
+
+    try {
+      await Conversation.deleteOne({ _id: id });
+      await Message.deleteMany({ conversationId: id });
+    } catch (dbErr) {
+      console.warn('MongoDB delete conversation fallback:', dbErr.message);
     }
 
     res.json({

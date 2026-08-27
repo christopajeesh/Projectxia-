@@ -136,7 +136,7 @@ const ChatPage = () => {
             participants: [
               {
                 userId: user?._id || user?.id || 'user_001_buyer',
-                name: user?.name || 'Rohan Sharma',
+                name: user?.name || 'Verified User',
                 avatar: user?.avatar,
                 role: 'user',
               },
@@ -172,12 +172,37 @@ const ChatPage = () => {
   };
 
   const fetchMessages = async (convId) => {
+    if (!convId) return;
+
+    // Load from local storage cache first for 0ms instant display
+    try {
+      const cached = localStorage.getItem(`px_msgs_${convId}`);
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMessages(parsed);
+        }
+      }
+    } catch (err) {}
+
     try {
       const res = await api.get(`/chat/messages/${convId}`);
-      setMessages(res.data.messages || []);
+      const fetchedMsgs = res.data.messages || [];
+      if (fetchedMsgs.length > 0) {
+        setMessages(fetchedMsgs);
+        localStorage.setItem(`px_msgs_${convId}`, JSON.stringify(fetchedMsgs));
+      }
       setTimeout(scrollToBottom, 100);
-    } catch (e) {}
+    } catch (e) {
+      console.error('Fetch messages error:', e);
+    }
   };
+
+  useEffect(() => {
+    if (activeConv?._id && messages.length > 0) {
+      localStorage.setItem(`px_msgs_${activeConv._id}`, JSON.stringify(messages));
+    }
+  }, [activeConv?._id, messages]);
 
   // SEND TEXT MESSAGE (With instant optimistic rendering)
   const handleSendMessage = async (e) => {
@@ -342,10 +367,11 @@ const ChatPage = () => {
 
   const handleDeleteConversation = async (convId, e) => {
     if (e) e.stopPropagation();
-    if (!window.confirm('Permanently delete this chat conversation?')) return;
+    if (!window.confirm('Permanently delete this chat conversation and all history?')) return;
     playClick();
     try {
       await api.delete(`/chat/conversations/${convId}`);
+      localStorage.removeItem(`px_msgs_${convId}`);
       setConversations((prev) => prev.filter((c) => c._id !== convId));
       if (activeConv?._id === convId) {
         setActiveConv(null);
