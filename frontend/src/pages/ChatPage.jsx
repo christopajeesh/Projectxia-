@@ -179,7 +179,7 @@ const ChatPage = () => {
     } catch (e) {}
   };
 
-  // SEND TEXT MESSAGE (Strictly single emit & deduplicated)
+  // SEND TEXT MESSAGE (With instant optimistic rendering)
   const handleSendMessage = async (e) => {
     if (e) e.preventDefault();
     if ((!inputMsg.trim() && !attachmentFile) || !activeConv || isSending) return;
@@ -189,13 +189,38 @@ const ChatPage = () => {
     const messageText = inputMsg;
     setInputMsg('');
 
-    const payload = {
+    const currentUserId = user?._id || user?.id || 'user_001_buyer';
+    const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`;
+
+    const optimisticMsg = {
+      _id: tempId,
       conversationId: activeConv._id,
-      receiverId: activeConv.participants?.find((p) => p.userId !== (user?._id || user?.id))?.userId || 'user_002_creator',
+      sender: {
+        id: currentUserId,
+        name: user?.name || 'Rohan Sharma',
+        avatar: user?.avatar || '',
+      },
+      receiverId: activeConv.participants?.find((p) => p.userId !== currentUserId)?.userId || 'user_002_creator',
       text: messageText,
       messageType: attachmentFile ? 'media' : 'text',
       mediaUrl: attachmentFile?.preview || null,
       fileName: attachmentFile?.name || null,
+      projectData: activeConv.projectContext,
+      isRead: false,
+      createdAt: new Date(),
+    };
+
+    // 1. Instantly render on screen (0ms delay)
+    setMessages((prev) => [...prev, optimisticMsg]);
+    setTimeout(scrollToBottom, 50);
+
+    const payload = {
+      conversationId: activeConv._id,
+      receiverId: optimisticMsg.receiverId,
+      text: messageText,
+      messageType: optimisticMsg.messageType,
+      mediaUrl: optimisticMsg.mediaUrl,
+      fileName: optimisticMsg.fileName,
       projectData: activeConv.projectContext,
     };
 
@@ -204,19 +229,21 @@ const ChatPage = () => {
 
     try {
       const res = await api.post('/chat/messages', payload);
-      const newMsg = res.data.message;
+      const newMsg = res.data.message || optimisticMsg;
 
-      // Add to local state ONCE
-      setMessages((prev) => {
-        const exists = prev.some((m) => (m._id || m.id) === (newMsg._id || newMsg.id));
-        if (exists) return prev;
-        return [...prev, newMsg];
-      });
+      // 2. Update temp message with server confirmed message
+      setMessages((prev) =>
+        prev.map((m) => (m._id === tempId ? newMsg : m))
+      );
 
-      // Emit socket to partner ONLY (partner receives it via socket.to)
+      if (res.data.conversation && res.data.conversation._id !== activeConv._id) {
+        setActiveConv(res.data.conversation);
+      }
+
+      // 3. Emit socket to partner
       if (socket) {
         socket.emit('send_message', {
-          conversationId: activeConv._id,
+          conversationId: newMsg.conversationId || activeConv._id,
           message: newMsg,
         });
       }
@@ -228,16 +255,39 @@ const ChatPage = () => {
     }
   };
 
-  // SEND VOICE NOTE
+  // SEND VOICE NOTE (With instant optimistic rendering)
   const sendVoiceNote = async () => {
     if (!activeConv || isSending) return;
     playClick();
     setIsSending(true);
 
+    const currentUserId = user?._id || user?.id || 'user_001_buyer';
+    const tempId = `temp_voice_${Date.now()}`;
+
+    const optimisticMsg = {
+      _id: tempId,
+      conversationId: activeConv._id,
+      sender: {
+        id: currentUserId,
+        name: user?.name || 'Rohan Sharma',
+        avatar: user?.avatar || '',
+      },
+      receiverId: activeConv.participants?.find((p) => p.userId !== currentUserId)?.userId || 'user_002_creator',
+      text: 'Voice note (0:18s)',
+      messageType: 'voice',
+      audioDuration: 18,
+      projectData: activeConv.projectContext,
+      isRead: false,
+      createdAt: new Date(),
+    };
+
+    setMessages((prev) => [...prev, optimisticMsg]);
+    setTimeout(scrollToBottom, 50);
+
     const payload = {
       conversationId: activeConv._id,
-      receiverId: activeConv.participants?.find((p) => p.userId !== (user?._id || user?.id))?.userId || 'user_002_creator',
-      text: 'Voice note (0:18s)',
+      receiverId: optimisticMsg.receiverId,
+      text: optimisticMsg.text,
       messageType: 'voice',
       audioDuration: 18,
       projectData: activeConv.projectContext,
@@ -245,20 +295,22 @@ const ChatPage = () => {
 
     try {
       const res = await api.post('/chat/messages', payload);
-      const newMsg = res.data.message;
+      const newMsg = res.data.message || optimisticMsg;
 
-      setMessages((prev) => {
-        const exists = prev.some((m) => (m._id || m.id) === (newMsg._id || newMsg.id));
-        if (exists) return prev;
-        return [...prev, newMsg];
-      });
+      setMessages((prev) =>
+        prev.map((m) => (m._id === tempId ? newMsg : m))
+      );
 
       if (socket) {
-        socket.emit('send_message', { conversationId: activeConv._id, message: newMsg });
+        socket.emit('send_message', {
+          conversationId: newMsg.conversationId || activeConv._id,
+          message: newMsg,
+        });
       }
       playSuccess();
       setTimeout(scrollToBottom, 100);
     } catch (e) {
+      console.error('Voice send error:', e);
     } finally {
       setIsSending(false);
     }
