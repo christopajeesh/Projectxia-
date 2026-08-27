@@ -153,10 +153,13 @@ const ChatPage = () => {
       if (location.state?.creatorId || location.state?.conversationId) {
         const targetConvId = location.state.conversationId;
         const creatorId = location.state.creatorId;
+        const creatorName = location.state.creatorName || 'Project Seller';
+        const creatorEmail = location.state.creatorEmail || '';
+        const creatorAvatar = location.state.creatorAvatar || '';
 
         let existing = mergedConvs.find((c) =>
           (targetConvId && c._id === targetConvId) ||
-          (creatorId && c.participants?.some((p) => p.userId === creatorId))
+          (creatorId && c.participants?.some((p) => p.userId === creatorId || (creatorEmail && p.email?.toLowerCase() === creatorEmail.toLowerCase())))
         );
 
         if (!existing) {
@@ -164,17 +167,17 @@ const ChatPage = () => {
             _id: targetConvId || `conv_${Date.now()}`,
             participants: [
               {
-                userId: user?._id || user?.id || 'user_001_buyer',
+                userId: user?._id || user?.id || 'user_guest',
                 email: user?.email || '',
                 name: user?.name || 'Verified User',
                 avatar: user?.avatar,
                 role: 'user',
               },
               {
-                userId: creatorId || 'user_002_creator',
-                email: 'priya.creator@projectxia.io',
-                name: location.state.creatorName || 'Dr. Priya Venkatesh',
-                avatar: location.state.creatorAvatar,
+                userId: creatorId || 'creator',
+                email: creatorEmail,
+                name: creatorName,
+                avatar: creatorAvatar,
                 role: 'creator',
               },
             ],
@@ -238,14 +241,14 @@ const ChatPage = () => {
       }
       setTimeout(scrollToBottom, 100);
     } catch (e) {
-      console.error('Fetch messages error:', e);
+      console.error('Failed fetching messages', e);
     }
   };
 
+  // Sync conversation lastMessage dynamically whenever messages change
   useEffect(() => {
-    if (activeConv?._id && messages.length > 0) {
+    if (activeConv && messages.length > 0) {
       const userKey = getUserKey();
-      localStorage.setItem(`px_msgs_${userKey}_${activeConv._id}`, JSON.stringify(messages));
 
       // Also update lastMessage in cached conversations
       setConversations((prevConvs) => {
@@ -277,18 +280,32 @@ const ChatPage = () => {
     const messageText = inputMsg;
     setInputMsg('');
 
-    const currentUserId = user?._id || user?.id || 'user_001_buyer';
+    const currentUserId = String(user?._id || user?.id || 'user_guest');
+    const currentUserEmail = String(user?.email || '').toLowerCase();
     const tempId = `temp_${Date.now()}_${Math.random().toString(36).substring(2, 5)}`;
+
+    const otherParticipant = activeConv.participants?.find(
+      (p) => String(p.userId) !== currentUserId && String(p.email || '').toLowerCase() !== currentUserEmail
+    );
+
+    const receiverId = otherParticipant?.userId || location.state?.creatorId || 'creator';
+    const receiverName = otherParticipant?.name || location.state?.creatorName || 'Project Seller';
+    const receiverEmail = otherParticipant?.email || location.state?.creatorEmail || '';
+    const receiverAvatar = otherParticipant?.avatar || location.state?.creatorAvatar || '';
 
     const optimisticMsg = {
       _id: tempId,
       conversationId: activeConv._id,
       sender: {
         id: currentUserId,
-        name: user?.name || 'Rohan Sharma',
+        email: currentUserEmail,
+        name: user?.name || 'Verified User',
         avatar: user?.avatar || '',
       },
-      receiverId: activeConv.participants?.find((p) => p.userId !== currentUserId)?.userId || 'user_002_creator',
+      receiverId,
+      receiverName,
+      receiverEmail,
+      receiverAvatar,
       text: messageText,
       messageType: attachmentFile ? 'media' : 'text',
       mediaUrl: attachmentFile?.preview || null,
@@ -304,7 +321,10 @@ const ChatPage = () => {
 
     const payload = {
       conversationId: activeConv._id,
-      receiverId: optimisticMsg.receiverId,
+      receiverId,
+      receiverName,
+      receiverEmail,
+      receiverAvatar,
       text: messageText,
       messageType: optimisticMsg.messageType,
       mediaUrl: optimisticMsg.mediaUrl,
@@ -328,11 +348,13 @@ const ChatPage = () => {
         setActiveConv(res.data.conversation);
       }
 
-      // 3. Emit socket to partner
+      // 3. Emit via real-time WebSocket to recipient
       if (socket) {
         socket.emit('send_message', {
-          conversationId: newMsg.conversationId || activeConv._id,
-          message: newMsg,
+          ...newMsg,
+          receiverId,
+          receiverEmail,
+          senderEmail: currentUserEmail,
         });
       }
       setTimeout(scrollToBottom, 100);

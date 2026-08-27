@@ -6,25 +6,37 @@ import Conversation from '../models/Conversation.js';
 // @route   GET /api/chat/conversations
 export const getConversations = async (req, res) => {
   try {
-    const userId = req.user?._id || req.user?.id || 'user_001_buyer';
-    const userEmail = (req.user?.email || '').toLowerCase();
+    const userId = String(req.user?._id || req.user?.id || '');
+    const userEmail = String(req.user?.email || '').toLowerCase();
 
     if (!memoryStore.conversations) {
       memoryStore.conversations = [];
     }
 
     let userConvs = memoryStore.conversations.filter(c =>
-      c.participants.some(p => p.userId === userId || (userEmail && p.email?.toLowerCase() === userEmail))
+      c.participants && c.participants.some(p => {
+        const pId = String(p.userId || p.id || '');
+        const pEmail = String(p.email || '').toLowerCase();
+        return (
+          (userId && pId === userId) ||
+          (userEmail && pEmail === userEmail) ||
+          (userEmail && pId.toLowerCase() === userEmail) ||
+          (userId && pEmail.toLowerCase() === userId.toLowerCase())
+        );
+      })
     );
 
     // Also fetch from MongoDB database if available
     try {
-      const dbConvs = await Conversation.find({
+      const dbQuery = {
         $or: [
           { 'participants.userId': userId },
-          { 'participants.email': userEmail }
+          { 'participants.email': userEmail },
+          { 'participants.userId': userEmail },
+          { 'participants.email': userId }
         ]
-      }).sort({ updatedAt: -1 }).lean();
+      };
+      const dbConvs = await Conversation.find(dbQuery).sort({ updatedAt: -1 }).lean();
 
       if (dbConvs && dbConvs.length > 0) {
         const mergedMap = new Map();
@@ -86,6 +98,9 @@ export const sendMessage = async (req, res) => {
     const {
       conversationId,
       receiverId,
+      receiverName,
+      receiverEmail,
+      receiverAvatar,
       text,
       messageType,
       mediaUrl,
@@ -96,10 +111,28 @@ export const sendMessage = async (req, res) => {
     } = req.body;
 
     const sender = {
-      id: req.user?._id || req.user?.id || 'user_001_buyer',
+      id: String(req.user?._id || req.user?.id || 'user_guest'),
+      email: (req.user?.email || '').toLowerCase(),
       name: req.user?.name || 'Verified User',
       avatar: req.user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
     };
+
+    let recEmail = (receiverEmail || '').toLowerCase();
+    let recName = receiverName || 'Project Seller';
+    let recAvatar = receiverAvatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80';
+
+    if (receiverId && (!recEmail || recName === 'Project Seller')) {
+      try {
+        const foundUser = await User.findOne({
+          $or: [{ _id: receiverId }, { email: receiverId }]
+        }).lean();
+        if (foundUser) {
+          if (foundUser.email) recEmail = foundUser.email.toLowerCase();
+          if (foundUser.name) recName = foundUser.name;
+          if (foundUser.avatar) recAvatar = foundUser.avatar;
+        }
+      } catch (e) {}
+    }
 
     let targetConvId = conversationId || `conv_${Date.now()}`;
 
@@ -111,6 +144,7 @@ export const sendMessage = async (req, res) => {
         participants: [
           {
             userId: sender.id,
+            email: sender.email,
             name: sender.name,
             avatar: sender.avatar,
             role: req.user?.role || 'user',
@@ -118,9 +152,10 @@ export const sendMessage = async (req, res) => {
             lastSeen: new Date(),
           },
           {
-            userId: receiverId || 'user_002_creator',
-            name: 'Dr. Priya Venkatesh',
-            avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+            userId: String(receiverId || 'creator'),
+            email: recEmail,
+            name: recName,
+            avatar: recAvatar,
             role: 'creator',
             isOnline: true,
             lastSeen: new Date(),

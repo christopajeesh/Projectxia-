@@ -131,9 +131,10 @@ const ProjectDetailPage = () => {
     }
     navigate('/chat', {
       state: {
-        creatorId: project.seller.id,
-        creatorName: project.seller.name,
-        creatorAvatar: project.seller.avatar,
+        creatorId: project.seller?.id || project.seller?._id || project.authorId,
+        creatorName: project.seller?.name || project.authorName || 'Project Seller',
+        creatorEmail: project.seller?.email || project.authorEmail || '',
+        creatorAvatar: project.seller?.avatar,
         projectContext: {
           projectId: project._id,
           title: project.title,
