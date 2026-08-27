@@ -53,7 +53,7 @@ const MarketplacePage = () => {
   const [search, setSearch] = useState(searchParams.get('search') || '');
   const [selectedCategory, setSelectedCategory] = useState(searchParams.get('category') || 'All');
   const [deliveryType, setDeliveryType] = useState('All');
-  const [maxPrice, setMaxPrice] = useState(25000);
+  const [maxPrice, setMaxPrice] = useState(1000000);
   const [sortBy, setSortBy] = useState('newest');
   const [verifiedOnly, setVerifiedOnly] = useState(false);
   const [hideOwnListings, setHideOwnListings] = useState(false);
@@ -304,7 +304,7 @@ const MarketplacePage = () => {
                   onChange={(e) => setVerifiedOnly(e.target.checked)}
                   className="rounded border-slate-700 bg-gray-900 text-cyan-400 focus:ring-0"
                 />
-                <span className="text-white font-bold">100% Plagiarism & Code-Audited Only</span>
+                <span className="text-white font-bold">Original Source Code Only</span>
               </label>
 
               {user && (
@@ -324,16 +324,16 @@ const MarketplacePage = () => {
             </div>
 
             <div className="flex items-center gap-3 text-slate-400">
-              <span>Max Budget: ₹{maxPrice.toLocaleString('en-IN')}</span>
+              <span>Max Budget: ₹{Number(maxPrice) >= 1000000 ? '10,00,000+ (Unlimited)' : Number(maxPrice).toLocaleString('en-IN')}</span>
               <input
                 type="range"
                 min="1000"
-                max="50000"
-                step="500"
+                max="1000000"
+                step="5000"
                 value={maxPrice}
                 onChange={(e) => setMaxPrice(e.target.value)}
                 onMouseUp={() => fetchMarketplaceProjects()}
-                className="w-28 accent-cyan-400"
+                className="w-32 accent-cyan-400"
               />
             </div>
           </div>
@@ -411,10 +411,6 @@ const MarketplacePage = () => {
                         <span className="text-[#00ffaa] bg-black/50 px-2.5 py-1 rounded-full border border-[#00ffaa]/30 font-bold truncate max-w-[200px]">
                           {project.category}
                         </span>
-                        <div className="flex items-center gap-1 text-amber-400 font-bold">
-                          <Star className="w-3.5 h-3.5 fill-current" />
-                          <span>{project.rating || 4.9}</span>
-                        </div>
                       </div>
 
                       <h3 className="font-display font-bold text-base text-white line-clamp-2 leading-snug group-hover:text-[#00ffaa] transition-colors">
@@ -485,18 +481,6 @@ const MarketplacePage = () => {
 
                     {/* Peer-to-Peer Showcase Actions vs Author Management */}
                     <div className="space-y-2 pt-1 font-mono text-xs">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          playClick();
-                          setActivePeekProject(project);
-                        }}
-                        className="w-full py-2 rounded-xl bg-purple-950/50 hover:bg-purple-900/60 border border-purple-500/30 text-purple-300 font-bold flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                      >
-                        <Terminal className="w-3.5 h-3.5 text-purple-400" />
-                        <span>⚡ Peek Architecture & Circuit BOM</span>
-                      </button>
-
                       {isOwnListing ? (
                         /* AUTHOR CONTROLS: Quick Adjust Sell Price & Manage Specs */
                         <div className="grid grid-cols-2 gap-2">
@@ -613,14 +597,6 @@ const MarketplacePage = () => {
               },
             });
           }}
-        />
-      )}
-
-      {/* Architecture & Code Peek Modal */}
-      {activePeekProject && (
-        <ArchitecturePeekModal
-          project={activePeekProject}
-          onClose={() => setActivePeekProject(null)}
         />
       )}
 

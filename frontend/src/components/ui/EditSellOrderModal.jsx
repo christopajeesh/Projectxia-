@@ -343,11 +343,10 @@ const EditSellOrderModal = ({ isOpen, onClose, project, onProjectUpdated }) => {
                     <input
                       type="number"
                       min="100"
-                      max="100000"
                       step="50"
                       value={price}
                       onChange={(e) => setPrice(e.target.value)}
-                      placeholder="e.g. 2499"
+                      placeholder="e.g. 25000 or 150000"
                       className="w-full bg-gray-950 border border-slate-800 focus:border-cyan-400 rounded-2xl pl-9 pr-4 py-3 text-sm text-white font-mono focus:outline-none"
                     />
                   </div>

@@ -292,7 +292,7 @@ const UploadProjectPage = () => {
             List Your Project for Sale
           </h1>
           <p className="text-xs sm:text-sm text-slate-300 max-w-xl mx-auto leading-relaxed">
-            Quick 2-step listing. Set your fixed price in INR (₹), upload screenshots & demo video. Verified original by AI Shield™.
+            Quick 2-step listing. Set your asking price in INR (₹) with no upper limit, upload screenshots & demo video for direct marketplace listing.
           </p>
         </div>
 

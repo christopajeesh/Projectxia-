@@ -355,7 +355,7 @@ const ProjectDetailPage = () => {
               <div className="space-y-2.5 text-xs font-mono text-slate-300">
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>Verified 4K Prototype Walkthrough Video</span>
+                  <span>Prototype Walkthrough Video & Demo</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
@@ -363,7 +363,7 @@ const ProjectDetailPage = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
-                  <span>AI Shield Plagiarism Passed ({project.plagiarismScore || 0.3}% index)</span>
+                  <span>Clean Original Code Structure</span>
                 </div>
               </div>
 
