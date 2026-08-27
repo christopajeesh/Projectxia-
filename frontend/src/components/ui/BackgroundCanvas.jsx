@@ -34,44 +34,44 @@ const BackgroundCanvas = () => {
     let rotationAngle = 0;
     let counterRotation = 0;
 
-    // 100+ High-Tech Cyber Symbols & Glowing Quantum Particles
+    // 120+ High-Tech Cyber Symbols & Glowing Quantum Particles
     const symbolTypes = ['</>', '{ }', '01', 'AI', '0x4F', '=>', '₹', 'λ', '10', 'GPU', 'AST'];
-    const count = Math.min(Math.floor(width / 14), 90);
+    const count = Math.min(Math.floor(width / 10), 120);
     
     const particles = Array.from({ length: count }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.5,
-      vy: (Math.random() - 0.5) * 0.5,
-      size: Math.random() * 2.8 + 1.2,
+      vx: (Math.random() - 0.5) * 0.6,
+      vy: (Math.random() - 0.5) * 0.6,
+      size: Math.random() * 3.2 + 1.5,
       color: Math.random() > 0.4 ? '#6366f1' : Math.random() > 0.5 ? '#00ffaa' : '#38bdf8',
-      symbol: Math.random() > 0.6 ? symbolTypes[Math.floor(Math.random() * symbolTypes.length)] : null,
-      alpha: Math.random() * 0.6 + 0.35,
+      symbol: Math.random() > 0.5 ? symbolTypes[Math.floor(Math.random() * symbolTypes.length)] : null,
+      alpha: Math.random() * 0.65 + 0.35,
     }));
 
     // Shooting Stars / Cyber Light Streaks
-    const shootingStars = Array.from({ length: 4 }, () => ({
+    const shootingStars = Array.from({ length: 6 }, () => ({
       x: Math.random() * width,
       y: Math.random() * (height * 0.6),
-      length: Math.random() * 80 + 40,
-      speed: Math.random() * 6 + 4,
+      length: Math.random() * 100 + 50,
+      speed: Math.random() * 7 + 5,
       angle: Math.PI / 4,
-      alpha: Math.random() * 0.7 + 0.3,
+      alpha: Math.random() * 0.8 + 0.35,
     }));
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
-      rotationAngle += 0.007;
-      counterRotation -= 0.005;
+      rotationAngle += 0.008;
+      counterRotation -= 0.006;
 
       const centerX = width * 0.5;
       const centerY = height * 0.45;
 
       // 1. PRIMARY ROTATING 3D WIREFRAME WAVE MESH
       ctx.save();
-      ctx.lineWidth = 1.3;
-      const radiusX = Math.min(width * 0.42, 480);
-      const radiusY = Math.min(height * 0.32, 280);
+      ctx.lineWidth = 1.6;
+      const radiusX = Math.min(width * 0.45, 520);
+      const radiusY = Math.min(height * 0.35, 300);
 
       const points = [];
 
@@ -84,7 +84,7 @@ const BackgroundCanvas = () => {
 
           const R = radiusX * 0.65;
           const tubeR = radiusY * 0.4;
-          const wave = Math.sin(u * 2.5 + rotationAngle * 2) * 32 + Math.cos(v * 3 + rotationAngle * 1.5) * 22;
+          const wave = Math.sin(u * 2.5 + rotationAngle * 2) * 36 + Math.cos(v * 3 + rotationAngle * 1.5) * 26;
 
           const x3d = (R + (tubeR + wave) * Math.cos(v)) * Math.cos(u + rotationAngle);
           const y3d = (R + (tubeR + wave) * Math.cos(v)) * Math.sin(u + rotationAngle);
@@ -110,20 +110,20 @@ const BackgroundCanvas = () => {
           ctx.beginPath();
           ctx.moveTo(p1.x, p1.y);
           ctx.lineTo(p2.x, p2.y);
-          ctx.strokeStyle = `rgba(99, 102, 241, ${0.32 * p1.scale})`;
+          ctx.strokeStyle = `rgba(99, 102, 241, ${0.48 * p1.scale})`;
           ctx.stroke();
 
           ctx.beginPath();
           ctx.moveTo(p1.x, p1.y);
           ctx.lineTo(p3.x, p3.y);
-          ctx.strokeStyle = `rgba(0, 255, 170, ${0.28 * p1.scale})`;
+          ctx.strokeStyle = `rgba(0, 255, 170, ${0.42 * p1.scale})`;
           ctx.stroke();
 
           if ((r + c) % 3 === 0) {
             ctx.beginPath();
-            ctx.arc(p1.x, p1.y, 2.5 * p1.scale, 0, Math.PI * 2);
+            ctx.arc(p1.x, p1.y, 3 * p1.scale, 0, Math.PI * 2);
             ctx.fillStyle = (r % 2 === 0) ? '#00ffaa' : '#38bdf8';
-            ctx.globalAlpha = 0.75 * p1.scale;
+            ctx.globalAlpha = 0.85 * p1.scale;
             ctx.fill();
           }
         }
@@ -132,8 +132,8 @@ const BackgroundCanvas = () => {
 
       // 2. SECONDARY COUNTER-ROTATING 3D SPHERICAL CORE ORBIT RING
       ctx.save();
-      ctx.lineWidth = 1.0;
-      const coreRadius = Math.min(width * 0.18, 160);
+      ctx.lineWidth = 1.2;
+      const coreRadius = Math.min(width * 0.2, 180);
       const coreCols = 16;
       const coreRows = 12;
 
@@ -153,7 +153,7 @@ const BackgroundCanvas = () => {
           if (j === 0) ctx.moveTo(px, py);
           else ctx.lineTo(px, py);
         }
-        ctx.strokeStyle = `rgba(168, 85, 247, ${0.22 * (i / coreRows)})`;
+        ctx.strokeStyle = `rgba(168, 85, 247, ${0.35 * (i / coreRows)})`;
         ctx.stroke();
       }
       ctx.restore();
@@ -167,7 +167,7 @@ const BackgroundCanvas = () => {
         if (s.x > width || s.y > height) {
           s.x = Math.random() * (width * 0.8);
           s.y = -20;
-          s.speed = Math.random() * 6 + 4;
+          s.speed = Math.random() * 7 + 5;
         }
 
         ctx.save();
@@ -183,7 +183,7 @@ const BackgroundCanvas = () => {
         gradient.addColorStop(1, 'transparent');
 
         ctx.strokeStyle = gradient;
-        ctx.lineWidth = 1.8;
+        ctx.lineWidth = 2.2;
         ctx.moveTo(s.x, s.y);
         ctx.lineTo(s.x - Math.cos(s.angle) * s.length, s.y - Math.sin(s.angle) * s.length);
         ctx.globalAlpha = s.alpha;
@@ -198,12 +198,12 @@ const BackgroundCanvas = () => {
           const pB = particles[j];
           const dist = Math.hypot(pA.x - pB.x, pA.y - pB.y);
 
-          if (dist < 140) {
+          if (dist < 170) {
             ctx.beginPath();
             ctx.moveTo(pA.x, pA.y);
             ctx.lineTo(pB.x, pB.y);
-            ctx.strokeStyle = `rgba(0, 255, 170, ${(1 - dist / 140) * 0.3})`;
-            ctx.lineWidth = 0.9;
+            ctx.strokeStyle = `rgba(0, 255, 170, ${(1 - dist / 170) * 0.45})`;
+            ctx.lineWidth = 1.1;
             ctx.stroke();
           }
         }
@@ -217,10 +217,10 @@ const BackgroundCanvas = () => {
         const dy = mouse.y - p.y;
         const dist = Math.hypot(dx, dy);
 
-        if (dist < 200 && dist > 0) {
-          const force = (200 - dist) / 200;
-          p.x -= (dx / dist) * force * 3.5;
-          p.y -= (dy / dist) * force * 3.5;
+        if (dist < 220 && dist > 0) {
+          const force = (220 - dist) / 220;
+          p.x -= (dx / dist) * force * 4.0;
+          p.y -= (dy / dist) * force * 4.0;
         }
 
         p.x += p.vx;
@@ -235,14 +235,14 @@ const BackgroundCanvas = () => {
         ctx.globalAlpha = p.alpha;
 
         if (p.symbol) {
-          ctx.font = '12px "Space Mono", monospace';
+          ctx.font = '13px "Space Mono", monospace';
           ctx.fillStyle = p.color;
           ctx.fillText(p.symbol, p.x, p.y);
         } else {
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
           ctx.fillStyle = p.color;
-          ctx.shadowBlur = 10;
+          ctx.shadowBlur = 14;
           ctx.shadowColor = p.color;
           ctx.fill();
         }
@@ -262,24 +262,24 @@ const BackgroundCanvas = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#050508]">
-      {/* 40px Sub-pixel Subtle Cyber Grid Pattern matching Pixellon specification */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:40px_40px] z-[0]" />
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#030408]">
+      {/* 40px Sub-pixel Cyber Grid Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,170,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,170,0.035)_1px,transparent_1px)] bg-[size:40px_40px] z-[0]" />
 
       {/* Tactile Digital Noise Grain Overlay */}
-      <div className="absolute inset-0 noise-bg-overlay opacity-60 z-[1]" />
+      <div className="absolute inset-0 noise-bg-overlay opacity-50 z-[1]" />
 
       {/* Dual 3D Wireframe Mesh & Shooting Star Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 opacity-85 z-[2]" />
+      <canvas ref={canvasRef} className="absolute inset-0 opacity-95 z-[2]" />
 
-      {/* Subtle Low-Light Radial Aurora Mesh (Indigo, Mint, Purple, Cyan) */}
-      <div className="absolute -top-32 -left-32 w-[700px] h-[700px] rounded-full bg-indigo-950/20 blur-[150px] animate-pulse-slow z-[3]" />
-      <div className="absolute top-1/4 -right-32 w-[650px] h-[650px] rounded-full bg-[#00ffaa]/08 blur-[150px] animate-aurora-glow z-[3]" />
-      <div className="absolute bottom-10 left-1/3 w-[600px] h-[600px] rounded-full bg-purple-950/20 blur-[150px] z-[3]" />
-      <div className="absolute top-2/3 right-1/4 w-[450px] h-[450px] rounded-full bg-cyan-950/15 blur-[140px] z-[3]" />
+      {/* Low-Light Radial Aurora Mesh (Indigo, Mint, Purple, Cyan) */}
+      <div className="absolute -top-32 -left-32 w-[750px] h-[750px] rounded-full bg-indigo-600/25 blur-[140px] animate-pulse-slow z-[3]" />
+      <div className="absolute top-1/4 -right-32 w-[700px] h-[700px] rounded-full bg-[#00ffaa]/20 blur-[140px] animate-aurora-glow z-[3]" />
+      <div className="absolute bottom-10 left-1/3 w-[650px] h-[650px] rounded-full bg-purple-600/25 blur-[140px] z-[3]" />
+      <div className="absolute top-2/3 right-1/4 w-[500px] h-[500px] rounded-full bg-cyan-500/20 blur-[130px] z-[3]" />
 
-      {/* Deep Pitch-Dark Edge Vignette */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#050508]/80 via-[#050508]/40 to-[#050508]/95 z-[4]" />
+      {/* Soft Edge Vignette */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#030408]/60 via-transparent to-[#030408]/85 z-[4]" />
     </div>
   );
 };
