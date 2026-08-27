@@ -304,7 +304,7 @@ const MarketplacePage = () => {
                     playClick();
                     setSelectedCategory(dept === 'All Departments' ? 'All' : dept);
                   }}
-                  className={`relative px-4 py-2 rounded-xl text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
+                  className={`relative px-4 py-2 rounded-xl text-xs font-mono transition-all cursor-pointer whitespace-nowrap shrink-0 ${
                     isSelected
                       ? 'text-black font-extrabold'
                       : 'text-slate-400 hover:text-white bg-slate-900/60 border border-white/5 hover:border-white/20'
