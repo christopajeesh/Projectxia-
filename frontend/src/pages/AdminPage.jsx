@@ -74,6 +74,7 @@ const AdminPage = () => {
   const [editingNotesId, setEditingNotesId] = useState(null);
   const [noteText, setNoteText] = useState('');
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [selectedUserForModal, setSelectedUserForModal] = useState(null);
 
   // Clearance Login States
   const [adminEmail, setAdminEmail] = useState('theprojectxia@gmail.com');
@@ -1306,66 +1307,99 @@ const AdminPage = () => {
                     <tr className="border-b border-slate-800 text-slate-400 uppercase text-[10px]">
                       <th className="pb-3">User & Profile</th>
                       <th className="pb-3">Role & Verification</th>
+                      <th className="pb-3">Last Seen / Login Date & Time</th>
                       <th className="pb-3">Login Method</th>
                       <th className="pb-3">IP / Network Node</th>
                       <th className="pb-3">Status</th>
-                      <th className="pb-3 text-right">Action</th>
+                      <th className="pb-3 text-right">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-900">
-                    {usersList.map((u) => (
-                      <tr key={u._id || u.id} className="hover:bg-white/5 transition-colors">
-                        <td className="py-3.5">
-                          <div className="flex items-center gap-2.5">
-                            <img
-                              src={u.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${u.name || 'User'}`}
-                              alt=""
-                              className="w-8 h-8 rounded-xl object-cover bg-gray-900"
-                            />
-                            <div>
-                              <p className="font-bold text-white">{u.name}</p>
-                              <p className="text-[10px] text-cyan-300 font-mono">{u.email}</p>
-                              <p className="text-[10px] text-slate-400">{u.mobile || 'Contact on File'}</p>
+                    {usersList.map((u) => {
+                      const userEmail = (u.email || '').toLowerCase();
+                      const userLogs = auditLogs.filter(
+                        (l) => (l.performedBy?.email || '').toLowerCase() === userEmail
+                      );
+                      const lastLog = userLogs[0];
+                      const lastLoginTime = lastLog?.createdAt || lastLog?.details?.timestamp || u.updatedAt || u.createdAt;
+                      const createdTime = u.createdAt || (userLogs.length ? userLogs[userLogs.length - 1]?.createdAt : null);
+
+                      const formattedLastLogin = lastLoginTime ? new Date(lastLoginTime).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'Active Recently';
+                      const formattedCreated = createdTime ? new Date(createdTime).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'Registered Member';
+
+                      return (
+                        <tr key={u._id || u.id} className="hover:bg-white/5 transition-colors">
+                          <td className="py-3.5">
+                            <div className="flex items-center gap-2.5">
+                              <img
+                                src={u.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${u.name || 'User'}`}
+                                alt=""
+                                className="w-8 h-8 rounded-xl object-cover bg-gray-900"
+                              />
+                              <div>
+                                <p className="font-bold text-white">{u.name}</p>
+                                <p className="text-[10px] text-cyan-300 font-mono">{u.email}</p>
+                                <p className="text-[10px] text-slate-400">{u.mobile || 'Contact on File'}</p>
+                              </div>
                             </div>
-                          </div>
-                        </td>
-                        <td className="py-3.5">
-                          <span className="text-cyan-400 font-bold uppercase">{u.role}</span>
-                          <p className="text-[10px] text-slate-400">{u.verificationLevel || 'Verified Innovator'}</p>
-                        </td>
-                        <td className="py-3.5 text-slate-300">
-                          <span className="px-2 py-0.5 rounded bg-gray-900 border border-slate-800 text-[10px]">
-                            {u.loginMethod || 'Email ID + Password'}
-                          </span>
-                        </td>
-                        <td className="py-3.5 text-slate-400 text-[11px]">
-                          {u.ipAddress || 'Active Node (Verified)'}
-                        </td>
-                        <td className="py-3.5">
-                          <span
-                            className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                              u.isBanned
-                                ? 'bg-rose-950 text-rose-400 border border-rose-500/40'
-                                : 'bg-emerald-950 text-emerald-400 border border-emerald-500/40'
-                            }`}
-                          >
-                            {u.isBanned ? 'QUARANTINED' : 'ACTIVE'}
-                          </span>
-                        </td>
-                        <td className="py-3.5 text-right">
-                          <button
-                            onClick={() => handleToggleBan(u._id || u.id)}
-                            className={`px-3 py-1 rounded-lg text-xs font-bold transition-all cursor-pointer ${
-                              u.isBanned
-                                ? 'bg-emerald-500 text-black hover:bg-emerald-400'
-                                : 'bg-rose-950/60 border border-rose-500/40 text-rose-300 hover:bg-rose-900'
-                            }`}
-                          >
-                            {u.isBanned ? 'Restore User' : 'Quarantine'}
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
+                          </td>
+                          <td className="py-3.5">
+                            <span className="text-cyan-400 font-bold uppercase">{u.role}</span>
+                            <p className="text-[10px] text-slate-400">{u.verificationLevel || 'Verified Innovator'}</p>
+                          </td>
+                          <td className="py-3.5 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5 text-cyan-300 font-bold text-[11px]">
+                              <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                              <span>{formattedLastLogin}</span>
+                            </div>
+                            <p className="text-[10px] text-slate-400">Reg: {formattedCreated}</p>
+                          </td>
+                          <td className="py-3.5 text-slate-300">
+                            <span className="px-2 py-0.5 rounded bg-gray-900 border border-slate-800 text-[10px]">
+                              {u.loginMethod || 'Email ID + Password'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 text-slate-400 text-[11px]">
+                            {u.ipAddress || 'Active Node (Verified)'}
+                          </td>
+                          <td className="py-3.5">
+                            <span
+                              className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                u.isBanned
+                                  ? 'bg-rose-950 text-rose-400 border border-rose-500/40'
+                                  : 'bg-emerald-950 text-emerald-400 border border-emerald-500/40'
+                              }`}
+                            >
+                              {u.isBanned ? 'QUARANTINED' : 'ACTIVE'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
+                              <button
+                                onClick={() => {
+                                  playClick();
+                                  setSelectedUserForModal(u);
+                                }}
+                                className="px-2.5 py-1.5 rounded-lg bg-cyan-950/80 border border-cyan-500/40 text-cyan-300 hover:bg-cyan-900 transition-all text-xs font-bold flex items-center gap-1 cursor-pointer"
+                              >
+                                <Eye className="w-3.5 h-3.5 text-cyan-400" />
+                                <span>Inspect Logs</span>
+                              </button>
+                              <button
+                                onClick={() => handleToggleBan(u._id || u.id)}
+                                className={`px-2.5 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                                  u.isBanned
+                                    ? 'bg-emerald-500 text-black hover:bg-emerald-400'
+                                    : 'bg-rose-950/60 border border-rose-500/40 text-rose-300 hover:bg-rose-900'
+                                }`}
+                              >
+                                {u.isBanned ? 'Restore' : 'Quarantine'}
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               )}
@@ -1550,6 +1584,156 @@ const AdminPage = () => {
             </form>
           </div>
         )}
+
+        {/* Single User Details & Activity Inspector Modal */}
+        <AnimatePresence>
+          {selectedUserForModal && (
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 md:p-6 font-mono text-xs overflow-y-auto">
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                onClick={() => setSelectedUserForModal(null)}
+                className="fixed inset-0 bg-black/85 backdrop-blur-md cursor-pointer"
+              />
+
+              <motion.div
+                initial={{ scale: 0.95, opacity: 0, y: 20 }}
+                animate={{ scale: 1, opacity: 1, y: 0 }}
+                exit={{ scale: 0.95, opacity: 0, y: 20 }}
+                className="relative w-full max-w-2xl bg-[#060b14] border-2 border-cyan-500/60 rounded-3xl p-5 sm:p-7 shadow-2xl z-10 text-left text-white max-h-[92vh] overflow-y-auto space-y-5"
+              >
+                {/* Modal Header */}
+                <div className="flex items-center justify-between border-b border-slate-800 pb-4">
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={selectedUserForModal.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${selectedUserForModal.name || 'User'}`}
+                      alt=""
+                      className="w-12 h-12 rounded-2xl object-cover border border-cyan-500/40 bg-gray-900"
+                    />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-display font-black text-white">{selectedUserForModal.name}</h3>
+                        <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-cyan-950 text-cyan-300 border border-cyan-500/40 uppercase">
+                          {selectedUserForModal.role || 'user'}
+                        </span>
+                        <span
+                          className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                            selectedUserForModal.isBanned
+                              ? 'bg-rose-950 text-rose-400 border border-rose-500/40'
+                              : 'bg-emerald-950 text-emerald-400 border border-emerald-500/40'
+                          }`}
+                        >
+                          {selectedUserForModal.isBanned ? 'QUARANTINED' : 'ACTIVE'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-cyan-300 font-mono mt-0.5">{selectedUserForModal.email}</p>
+                      <p className="text-[11px] text-slate-400 font-mono">{selectedUserForModal.mobile || 'Contact on File'}</p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setSelectedUserForModal(null)}
+                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
+
+                {/* Timestamps & Info Grid */}
+                {(() => {
+                  const userEmail = (selectedUserForModal.email || '').toLowerCase();
+                  const userLogs = auditLogs.filter(
+                    (l) => (l.performedBy?.email || '').toLowerCase() === userEmail
+                  );
+                  const lastLog = userLogs[0];
+                  const lastLoginTime = lastLog?.createdAt || lastLog?.details?.timestamp || selectedUserForModal.updatedAt || selectedUserForModal.createdAt;
+                  const createdTime = selectedUserForModal.createdAt || (userLogs.length ? userLogs[userLogs.length - 1]?.createdAt : null);
+
+                  const formattedLastLogin = lastLoginTime ? new Date(lastLoginTime).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'Active Session';
+                  const formattedCreated = createdTime ? new Date(createdTime).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'Registered Member';
+
+                  return (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div className="p-3.5 rounded-2xl bg-gray-900/90 border border-slate-800 space-y-1">
+                          <span className="text-[10px] font-mono text-slate-400 uppercase font-bold flex items-center gap-1">
+                            <Clock className="w-3 h-3 text-cyan-400" />
+                            <span>Last Seen / Login Date & Time</span>
+                          </span>
+                          <p className="text-xs font-bold text-cyan-300">{formattedLastLogin}</p>
+                        </div>
+
+                        <div className="p-3.5 rounded-2xl bg-gray-900/90 border border-slate-800 space-y-1">
+                          <span className="text-[10px] font-mono text-slate-400 uppercase font-bold flex items-center gap-1">
+                            <UserCheck className="w-3 h-3 text-emerald-400" />
+                            <span>Account Registered</span>
+                          </span>
+                          <p className="text-xs font-bold text-emerald-300">{formattedCreated}</p>
+                        </div>
+
+                        <div className="p-3.5 rounded-2xl bg-gray-900/90 border border-slate-800 space-y-1">
+                          <span className="text-[10px] font-mono text-slate-400 uppercase font-bold flex items-center gap-1">
+                            <Activity className="w-3 h-3 text-purple-400" />
+                            <span>Total User Activity Logs</span>
+                          </span>
+                          <p className="text-xs font-bold text-purple-300">{userLogs.length} Recorded Events</p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-800">
+                        <h4 className="font-bold text-white text-xs flex items-center gap-1.5">
+                          <Activity className="w-4 h-4 text-cyan-400" />
+                          <span>Activity & Login History for {selectedUserForModal.name}</span>
+                        </h4>
+                        <span className="text-[10px] text-slate-400 font-mono">Sorted by latest timestamp</span>
+                      </div>
+
+                      <div className="p-3 rounded-2xl bg-gray-950 border border-slate-800 space-y-2 max-h-64 overflow-y-auto">
+                        {userLogs.length === 0 ? (
+                          <div className="p-6 text-center text-slate-400 text-xs">
+                            No individual activity logs recorded for this user yet.
+                          </div>
+                        ) : (
+                          userLogs.map((log) => {
+                            const logTime = log.createdAt || log.details?.timestamp || log.timestamp;
+                            const formattedLogTime = logTime ? new Date(logTime).toLocaleString('en-US', { dateStyle: 'medium', timeStyle: 'short' }) : 'Recently';
+
+                            return (
+                              <div
+                                key={log._id || log.id}
+                                className="p-2.5 rounded-xl bg-gray-900/90 border border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs"
+                              >
+                                <div className="flex items-center gap-2">
+                                  <Clock className="w-3.5 h-3.5 text-cyan-400 shrink-0" />
+                                  <div>
+                                    <span className="font-bold text-white mr-2">{log.action}</span>
+                                    <span className="text-[10px] px-1.5 py-0.2 rounded bg-gray-800 text-slate-400">
+                                      {log.category || 'AUTH_EVENT'}
+                                    </span>
+                                    {log.details?.reason && (
+                                      <p className="text-[10px] text-rose-400">Reason: {log.details.reason}</p>
+                                    )}
+                                  </div>
+                                </div>
+
+                                <div className="flex items-center gap-2 shrink-0 text-[10px] font-mono text-slate-400">
+                                  <span>{formattedLogTime}</span>
+                                  <span className="px-1.5 py-0.5 rounded bg-slate-900 text-cyan-300 border border-slate-800">
+                                    IP: {log.ipAddress || '127.0.0.1'}
+                                  </span>
+                                </div>
+                              </div>
+                            );
+                          })
+                        )}
+                      </div>
+                    </div>
+                  );
+                })()}
+              </motion.div>
+            </div>
+          )}
+        </AnimatePresence>
       </div>
     </div>
   );
