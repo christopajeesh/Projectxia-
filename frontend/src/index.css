@@ -31,12 +31,12 @@ html.lenis, html.lenis body {
     -webkit-text-size-adjust: 100%;
     -webkit-overflow-scrolling: touch;
     scroll-behavior: auto !important;
-    background-color: #02040a !important;
+    background-color: #000000 !important;
     color: #f1f5f9;
   }
 
   body {
-    background-color: #02040a !important;
+    background-color: #000000 !important;
     color: #f1f5f9;
     overflow-x: hidden;
     font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif !important;
@@ -74,27 +74,27 @@ html.lenis, html.lenis body {
 /* Background Grid Overlay */
 .bg-grid-pattern {
   background-image: 
-    linear-gradient(rgba(30, 58, 138, 0.08) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(30, 58, 138, 0.08) 1px, transparent 1px);
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
   background-size: 40px 40px;
 }
 
 /* Floating Glass Pill Navbar */
 .floating-pill-nav {
-  background: rgba(6, 10, 20, 0.88);
-  border: 1.5px solid rgba(255, 255, 255, 0.16);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.95), inset 0 1px 1px 0 rgba(255, 255, 255, 0.25);
+  background: rgba(3, 5, 10, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(36px);
+  -webkit-backdrop-filter: blur(36px);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 1.0), inset 0 1px 1px 0 rgba(255, 255, 255, 0.15);
 }
 
 /* Glass Panels & Surfaces */
 .glass-panel {
-  background: rgba(6, 10, 20, 0.72);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(32px);
-  -webkit-backdrop-filter: blur(32px);
-  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.92), inset 0 1px 1px 0 rgba(255, 255, 255, 0.2);
+  background: rgba(4, 7, 14, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(36px);
+  -webkit-backdrop-filter: blur(36px);
+  box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 1.0), inset 0 1px 1px 0 rgba(255, 255, 255, 0.12);
   transform: translateZ(0);
 }
 
