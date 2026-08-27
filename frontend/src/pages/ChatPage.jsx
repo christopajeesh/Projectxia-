@@ -379,7 +379,7 @@ const ChatPage = () => {
                   <h3 className="font-display font-bold text-xs text-white truncate max-w-[140px]">
                     {user?.name || 'Verified Innovator'}
                   </h3>
-                  <span className="text-[10px] text-[#00a884] block font-mono">WhatsApp Realtime P2P</span>
+                  <span className="text-[10px] text-[#00a884] block font-mono">ProjectXia Direct Chat</span>
                 </div>
               </div>
               <span className="text-[10px] font-mono text-[#00a884] bg-[#00a884]/15 px-2.5 py-1 rounded-full border border-[#00a884]/30 font-bold">
@@ -450,12 +450,12 @@ const ChatPage = () => {
           </div>
 
           {/* ============================================================ */}
-          {/* RIGHT: WHATSAPP ACTIVE CHAT ROOM */}
+          {/* RIGHT: ACTIVE CHAT ROOM */}
           {/* ============================================================ */}
           <div className="md:col-span-8 flex flex-col bg-[#0b141a] relative">
             {activeConv ? (
               <>
-                {/* WHATSAPP CHAT HEADER */}
+                {/* CHAT HEADER */}
                 <div className="p-3.5 bg-[#202c33] flex items-center justify-between border-b border-[#202c33] relative z-20">
                   <div className="flex items-center gap-3">
                     <div className="relative">
@@ -472,7 +472,7 @@ const ChatPage = () => {
                       </h3>
                       <p className="text-[10px] font-mono text-[#00a884] flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#00a884]" />
-                        <span>{isTyping ? `${typingUser} is typing...` : 'Online • WhatsApp Verified Creator'}</span>
+                        <span>{isTyping ? `${typingUser} is typing...` : 'Online • Project Creator'}</span>
                       </p>
                     </div>
                   </div>
@@ -503,7 +503,7 @@ const ChatPage = () => {
                   </div>
                 </div>
 
-                {/* MESSAGES STREAM WITH WHATSAPP DOODLE BACKGROUND */}
+                {/* MESSAGES STREAM WITH DOODLE BACKGROUND */}
                 <div
                   className="flex-1 overflow-y-auto p-4 space-y-3 font-mono text-xs relative"
                   style={{
@@ -527,7 +527,9 @@ const ChatPage = () => {
 
                   {/* CHAT MESSAGES */}
                   {messages.map((msg) => {
-                    const isMe = msg.sender?.id === (user?._id || user?.id || 'user_001_buyer');
+                    const currentUid = String(user?._id || user?.id || 'user_001_buyer').trim();
+                    const msgSenderId = String(msg.sender?.id || msg.sender?._id || '').trim();
+                    const isMe = msgSenderId === currentUid || (user?.email && msg.sender?.email === user.email);
 
                     return (
                       <div
@@ -549,7 +551,7 @@ const ChatPage = () => {
                           )}
 
                           {/* NEGOTIATION DEAL OFFER CARD */}
-                          {msg.messageType === 'deal_offer' || msg.projectData || (msg.text && msg.text.includes('PROPOSED NEGOTIATION DEAL')) ? (
+                          {msg.messageType === 'deal_offer' || (msg.text && msg.text.includes('PROPOSED NEGOTIATION DEAL')) ? (
                             <div className="space-y-2.5 p-3.5 bg-[#111b21]/90 rounded-2xl border border-[#00a884]/50 shadow-inner my-1">
                               <div className="flex items-center gap-2 text-[#00a884] font-bold text-xs">
                                 <Handshake className="w-4.5 h-4.5 shrink-0 text-[#00a884]" />
