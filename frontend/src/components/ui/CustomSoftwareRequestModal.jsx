@@ -298,10 +298,10 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
                   <div className="p-4 rounded-2xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-200 text-xs max-w-md mx-auto leading-relaxed shadow-lg">
                     <p className="font-bold flex items-center justify-center gap-1.5 text-emerald-300 text-sm">
                       <Clock className="w-4 h-4 text-emerald-400 animate-spin-slow" />
-                      <span>Guaranteed Response within 12 Hours</span>
+                      <span>We will contact you within 24 hours</span>
                     </p>
                     <p className="mt-1.5 text-slate-300">
-                      Our ProjectXia Developing Team has received your specifications. An email alert has been sent to <strong className="text-white">theprojectxia@gmail.com</strong> and a confirmation has been sent to your email.
+                      Our ProjectXia senior engineering team has received your specifications. An alert has been dispatched to <strong className="text-white">theprojectxia@gmail.com</strong> and our team will reach out to you directly.
                     </p>
                   </div>
                 </div>
@@ -312,8 +312,8 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
                     <span className="text-cyan-300 font-bold">{formData.mobile || formData.email}</span>
                   </div>
                   <div className="flex justify-between border-b border-slate-800 pb-1.5">
-                    <span className="text-slate-400">Contact Window:</span>
-                    <span className="text-emerald-400 font-bold">⚡ Within 12 Hours</span>
+                    <span className="text-slate-400">Response Window:</span>
+                    <span className="text-emerald-400 font-bold">⚡ We will contact you within 24 hours</span>
                   </div>
                   <div className="flex justify-between border-b border-slate-800 pb-1.5">
                     <span className="text-slate-400">Assigned Team:</span>
@@ -326,20 +326,10 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
                 </div>
 
                 <div className="max-w-md mx-auto space-y-2.5 pt-2">
-                  <a
-                    href={`https://wa.me/917594924788?text=${encodeURIComponent(`Hi ProjectXia Engineering Team! I just submitted my custom project request on ProjectXia for: "${formData.projectTitle || formData.requirements.slice(0, 40)}". Looking forward to discussing the architecture blueprint!`)}`}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="w-full py-3.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-display font-black text-xs flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/25 transition-all hover:scale-102 cursor-pointer"
-                  >
-                    <MessageCircle className="w-4 h-4" />
-                    <span>💬 Chat with Lead Engineer on WhatsApp Now</span>
-                  </a>
-
                   <button
                     type="button"
                     onClick={handleResetAndClose}
-                    className="w-full py-2.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-300 text-xs font-mono transition-all cursor-pointer"
+                    className="w-full py-3 rounded-xl bg-cyan-500 hover:bg-cyan-400 text-black font-display font-black text-xs transition-all shadow-lg shadow-cyan-500/25 hover:scale-[1.01] cursor-pointer"
                   >
                     Done • Return to Platform
                   </button>
@@ -354,7 +344,7 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
                     <span>Need a custom software project, college capstone, or startup MVP?</span>
                   </p>
                   <p className="text-[11px] text-slate-300">
-                    Fill in your project idea below. Our senior engineering team will review your requirements and reach out to you directly via WhatsApp or phone call within 12 hours with a complete architecture blueprint and quote.
+                    Fill in your project idea below. Our senior engineering team will review your requirements and reach out to you directly via phone, WhatsApp, or email within 24 hours with a complete architecture blueprint and quote.
                   </p>
                 </div>
 
