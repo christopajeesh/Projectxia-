@@ -44,6 +44,7 @@ const MarketplacePage = () => {
   const [activeDealProject, setActiveDealProject] = useState(null);
   const [activeEditProject, setActiveEditProject] = useState(null);
 
+  const [allProjects, setAllProjects] = useState([]);
   const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeVideoModal, setActiveVideoModal] = useState(null);
@@ -92,27 +93,65 @@ const MarketplacePage = () => {
     return false;
   };
 
+  // Initial fetch on mount
   useEffect(() => {
+    // 0ms instant display from local storage cache
+    try {
+      const cached = localStorage.getItem('px_cached_marketplace_projects');
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setAllProjects(parsed);
+          setLoading(false);
+        }
+      }
+    } catch (err) {}
+
     fetchMarketplaceProjects();
     window.addEventListener('storage', fetchMarketplaceProjects);
     return () => {
       window.removeEventListener('storage', fetchMarketplaceProjects);
     };
-  }, [selectedCategory, sortBy, verifiedOnly, deliveryType, hideOwnListings]);
+  }, []);
+
+  // Instant client-side filtering whenever filters change (0ms latency!)
+  useEffect(() => {
+    let filtered = [...allProjects];
+
+    if (search.trim()) {
+      const q = search.toLowerCase().trim();
+      filtered = filtered.filter(
+        (p) =>
+          (p.title || '').toLowerCase().includes(q) ||
+          (p.description || '').toLowerCase().includes(q) ||
+          (p.category || '').toLowerCase().includes(q) ||
+          (p.techStack || []).some((t) => String(t).toLowerCase().includes(q))
+      );
+    }
+
+    if (deliveryType !== 'All') {
+      filtered = filtered.filter((p) => p.projectType === deliveryType);
+    }
+
+    if (selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Departments') {
+      const qCat = selectedCategory.toLowerCase().slice(0, 5);
+      filtered = filtered.filter((p) => (p.category || '').toLowerCase().includes(qCat));
+    }
+
+    if (maxPrice && Number(maxPrice) < 1000000) {
+      filtered = filtered.filter((p) => Number(p.price || 0) <= Number(maxPrice));
+    }
+
+    if (hideOwnListings && user) {
+      filtered = filtered.filter((p) => !isUserOwnProject(p));
+    }
+
+    setProjects(filtered);
+  }, [allProjects, search, selectedCategory, deliveryType, maxPrice, hideOwnListings, user]);
 
   const fetchMarketplaceProjects = async () => {
     try {
-      setLoading(true);
-      const params = new URLSearchParams();
-      if (search) params.append('search', search);
-      if (selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Departments') {
-        params.append('category', selectedCategory);
-      }
-      if (sortBy) params.append('sort', sortBy);
-      if (verifiedOnly) params.append('verifiedOnly', 'true');
-      if (maxPrice) params.append('maxPrice', maxPrice);
-
-      const res = await api.get(`/projects?${params.toString()}`).catch(() => ({ data: { projects: [] } }));
+      const res = await api.get('/projects').catch(() => ({ data: { projects: [] } }));
       const serverList = res.data?.projects || [];
       const localList = JSON.parse(localStorage.getItem('projectxia_uploaded_projects') || '[]');
       const deletedList = JSON.parse(localStorage.getItem('projectxia_admin_deleted_projects') || '[]');
@@ -135,20 +174,10 @@ const MarketplacePage = () => {
       });
 
       let fetchedList = Array.from(combinedMap.values());
-      if (deliveryType !== 'All') {
-        fetchedList = fetchedList.filter((p) => p.projectType === deliveryType);
-      }
-      if (selectedCategory && selectedCategory !== 'All' && selectedCategory !== 'All Departments') {
-        fetchedList = fetchedList.filter((p) => (p.category || '').toLowerCase().includes(selectedCategory.toLowerCase().slice(0, 5)));
-      }
-      if (hideOwnListings && user) {
-        fetchedList = fetchedList.filter((p) => !isUserOwnProject(p));
-      }
-
-      setProjects(fetchedList);
+      setAllProjects(fetchedList);
+      localStorage.setItem('px_cached_marketplace_projects', JSON.stringify(fetchedList));
     } catch (e) {
       console.warn('[Marketplace Fetch Warning]:', e.message);
-      setProjects([]);
     } finally {
       setLoading(false);
     }

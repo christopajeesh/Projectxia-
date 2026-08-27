@@ -17,7 +17,7 @@ export const connectDB = async () => {
   try {
     mongoose.set('strictQuery', false);
     const conn = await mongoose.connect(mongoURI, {
-      serverSelectionTimeoutMS: 10000,
+      serverSelectionTimeoutMS: 2000,
     });
     isConnected = true;
     useMemoryFallback = false;
