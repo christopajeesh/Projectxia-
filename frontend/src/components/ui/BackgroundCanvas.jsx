@@ -44,7 +44,7 @@ const BackgroundCanvas = () => {
       vx: (Math.random() - 0.5) * 0.6,
       vy: (Math.random() - 0.5) * 0.6,
       size: Math.random() * 3.2 + 1.5,
-      color: Math.random() > 0.4 ? '#6366f1' : Math.random() > 0.5 ? '#00ffaa' : '#38bdf8',
+      color: Math.random() > 0.4 ? '#38bdf8' : Math.random() > 0.5 ? '#6366f1' : '#3b82f6',
       symbol: Math.random() > 0.5 ? symbolTypes[Math.floor(Math.random() * symbolTypes.length)] : null,
       alpha: Math.random() * 0.65 + 0.35,
     }));
@@ -116,13 +116,13 @@ const BackgroundCanvas = () => {
           ctx.beginPath();
           ctx.moveTo(p1.x, p1.y);
           ctx.lineTo(p3.x, p3.y);
-          ctx.strokeStyle = `rgba(0, 255, 170, ${0.42 * p1.scale})`;
+          ctx.strokeStyle = `rgba(56, 189, 248, ${0.42 * p1.scale})`;
           ctx.stroke();
 
           if ((r + c) % 3 === 0) {
             ctx.beginPath();
             ctx.arc(p1.x, p1.y, 3 * p1.scale, 0, Math.PI * 2);
-            ctx.fillStyle = (r % 2 === 0) ? '#00ffaa' : '#38bdf8';
+            ctx.fillStyle = (r % 2 === 0) ? '#38bdf8' : '#3b82f6';
             ctx.globalAlpha = 0.85 * p1.scale;
             ctx.fill();
           }
@@ -153,7 +153,7 @@ const BackgroundCanvas = () => {
           if (j === 0) ctx.moveTo(px, py);
           else ctx.lineTo(px, py);
         }
-        ctx.strokeStyle = `rgba(168, 85, 247, ${0.35 * (i / coreRows)})`;
+        ctx.strokeStyle = `rgba(59, 130, 246, ${0.35 * (i / coreRows)})`;
         ctx.stroke();
       }
       ctx.restore();
@@ -178,7 +178,7 @@ const BackgroundCanvas = () => {
           s.x - Math.cos(s.angle) * s.length,
           s.y - Math.sin(s.angle) * s.length
         );
-        gradient.addColorStop(0, '#00ffaa');
+        gradient.addColorStop(0, '#38bdf8');
         gradient.addColorStop(0.5, '#6366f1');
         gradient.addColorStop(1, 'transparent');
 
@@ -202,7 +202,7 @@ const BackgroundCanvas = () => {
             ctx.beginPath();
             ctx.moveTo(pA.x, pA.y);
             ctx.lineTo(pB.x, pB.y);
-            ctx.strokeStyle = `rgba(0, 255, 170, ${(1 - dist / 170) * 0.45})`;
+            ctx.strokeStyle = `rgba(56, 189, 248, ${(1 - dist / 170) * 0.42})`;
             ctx.lineWidth = 1.1;
             ctx.stroke();
           }
@@ -262,9 +262,9 @@ const BackgroundCanvas = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#030408]">
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#020617]">
       {/* 40px Sub-pixel Cyber Grid Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(0,255,170,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(0,255,170,0.035)_1px,transparent_1px)] bg-[size:40px_40px] z-[0]" />
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(56,189,248,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(56,189,248,0.035)_1px,transparent_1px)] bg-[size:40px_40px] z-[0]" />
 
       {/* Tactile Digital Noise Grain Overlay */}
       <div className="absolute inset-0 noise-bg-overlay opacity-50 z-[1]" />
@@ -272,14 +272,14 @@ const BackgroundCanvas = () => {
       {/* Dual 3D Wireframe Mesh & Shooting Star Canvas */}
       <canvas ref={canvasRef} className="absolute inset-0 opacity-95 z-[2]" />
 
-      {/* Low-Light Radial Aurora Mesh (Indigo, Mint, Purple, Cyan) */}
-      <div className="absolute -top-32 -left-32 w-[750px] h-[750px] rounded-full bg-indigo-600/25 blur-[140px] animate-pulse-slow z-[3]" />
-      <div className="absolute top-1/4 -right-32 w-[700px] h-[700px] rounded-full bg-[#00ffaa]/20 blur-[140px] animate-aurora-glow z-[3]" />
-      <div className="absolute bottom-10 left-1/3 w-[650px] h-[650px] rounded-full bg-purple-600/25 blur-[140px] z-[3]" />
-      <div className="absolute top-2/3 right-1/4 w-[500px] h-[500px] rounded-full bg-cyan-500/20 blur-[130px] z-[3]" />
+      {/* Low-Light Radial Aurora Mesh (Indigo, Sapphire, Deep Blue, Cyan) */}
+      <div className="absolute -top-32 -left-32 w-[750px] h-[750px] rounded-full bg-[#1e1b4b]/50 blur-[140px] animate-pulse-slow z-[3]" />
+      <div className="absolute top-1/4 -right-32 w-[700px] h-[700px] rounded-full bg-[#0369a1]/30 blur-[140px] animate-aurora-glow z-[3]" />
+      <div className="absolute bottom-10 left-1/3 w-[650px] h-[650px] rounded-full bg-[#1d4ed8]/30 blur-[140px] z-[3]" />
+      <div className="absolute top-2/3 right-1/4 w-[500px] h-[500px] rounded-full bg-[#0284c7]/25 blur-[130px] z-[3]" />
 
       {/* Soft Edge Vignette */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#030408]/60 via-transparent to-[#030408]/85 z-[4]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#020617]/60 via-transparent to-[#020617]/85 z-[4]" />
     </div>
   );
 };

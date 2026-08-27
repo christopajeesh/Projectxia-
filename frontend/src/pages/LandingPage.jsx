@@ -595,8 +595,8 @@ const LandingPage = () => {
                   transition={{ duration: 0.4, delay: idx * 0.08 }}
                   className={`rounded-3xl transition-all duration-300 backdrop-blur-3xl overflow-hidden ${
                     isOpen
-                      ? 'bg-gradient-to-br from-emerald-950/90 via-[#0b1329]/95 to-teal-950/90 border-2 border-[#00ffaa] shadow-[0_0_45px_rgba(0,255,170,0.45),inset_0_1px_2px_0_rgba(255,255,255,0.4)]'
-                      : 'bg-[#0a101d]/70 border border-white/25 hover:border-[#00ffaa]/70 hover:bg-[#0f172a]/85 shadow-[0_10px_35px_rgba(0,0,0,0.7),inset_0_1px_1px_0_rgba(255,255,255,0.3)] hover:shadow-[0_12px_40px_rgba(0,255,170,0.25),inset_0_1px_2px_0_rgba(255,255,255,0.45)]'
+                      ? 'bg-gradient-to-br from-blue-950/90 via-[#0b1329]/95 to-slate-950/90 border-2 border-[#38bdf8] shadow-[0_0_40px_rgba(56,189,248,0.35),inset_0_1px_2px_0_rgba(255,255,255,0.4)]'
+                      : 'bg-[#0a101d]/70 border border-white/20 hover:border-[#38bdf8]/70 hover:bg-[#0f172a]/85 shadow-[0_10px_35px_rgba(0,0,0,0.7),inset_0_1px_1px_0_rgba(255,255,255,0.3)] hover:shadow-[0_12px_40px_rgba(56,189,248,0.2),inset_0_1px_2px_0_rgba(255,255,255,0.45)]'
                   }`}
                 >
                   <button
@@ -610,13 +610,13 @@ const LandingPage = () => {
                     <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
                       <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-mono font-black shrink-0 transition-all ${
                         isOpen
-                          ? 'bg-[#00ffaa] text-black shadow-[0_0_15px_rgba(0,255,170,0.8)]'
-                          : 'bg-white/10 text-[#00ffaa] border border-white/20 group-hover:bg-[#00ffaa]/25 group-hover:border-[#00ffaa]/60 shadow-inner'
+                          ? 'bg-[#38bdf8] text-slate-950 shadow-[0_0_15px_rgba(56,189,248,0.8)]'
+                          : 'bg-white/10 text-[#38bdf8] border border-white/20 group-hover:bg-[#38bdf8]/25 group-hover:border-[#38bdf8]/60 shadow-inner'
                       }`}>
                         0{idx + 1}
                       </span>
                       <h3 className={`font-display font-bold text-sm sm:text-base leading-snug transition-colors ${
-                        isOpen ? 'text-[#00ffaa] drop-shadow-md' : 'text-white group-hover:text-[#00ffaa]'
+                        isOpen ? 'text-[#38bdf8] drop-shadow-md' : 'text-white group-hover:text-[#38bdf8]'
                       }`}>
                         {faq.q}
                       </h3>
@@ -624,7 +624,7 @@ const LandingPage = () => {
 
                     <div className={`p-2 rounded-xl transition-all shrink-0 ${
                       isOpen
-                        ? 'bg-[#00ffaa]/25 text-[#00ffaa] border border-[#00ffaa]/50 rotate-180 shadow-[0_0_15px_rgba(0,255,170,0.4)]'
+                        ? 'bg-[#38bdf8]/25 text-[#38bdf8] border border-[#38bdf8]/50 rotate-180 shadow-[0_0_15px_rgba(56,189,248,0.4)]'
                         : 'bg-white/10 text-slate-300 border border-white/20 group-hover:text-white group-hover:bg-white/20'
                     }`}>
                       <ChevronDown className="w-4 h-4 transition-transform duration-300" />
