@@ -121,15 +121,18 @@ const ChatPage = () => {
       const res = await api.get('/chat/conversations');
       let convList = res.data.conversations || [];
 
-      // If arriving from a project with creator context, select or initialize conversation
-      if (location.state?.creatorId) {
+      if (location.state?.creatorId || location.state?.conversationId) {
+        const targetConvId = location.state.conversationId;
+        const creatorId = location.state.creatorId;
+
         let existing = convList.find((c) =>
-          c.participants?.some((p) => p.userId === location.state.creatorId)
+          (targetConvId && c._id === targetConvId) ||
+          (creatorId && c.participants?.some((p) => p.userId === creatorId))
         );
 
         if (!existing) {
           existing = {
-            _id: `conv_new_${Date.now()}`,
+            _id: targetConvId || `conv_${Date.now()}`,
             participants: [
               {
                 userId: user?._id || user?.id || 'user_001_buyer',
@@ -138,7 +141,7 @@ const ChatPage = () => {
                 role: 'user',
               },
               {
-                userId: location.state.creatorId,
+                userId: creatorId || 'user_002_creator',
                 name: location.state.creatorName || 'Dr. Priya Venkatesh',
                 avatar: location.state.creatorAvatar,
                 role: 'creator',
@@ -152,15 +155,20 @@ const ChatPage = () => {
           };
           convList = [existing, ...convList];
         }
+
         setConversations(convList);
         setActiveConv(existing);
+        fetchMessages(existing._id);
       } else {
         setConversations(convList);
         if (convList.length > 0) {
           setActiveConv(convList[0]);
+          fetchMessages(convList[0]._id);
         }
       }
-    } catch (e) {}
+    } catch (e) {
+      console.error('Failed fetching conversations', e);
+    }
   };
 
   const fetchMessages = async (convId) => {

@@ -5,13 +5,73 @@ import { memoryStore } from '../seed/seedData.js';
 export const getConversations = async (req, res) => {
   try {
     const userId = req.user?._id || req.user?.id || 'user_001_buyer';
-    const conversations = memoryStore.conversations.filter(c =>
-      c.participants.some(p => p.userId === userId)
+    const userName = req.user?.name || 'Verified Innovator';
+    const userAvatar = req.user?.avatar || '';
+
+    if (!memoryStore.conversations) {
+      memoryStore.conversations = [];
+    }
+
+    let userConvs = memoryStore.conversations.filter(c =>
+      c.participants.some(p => p.userId === userId || p.userId === 'user_001_buyer' || p.userId === 'user_admin_theprojectxia')
     );
+
+    // If user has no conversations yet, create a default active conversation with Senior Creator Dr. Priya
+    if (userConvs.length === 0) {
+      const defaultConvId = `conv_default_${userId}`;
+      const defaultConv = {
+        _id: defaultConvId,
+        participants: [
+          {
+            userId,
+            name: userName,
+            avatar: userAvatar,
+            role: 'user',
+            isOnline: true,
+          },
+          {
+            userId: 'user_002_creator',
+            name: 'Dr. Priya Venkatesh',
+            avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
+            role: 'creator',
+            isOnline: true,
+          },
+        ],
+        projectContext: {
+          title: 'Direct Creator Support & Negotiation',
+          price: 2999,
+        },
+        lastMessage: {
+          text: 'Welcome to ProjectXia! Direct creator chat & deal negotiation is active.',
+          createdAt: new Date(),
+        },
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      };
+
+      memoryStore.conversations.unshift(defaultConv);
+      userConvs = [defaultConv];
+
+      if (!memoryStore.messages) memoryStore.messages = [];
+      memoryStore.messages.push({
+        _id: `msg_welcome_${Date.now()}`,
+        conversationId: defaultConvId,
+        sender: {
+          id: 'user_002_creator',
+          name: 'Dr. Priya Venkatesh',
+          avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
+        },
+        receiverId: userId,
+        text: 'Hello! Welcome to ProjectXia. I am Dr. Priya Venkatesh, senior platform creator. Feel free to ask me technical questions or submit negotiation offers directly.',
+        messageType: 'text',
+        isRead: true,
+        createdAt: new Date(),
+      });
+    }
 
     res.json({
       success: true,
-      conversations,
+      conversations: userConvs,
     });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
@@ -23,7 +83,29 @@ export const getConversations = async (req, res) => {
 export const getMessages = async (req, res) => {
   try {
     const { conversationId } = req.params;
-    const messages = memoryStore.messages.filter(m => m.conversationId === conversationId && !m.isDeleted);
+    let messages = (memoryStore.messages || []).filter(m => m.conversationId === conversationId && !m.isDeleted);
+
+    // If empty, auto-generate welcome message for new conversation ID
+    if (messages.length === 0 && conversationId) {
+      const conv = (memoryStore.conversations || []).find(c => c._id === conversationId);
+      const seedMsg = {
+        _id: `msg_auto_${Date.now()}`,
+        conversationId,
+        sender: {
+          id: conv?.participants?.[1]?.userId || 'user_002_creator',
+          name: conv?.participants?.[1]?.name || 'Dr. Priya Venkatesh',
+          avatar: conv?.participants?.[1]?.avatar || 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=200&auto=format&fit=crop&q=80',
+        },
+        receiverId: req.user?._id || req.user?.id || 'user_001_buyer',
+        text: conv?.lastMessage?.text || 'Direct project discussion initiated. Ask any questions or negotiate terms directly.',
+        messageType: 'text',
+        isRead: true,
+        createdAt: conv?.createdAt || new Date(),
+      };
+      if (!memoryStore.messages) memoryStore.messages = [];
+      memoryStore.messages.push(seedMsg);
+      messages = [seedMsg];
+    }
 
     res.json({
       success: true,
@@ -56,12 +138,11 @@ export const sendMessage = async (req, res) => {
       avatar: req.user?.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150&auto=format&fit=crop&q=80',
     };
 
-    let targetConvId = conversationId;
+    let targetConvId = conversationId || `conv_${Date.now()}`;
 
-    // If conversation does not exist, create one
+    // If conversation does not exist, create one preserving targetConvId
     let conversation = memoryStore.conversations.find(c => c._id === targetConvId);
     if (!conversation) {
-      targetConvId = `conv_${Date.now()}`;
       conversation = {
         _id: targetConvId,
         participants: [
