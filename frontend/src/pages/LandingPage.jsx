@@ -113,38 +113,27 @@ const LandingPage = () => {
     setInlineAuthMsg('');
     setShowAutoRegisterBtn(false);
 
-    // 1. Try direct login
-    let res = await login(inlineEmail, inlinePassword);
-
-    // 2. If user is new, auto-register and sign in instantly
-    if (!res.success) {
-      res = await quickRegisterLogin(inlineEmail, inlinePassword || 'ProjectXia@2026');
-    }
-
+    // Enforce login check against registered accounts
+    const res = await login(inlineEmail, inlinePassword);
     setInlineLoading(false);
+
     if (res.success) {
       playSuccess();
       confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
       window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
       navigate('/');
     } else {
-      setInlineAuthMsg(res.message);
+      if (res.notRegistered) {
+        setInlineAuthMsg('No account found with this Email ID. Please register with your Email ID and password first.');
+        openAuthModal('register', `No account found for ${inlineEmail}. Please set your password to complete registration.`);
+      } else {
+        setInlineAuthMsg(res.message || 'Login failed. Please verify your credentials.');
+      }
     }
   };
 
   const handleInlineAutoRegister = async () => {
-    setInlineLoading(true);
-    setInlineAuthMsg('');
-    const res = await quickRegisterLogin(inlineEmail, inlinePassword || 'ProjectXia@2026');
-    setInlineLoading(false);
-    if (res.success) {
-      playSuccess();
-      confetti({ particleCount: 80, spread: 80, origin: { y: 0.6 } });
-      window.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-      navigate('/');
-    } else {
-      setInlineAuthMsg(res.message);
-    }
+    openAuthModal('register', 'Please create your account with your Email ID and password.');
   };
 
   const handleInlineGoogle = async () => {
@@ -317,67 +306,96 @@ const LandingPage = () => {
             </motion.div>
 
             {/* 4 Pillars Quick Overview Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-6 text-left">
+            {/* 4 Pillars Quick Overview Cards - ULTRA-HIGH VISIBILITY ELECTRIC CARDS */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 pt-6 text-left">
+              {/* 1. Buy Projects Card (Electric Cyan & Royal Blue) */}
               <div
                 onClick={() => handleProtectedNavigation('/marketplace', 'Please log in or register to explore verified engineering projects.')}
-                className="p-5 rounded-3xl bg-white/[0.02] hover:bg-white/[0.05] border border-white/10 hover:border-indigo-500/40 hover:shadow-[0_0_25px_rgba(99,102,241,0.15)] transition-all duration-300 cursor-pointer group"
+                className="p-6 rounded-3xl bg-gradient-to-br from-cyan-950/95 via-slate-900 to-blue-950/95 border-2 border-cyan-400 shadow-[0_0_40px_rgba(56,189,248,0.5)] hover:shadow-[0_0_60px_rgba(56,189,248,0.85)] hover:border-cyan-300 hover:scale-[1.03] transition-all duration-300 cursor-pointer group relative overflow-hidden"
               >
-                <div className="flex items-center gap-2.5 mb-2">
-                  <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-400 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
-                    <Code className="w-4 h-4" />
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-cyan-400/35 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform" />
+                <div className="flex items-center justify-between mb-4 relative z-10">
+                  <div className="p-3 rounded-2xl bg-cyan-400 text-black shadow-[0_0_22px_rgba(56,189,248,0.9)] group-hover:scale-110 transition-transform">
+                    <Code className="w-6 h-6 stroke-[3]" />
                   </div>
-                  <span className="font-display font-bold text-xs text-white group-hover:text-indigo-300">1. Buy Projects</span>
+                  <span className="text-[11px] font-mono font-black px-3 py-1.5 rounded-full bg-cyan-400/25 text-cyan-200 border border-cyan-400 uppercase tracking-widest shadow-sm">
+                    EXPLORE
+                  </span>
                 </div>
-                <p className="text-xs text-neutral-400 leading-relaxed">
-                  Verified source code, circuits & 4K video walkthroughs.
+                <h3 className="font-display font-black text-xl text-white group-hover:text-cyan-300 transition-colors relative z-10 mb-1.5 drop-shadow-md">
+                  1. Buy Projects
+                </h3>
+                <p className="text-xs sm:text-sm text-white font-bold leading-relaxed relative z-10">
+                  Verified source code, circuits & 4K video walkthroughs ready for instant download.
                 </p>
               </div>
 
+              {/* 2. Sell Your Project Card (Neon Mint Green) */}
               <div
                 onClick={() => handleProtectedNavigation('/upload', 'Please log in or register to upload and monetize your project.')}
-                className="p-4 rounded-2xl bg-emerald-950/40 hover:bg-emerald-900/60 border border-emerald-500/30 hover:border-emerald-400 transition-all cursor-pointer group shadow-lg"
+                className="p-6 rounded-3xl bg-gradient-to-br from-emerald-950/95 via-slate-900 to-teal-950/95 border-2 border-[#00ffaa] shadow-[0_0_40px_rgba(0,255,170,0.5)] hover:shadow-[0_0_60px_rgba(0,255,170,0.85)] hover:border-[#33ffbb] hover:scale-[1.03] transition-all duration-300 cursor-pointer group relative overflow-hidden"
               >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <div className="p-1.5 rounded-lg bg-emerald-500/20 text-emerald-400 group-hover:bg-emerald-400 group-hover:text-black transition-colors">
-                    <UploadCloud className="w-4 h-4" />
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-[#00ffaa]/35 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform" />
+                <div className="flex items-center justify-between mb-4 relative z-10">
+                  <div className="p-3 rounded-2xl bg-[#00ffaa] text-black shadow-[0_0_22px_rgba(0,255,170,0.9)] group-hover:scale-110 transition-transform">
+                    <UploadCloud className="w-6 h-6 stroke-[3]" />
                   </div>
-                  <span className="font-display font-bold text-xs text-white group-hover:text-emerald-300">2. Sell Your Project</span>
+                  <span className="text-[11px] font-mono font-black px-3 py-1.5 rounded-full bg-[#00ffaa]/25 text-[#00ffaa] border border-[#00ffaa] uppercase tracking-widest shadow-sm">
+                    MONETIZE
+                  </span>
                 </div>
-                <p className="text-[11px] text-slate-300 leading-snug">
-                  Monetize your original projects & code with direct payouts.
+                <h3 className="font-display font-black text-xl text-white group-hover:text-[#00ffaa] transition-colors relative z-10 mb-1.5 drop-shadow-md">
+                  2. Sell Your Project
+                </h3>
+                <p className="text-xs sm:text-sm text-white font-bold leading-relaxed relative z-10">
+                  Monetize your original projects & source code with direct instant payouts.
                 </p>
               </div>
 
+              {/* 3. Plagiarism Check Card (Vivid Neon Fuchsia/Purple) */}
               <div
                 onClick={() => handleProtectedNavigation('/ai-shield', 'Please log in or register to run AI Plagiarism & Code Integrity scans.')}
-                className="p-4 rounded-2xl bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/30 hover:border-purple-400 transition-all cursor-pointer group shadow-lg"
+                className="p-6 rounded-3xl bg-gradient-to-br from-purple-950/95 via-slate-900 to-fuchsia-950/95 border-2 border-fuchsia-400 shadow-[0_0_40px_rgba(232,121,249,0.5)] hover:shadow-[0_0_60px_rgba(232,121,249,0.85)] hover:border-fuchsia-300 hover:scale-[1.03] transition-all duration-300 cursor-pointer group relative overflow-hidden"
               >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <div className="p-1.5 rounded-lg bg-purple-500/20 text-purple-400 group-hover:bg-purple-400 group-hover:text-black transition-colors">
-                    <Shield className="w-4 h-4" />
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-fuchsia-400/35 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform" />
+                <div className="flex items-center justify-between mb-4 relative z-10">
+                  <div className="p-3 rounded-2xl bg-fuchsia-400 text-black shadow-[0_0_22px_rgba(232,121,249,0.9)] group-hover:scale-110 transition-transform">
+                    <Shield className="w-6 h-6 stroke-[3]" />
                   </div>
-                  <span className="font-display font-bold text-xs text-white group-hover:text-purple-300">3. Plagiarism Check</span>
+                  <span className="text-[11px] font-mono font-black px-3 py-1.5 rounded-full bg-fuchsia-400/25 text-fuchsia-200 border border-fuchsia-400 uppercase tracking-widest shadow-sm">
+                    VERIFY
+                  </span>
                 </div>
-                <p className="text-[11px] text-slate-300 leading-snug">
-                  Scan code & IEEE thesis reports for originality score.
+                <h3 className="font-display font-black text-xl text-white group-hover:text-fuchsia-300 transition-colors relative z-10 mb-1.5 drop-shadow-md">
+                  3. Plagiarism Check
+                </h3>
+                <p className="text-xs sm:text-sm text-white font-bold leading-relaxed relative z-10">
+                  Scan code & IEEE thesis reports against billions of sources for originality.
                 </p>
               </div>
 
+              {/* 4. Build Custom Card (Vivid Gold & Amber) */}
               <div
                 onClick={() => {
                   playSuccess();
                   setIsDevModalOpen(true);
                 }}
-                className="p-4 rounded-2xl bg-gradient-to-r from-purple-950/60 to-blue-950/60 hover:from-purple-900/80 hover:to-blue-900/80 border border-purple-500/40 hover:border-purple-300 transition-all cursor-pointer group shadow-lg"
+                className="p-6 rounded-3xl bg-gradient-to-br from-amber-950/95 via-slate-900 to-yellow-950/95 border-2 border-amber-400 shadow-[0_0_40px_rgba(251,191,36,0.5)] hover:shadow-[0_0_60px_rgba(251,191,36,0.85)] hover:border-amber-300 hover:scale-[1.03] transition-all duration-300 cursor-pointer group relative overflow-hidden"
               >
-                <div className="flex items-center gap-2 mb-1.5">
-                  <div className="p-1.5 rounded-lg bg-amber-400/20 text-amber-300 group-hover:bg-amber-400 group-hover:text-black transition-colors">
-                    <Lightbulb className="w-4 h-4" />
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-amber-400/35 rounded-full blur-2xl pointer-events-none group-hover:scale-150 transition-transform" />
+                <div className="flex items-center justify-between mb-4 relative z-10">
+                  <div className="p-3 rounded-2xl bg-amber-400 text-black shadow-[0_0_22px_rgba(251,191,36,0.9)] group-hover:scale-110 transition-transform">
+                    <Lightbulb className="w-6 h-6 stroke-[3]" />
                   </div>
-                  <span className="font-display font-bold text-xs text-white group-hover:text-amber-300">4. Build Custom</span>
+                  <span className="text-[11px] font-mono font-black px-3 py-1.5 rounded-full bg-amber-400/25 text-amber-200 border border-amber-400 uppercase tracking-widest shadow-sm">
+                    DEV TEAM
+                  </span>
                 </div>
-                <p className="text-[11px] text-slate-300 leading-snug">
-                  Hire our in-house engineers with 12h callback.
+                <h3 className="font-display font-black text-xl text-white group-hover:text-amber-300 transition-colors relative z-10 mb-1.5 drop-shadow-md">
+                  4. Build Custom
+                </h3>
+                <p className="text-xs sm:text-sm text-white font-bold leading-relaxed relative z-10">
+                  Hire our in-house engineering team with guaranteed 12-hour callback.
                 </p>
               </div>
             </div>

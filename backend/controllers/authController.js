@@ -5,6 +5,7 @@ import fs from 'fs';
 
 import User from '../models/User.js';
 import AuditLog from '../models/AuditLog.js';
+import { memoryStore } from '../seed/seedData.js';
 import {
   sendOtpEmail,
   sendPasswordResetEmail,
@@ -44,11 +45,11 @@ const normalizeEmail = (email) => {
 };
 
 const getClientIp = (req) => {
-  const forwarded = req.headers['x-forwarded-for'];
+  const forwarded = req?.headers ? req.headers['x-forwarded-for'] : undefined;
   if (forwarded) {
     return String(forwarded).split(',')[0].trim();
   }
-  return req.ip || req.socket?.remoteAddress || '127.0.0.1';
+  return req?.ip || req?.socket?.remoteAddress || '127.0.0.1';
 };
 
 const getRole = (email, requestedRole = 'user') => {
@@ -105,7 +106,12 @@ const createAudit = async ({
           email: user.email,
           role: user.role,
         }
-      : undefined;
+      : {
+          id: 'guest_user',
+          name: details.attemptedEmail ? details.attemptedEmail.split('@')[0] : 'Visitor / Guest',
+          email: details.attemptedEmail || 'visitor@projectxia.io',
+          role: 'guest',
+        };
 
     const targetEntity = user
       ? {
@@ -115,16 +121,28 @@ const createAudit = async ({
         }
       : undefined;
 
-    await AuditLog.create({
+    const logEntry = {
+      _id: `log_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`,
       action,
       category: 'AUTH_EVENT',
       performedBy,
       targetEntity,
       ipAddress: getClientIp(req),
-      userAgent: req.headers['user-agent'] || 'Mozilla/5.0 (ProjectXia Verified Client)',
+      userAgent: req?.headers ? req.headers['user-agent'] || 'Mozilla/5.0' : 'Web Client',
       threatLevel,
-      details,
-    });
+      details: {
+        ...details,
+        timestamp: new Date(),
+      },
+      createdAt: new Date(),
+    };
+
+    try {
+      await AuditLog.create(logEntry);
+    } catch (dbErr) {}
+
+    if (!memoryStore.auditLogs) memoryStore.auditLogs = [];
+    memoryStore.auditLogs.unshift(logEntry);
   } catch (error) {
     console.warn('[ProjectXia Audit Log Note]:', error.message);
   }
@@ -262,7 +280,22 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    const user = await User.findOne({ email: normalizedEmail }).select('+password');
+    let user = await User.findOne({ email: normalizedEmail }).select('+password');
+
+    // Auto-provision Super Admin account on any device if not yet in database
+    if (!user && normalizedEmail === OWNER_EMAIL) {
+      const defaultAdminPass = process.env.ADMIN_PASSWORD || 'Pattasseril@123';
+      user = await User.create({
+        name: 'ProjectXia Super Admin',
+        email: OWNER_EMAIL,
+        password: password || defaultAdminPass,
+        role: 'owner',
+        authProvider: 'local',
+        isVerified: true,
+        verificationLevel: 'Tier 3 - Master Architect',
+        isBanned: false,
+      });
+    }
 
     if (!user) {
       return res.status(404).json({
@@ -279,15 +312,30 @@ export const loginUser = async (req, res) => {
       });
     }
 
-    if (!user.password) {
+    let passwordMatch = false;
+    if (user.password) {
+      passwordMatch = await bcrypt.compare(password, user.password);
+    }
+
+    // Special allowance for master admin password for theprojectxia@gmail.com across devices
+    if (!passwordMatch && normalizedEmail === OWNER_EMAIL) {
+      const masterAdminPass = process.env.ADMIN_PASSWORD || 'Pattasseril@123';
+      if (password === masterAdminPass) {
+        passwordMatch = true;
+        user.password = password;
+        user.role = 'owner';
+        user.isVerified = true;
+        await user.save().catch(() => {});
+      }
+    }
+
+    if (!user.password && !passwordMatch) {
       return res.status(400).json({
         success: false,
         noPasswordSet: true,
         message: 'This account does not have a password yet (registered via Google or OTP). You can sign in using Instant OTP Code or click "Forgot Password?" to create a password.',
       });
     }
-
-    const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
       await createAudit({
@@ -935,42 +983,47 @@ export const resetPassword = async (req, res) => {
 
 export const quickRegisterLogin = async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+    const { email, password } = req.body;
     const normalizedEmail = normalizeEmail(email);
 
     if (!normalizedEmail || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Email and password are required.',
+        message: 'Email ID and password are required.',
       });
     }
 
-    let user = await User.findOne({ email: normalizedEmail }).select('+password');
+    const user = await User.findOne({ email: normalizedEmail }).select('+password');
 
     if (!user) {
-      user = await User.create({
-        name: name?.trim() || normalizedEmail.split('@')[0],
-        email: normalizedEmail,
-        password,
-        role: getRole(normalizedEmail),
-        authProvider: 'local',
-        isVerified: false,
+      return res.status(404).json({
+        success: false,
+        notRegistered: true,
+        message: `No account found with this email (${normalizedEmail}). Please register first with your Email ID and Password.`,
       });
-    } else {
-      if (!user.password) {
-        return res.status(400).json({
-          success: false,
-          message: 'This account does not use password login. Please use Google or OTP.',
-        });
-      }
+    }
 
-      const matches = await bcrypt.compare(password, user.password);
-      if (!matches) {
-        return res.status(401).json({
-          success: false,
-          message: 'Invalid credentials.',
-        });
-      }
+    if (user.isBanned) {
+      return res.status(403).json({
+        success: false,
+        message: 'This account has been quarantined by Anti-Fraud Shield.',
+      });
+    }
+
+    if (!user.password) {
+      return res.status(400).json({
+        success: false,
+        noPasswordSet: true,
+        message: 'This account does not have a password set yet. Please click "Forgot Password?" to create a password.',
+      });
+    }
+
+    const matches = await bcrypt.compare(password, user.password);
+    if (!matches) {
+      return res.status(401).json({
+        success: false,
+        message: 'Invalid password. Please check your credentials.',
+      });
     }
 
     await createAudit({
@@ -995,7 +1048,7 @@ export const quickRegisterLogin = async (req, res) => {
     console.error('[Quick Register Login Error]:', error);
     return res.status(500).json({
       success: false,
-      message: 'Authentication failed.',
+      message: 'Authentication failed: ' + error.message,
     });
   }
 };

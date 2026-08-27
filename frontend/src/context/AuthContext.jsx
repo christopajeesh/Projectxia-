@@ -94,6 +94,14 @@ export const AuthProvider = ({ children }) => {
           return { success: true, user: res.data.user };
         }
       } catch (apiErr) {
+        if (apiErr.response?.data?.notRegistered || apiErr.response?.status === 404) {
+          return {
+            success: false,
+            notRegistered: true,
+            statusCode: 404,
+            message: apiErr.response?.data?.message || `No account found with this email (${cleanEmail}). Please register first.`,
+          };
+        }
         if (apiErr.response?.data?.noPasswordSet) {
           return {
             success: false,
@@ -104,28 +112,24 @@ export const AuthProvider = ({ children }) => {
         if (apiErr.response?.status === 401) {
           return {
             success: false,
+            statusCode: 401,
             message: apiErr.response?.data?.message || 'Invalid password. Please check your password.',
           };
         }
+        return {
+          success: false,
+          message: apiErr.response?.data?.message || 'Login failed. Please check your credentials.',
+        };
       }
 
-      // 3. Fallback direct session
-      const fallbackUser = {
-        id: 'usr_' + Date.now(),
-        email: cleanEmail,
-        name: cleanEmail.split('@')[0],
-        role: cleanEmail === 'theprojectxia@gmail.com' ? 'owner' : 'user',
-        authProvider: 'local',
-        isVerified: true,
+      return {
+        success: false,
+        message: 'Login failed. Unable to authenticate session.',
       };
-      const fallbackToken = 'px_tok_' + Math.random().toString(36).slice(2) + Date.now();
-      saveAuthSession(fallbackToken, fallbackUser);
-      setIsAuthModalOpen(false);
-      return { success: true, user: fallbackUser };
     } catch (err) {
       return {
         success: false,
-        message: err.response?.data?.message || 'Login failed. Please verify credentials.',
+        message: err.response?.data?.message || err.message || 'Login failed. Please verify credentials.',
       };
     } finally {
       setIsLoading(false);
@@ -157,28 +161,24 @@ export const AuthProvider = ({ children }) => {
           return {
             success: false,
             alreadyRegistered: true,
+            statusCode: 409,
             message: 'An account with this email already exists.',
           };
         }
+        return {
+          success: false,
+          message: apiErr.response?.data?.message || 'Registration failed.',
+        };
       }
 
-      // 3. Fallback direct session
-      const fallbackUser = {
-        id: 'usr_' + Date.now(),
-        email: cleanEmail,
-        name: cleanEmail.split('@')[0],
-        role: cleanEmail === 'theprojectxia@gmail.com' ? 'owner' : 'user',
-        authProvider: 'local',
-        isVerified: true,
+      return {
+        success: false,
+        message: 'Registration failed. Unable to create account.',
       };
-      const fallbackToken = 'px_tok_' + Math.random().toString(36).slice(2) + Date.now();
-      saveAuthSession(fallbackToken, fallbackUser);
-      setIsAuthModalOpen(false);
-      return { success: true, user: fallbackUser };
     } catch (err) {
       return {
         success: false,
-        message: err.response?.data?.message || 'Registration failed.',
+        message: err.response?.data?.message || err.message || 'Registration failed.',
       };
     } finally {
       setIsLoading(false);
@@ -391,37 +391,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // 6. Quick Auto-Register and Sign In
-  const quickRegisterLogin = async (email, password, name) => {
-    setIsLoading(true);
-    const cleanEmail = String(email).trim().toLowerCase();
-    try {
-      try {
-        const res = await api.post('/auth/quick-register-login', { email: cleanEmail, password, name });
-        if (res.data?.token && res.data?.user) {
-          saveAuthSession(res.data.token, res.data.user);
-          setIsAuthModalOpen(false);
-          return { success: true, user: res.data.user };
-        }
-      } catch (apiErr) {}
-
-      const fallbackUser = {
-        id: 'usr_' + Date.now(),
-        email: cleanEmail,
-        name: name || cleanEmail.split('@')[0],
-        role: cleanEmail === 'theprojectxia@gmail.com' ? 'owner' : 'user',
-        authProvider: 'local',
-        isVerified: true,
-      };
-      const fallbackToken = 'px_tok_' + Math.random().toString(36).slice(2) + Date.now();
-      saveAuthSession(fallbackToken, fallbackUser);
-      setIsAuthModalOpen(false);
-      return { success: true, user: fallbackUser };
-    } catch (err) {
-      return { success: false, message: err.response?.data?.message || 'Authentication failed.' };
-    } finally {
-      setIsLoading(false);
-    }
+  // 6. Quick Sign In (Enforces registration requirement)
+  const quickRegisterLogin = async (email, password) => {
+    return await login(email, password);
   };
 
   // 7. Send OTP to phone/email

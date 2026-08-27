@@ -262,21 +262,24 @@ const BackgroundCanvas = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#010103]">
-      {/* 50px Sub-pixel Subtle Cyber Grid Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:50px_50px]" />
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#050508]">
+      {/* 40px Sub-pixel Subtle Cyber Grid Pattern matching Pixellon specification */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.015)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.015)_1px,transparent_1px)] bg-[size:40px_40px] z-[0]" />
 
-      {/* Dual 3D Wireframe & Shooting Star Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 opacity-80" />
+      {/* Tactile Digital Noise Grain Overlay */}
+      <div className="absolute inset-0 noise-bg-overlay opacity-60 z-[1]" />
+
+      {/* Dual 3D Wireframe Mesh & Shooting Star Canvas */}
+      <canvas ref={canvasRef} className="absolute inset-0 opacity-85 z-[2]" />
 
       {/* Subtle Low-Light Radial Aurora Mesh (Indigo, Mint, Purple, Cyan) */}
-      <div className="absolute -top-32 -left-32 w-[700px] h-[700px] rounded-full bg-indigo-950/20 blur-[150px] animate-pulse-slow" />
-      <div className="absolute top-1/4 -right-32 w-[650px] h-[650px] rounded-full bg-[#00ffaa]/08 blur-[150px] animate-aurora-glow" />
-      <div className="absolute bottom-10 left-1/3 w-[600px] h-[600px] rounded-full bg-purple-950/20 blur-[150px]" />
-      <div className="absolute top-2/3 right-1/4 w-[450px] h-[450px] rounded-full bg-cyan-950/15 blur-[140px]" />
+      <div className="absolute -top-32 -left-32 w-[700px] h-[700px] rounded-full bg-indigo-950/20 blur-[150px] animate-pulse-slow z-[3]" />
+      <div className="absolute top-1/4 -right-32 w-[650px] h-[650px] rounded-full bg-[#00ffaa]/08 blur-[150px] animate-aurora-glow z-[3]" />
+      <div className="absolute bottom-10 left-1/3 w-[600px] h-[600px] rounded-full bg-purple-950/20 blur-[150px] z-[3]" />
+      <div className="absolute top-2/3 right-1/4 w-[450px] h-[450px] rounded-full bg-cyan-950/15 blur-[140px] z-[3]" />
 
       {/* Deep Pitch-Dark Edge Vignette */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#010103]/80 via-[#010103]/40 to-[#010103]/95" />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#050508]/80 via-[#050508]/40 to-[#050508]/95 z-[4]" />
     </div>
   );
 };

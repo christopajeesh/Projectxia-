@@ -378,6 +378,43 @@ const AdminPage = () => {
     confetti({ particleCount: 50, spread: 70 });
   };
 
+  const handleExportLogsCSV = () => {
+    playClick();
+    if (auditLogs.length === 0) {
+      alert('No activity logs available to export.');
+      return;
+    }
+
+    const headers = [
+      'Log ID', 'Date & Time', 'User Name', 'User Email', 'Role',
+      'Action / Activity', 'Category', 'Threat Level', 'IP Address', 'User Agent / Device', 'Details'
+    ];
+
+    const rows = auditLogs.map((l) => [
+      `"${l._id || ''}"`,
+      `"${new Date(l.createdAt || l.details?.timestamp || Date.now()).toLocaleString()}"`,
+      `"${(l.performedBy?.name || 'Visitor').replace(/"/g, '""')}"`,
+      `"${(l.performedBy?.email || 'N/A').replace(/"/g, '""')}"`,
+      `"${(l.performedBy?.role || 'user').replace(/"/g, '""')}"`,
+      `"${(l.action || '').replace(/"/g, '""')}"`,
+      `"${(l.category || 'AUTH_EVENT').replace(/"/g, '""')}"`,
+      `"${(l.threatLevel || 'CLEAN').replace(/"/g, '""')}"`,
+      `"${(l.ipAddress || '127.0.0.1').replace(/"/g, '""')}"`,
+      `"${(l.userAgent || 'Web Client').replace(/"/g, '""')}"`,
+      `"${JSON.stringify(l.details || {}).replace(/"/g, '""')}"`,
+    ]);
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((e) => e.join(','))].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `ProjectXia_Activity_Audit_Logs_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    confetti({ particleCount: 50, spread: 70 });
+  };
+
   const handleAdminClearanceLogin = async (e) => {
     e.preventDefault();
     playClick();
@@ -391,8 +428,8 @@ const AdminPage = () => {
       return;
     }
 
-    if (cleanPass !== 'Pattasseril@123') {
-      setLoginError('Invalid Master Password for ProjectXia Core OS.');
+    if (!cleanPass) {
+      setLoginError('Master Clearance Password is required.');
       return;
     }
 
@@ -401,7 +438,7 @@ const AdminPage = () => {
       try {
         const res = await api.post('/auth/login', {
           email: 'theprojectxia@gmail.com',
-          password: 'Pattasseril@123',
+          password: cleanPass,
         });
         if (res.data?.token && res.data?.user) {
           sessionStorage.setItem('projectxia_token', res.data.token);
@@ -411,8 +448,14 @@ const AdminPage = () => {
           window.location.reload();
           return;
         }
-      } catch (apiErr) {}
+      } catch (apiErr) {
+        if (apiErr.response?.status === 401) {
+          setLoginError('Invalid Master Password for Super Admin clearance.');
+          return;
+        }
+      }
 
+      // Offline fallback session for owner
       const ownerUser = {
         _id: 'usr_owner_theprojectxia',
         id: 'usr_owner_theprojectxia',
@@ -700,6 +743,7 @@ const AdminPage = () => {
             { id: 'projects', label: `🏷️ Seller Projects (${projectsList.length})` },
             { id: 'plagiarism', label: `🛡️ AI Plagiarism Scans (${plagiarismScans.length})` },
             { id: 'users', label: `👤 Logins & Governance (${usersList.length})` },
+            { id: 'logs', label: `📜 Login & Activity Audit Logs (${auditLogs.length})` },
             { id: 'broadcast', label: '📢 Live Broadcaster' },
           ].map((tab) => (
             <button
@@ -779,6 +823,15 @@ const AdminPage = () => {
                   const clientName = lead.name || lead.clientName || 'Prospective Client';
                   const isEditingThisNote = editingNotesId === leadId;
 
+                  const rawDate = lead.createdAt || lead.submittedAt || lead.date;
+                  const dateObj = rawDate ? new Date(rawDate) : new Date();
+                  const formattedDate = !isNaN(dateObj.getTime())
+                    ? dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                    : 'Recently';
+                  const formattedTime = !isNaN(dateObj.getTime())
+                    ? dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })
+                    : '';
+
                   return (
                     <div
                       key={leadId}
@@ -810,11 +863,19 @@ const AdminPage = () => {
                                 </a>
                               )}
                               <span className="text-purple-300">• {lead.dept || lead.department || 'Engineering'}</span>
+                              <span className="text-amber-400 flex items-center gap-1 font-mono font-bold text-[11px] bg-amber-950/60 px-2 py-0.5 rounded-lg border border-amber-500/30">
+                                <Clock className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+                                <span>{formattedDate} {formattedTime && `at ${formattedTime}`}</span>
+                              </span>
                             </div>
                           </div>
                         </div>
 
                         <div className="flex flex-wrap items-center gap-2 sm:justify-end">
+                          <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-900/90 border border-cyan-500/40 text-cyan-300 text-xs font-mono font-bold shadow-sm">
+                            <Clock className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                            <span>{formattedDate} {formattedTime && `• ${formattedTime}`}</span>
+                          </div>
                           <span className="px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-500/40 text-emerald-400 text-xs font-bold">
                             {lead.budget || lead.budgetRange || '₹15,000 - ₹30,000'}
                           </span>
@@ -1312,7 +1373,133 @@ const AdminPage = () => {
           </div>
         )}
 
-        {/* TAB 6: PLATFORM LIVE BROADCASTER */}
+        {/* TAB 6: WEBSITE LOGIN & ACTIVITY AUDIT LOGS */}
+        {activeTab === 'logs' && (
+          <div className="space-y-4 font-mono text-xs">
+            <div className="flex flex-col sm:flex-row gap-3 items-center justify-between p-4 rounded-2xl bg-gray-950/90 border border-slate-800">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-purple-950/80 border border-purple-500/40 text-purple-400">
+                  <Activity className="w-5 h-5 animate-pulse" />
+                </div>
+                <div>
+                  <h3 className="text-base font-display font-bold text-white flex items-center gap-2">
+                    <span>Website Login & Activity Audit Ledger</span>
+                  </h3>
+                  <p className="text-[11px] font-mono text-slate-400">
+                    Live recorded user logins, registrations, failed attempts, password resets, and site activities with exact Date & Time.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
+                <button
+                  type="button"
+                  onClick={handleExportLogsCSV}
+                  className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-cyan-400 text-cyan-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+                >
+                  <Download className="w-4 h-4 text-cyan-400" />
+                  <span>Export Logs CSV</span>
+                </button>
+              </div>
+            </div>
+
+            <div className="p-4 rounded-3xl bg-gray-950/90 border border-cyan-500/30 overflow-x-auto shadow-2xl">
+              {auditLogs.length === 0 ? (
+                <div className="p-12 text-center text-slate-400 space-y-2">
+                  <Activity className="w-8 h-8 text-purple-400/60 mx-auto" />
+                  <p className="font-display font-bold text-white text-sm">No activity logs recorded yet</p>
+                  <p className="text-xs text-slate-500">
+                    When visitors or registered users sign in, register, or perform actions, their activity details with date & time will be listed here.
+                  </p>
+                </div>
+              ) : (
+                <table className="w-full text-left font-mono text-xs">
+                  <thead>
+                    <tr className="border-b border-slate-800 text-slate-400 uppercase text-[10px]">
+                      <th className="pb-3">Date & Time</th>
+                      <th className="pb-3">User & Email</th>
+                      <th className="pb-3">Activity / Action</th>
+                      <th className="pb-3">Category</th>
+                      <th className="pb-3">IP Address / Node</th>
+                      <th className="pb-3 text-right">Threat Level</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-900">
+                    {auditLogs.map((log) => {
+                      const logId = log._id || log.id;
+                      const rawTime = log.createdAt || log.details?.timestamp || log.timestamp;
+                      const dateObj = rawTime ? new Date(rawTime) : new Date();
+                      const formattedDate = !isNaN(dateObj.getTime())
+                        ? dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+                        : 'Recently';
+                      const formattedTime = !isNaN(dateObj.getTime())
+                        ? dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true })
+                        : '';
+
+                      const actorName = log.performedBy?.name || 'Visitor / Guest';
+                      const actorEmail = log.performedBy?.email || 'N/A';
+                      const actorRole = log.performedBy?.role || 'user';
+
+                      return (
+                        <tr key={logId} className="hover:bg-white/5 transition-colors">
+                          <td className="py-3.5 whitespace-nowrap">
+                            <div className="flex items-center gap-1.5 text-cyan-300 font-bold text-[11px]">
+                              <Clock className="w-3.5 h-3.5 text-cyan-400" />
+                              <span>{formattedDate}</span>
+                            </div>
+                            <p className="text-[10px] text-slate-400">{formattedTime}</p>
+                          </td>
+                          <td className="py-3.5">
+                            <div>
+                              <p className="font-bold text-white flex items-center gap-1.5">
+                                <span>{actorName}</span>
+                                <span className="px-1.5 py-0.2 rounded text-[9px] font-bold bg-slate-900 text-purple-300 border border-purple-500/30 uppercase">
+                                  {actorRole}
+                                </span>
+                              </p>
+                              <p className="text-[10px] text-cyan-300 font-mono">{actorEmail}</p>
+                            </div>
+                          </td>
+                          <td className="py-3.5">
+                            <span className="px-2 py-0.5 rounded bg-gray-900 border border-slate-800 text-white font-bold text-[11px]">
+                              {log.action}
+                            </span>
+                            {log.details?.reason && (
+                              <p className="text-[10px] text-rose-400 mt-0.5">Reason: {log.details.reason}</p>
+                            )}
+                          </td>
+                          <td className="py-3.5">
+                            <span className="text-slate-400 text-[10px] uppercase font-bold">
+                              {log.category || 'AUTH_EVENT'}
+                            </span>
+                          </td>
+                          <td className="py-3.5 text-slate-400 text-[11px]">
+                            {log.ipAddress || '127.0.0.1'}
+                          </td>
+                          <td className="py-3.5 text-right">
+                            <span
+                              className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                                log.threatLevel === 'CRITICAL_BLOCKED' || log.threatLevel === 'HIGH'
+                                  ? 'bg-rose-950 text-rose-400 border border-rose-500/40'
+                                  : log.threatLevel === 'LOW' || log.threatLevel === 'MEDIUM'
+                                  ? 'bg-amber-950 text-amber-300 border border-amber-500/40'
+                                  : 'bg-emerald-950 text-emerald-400 border border-emerald-500/40'
+                              }`}
+                            >
+                              {log.threatLevel || 'CLEAN'}
+                            </span>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* TAB 7: PLATFORM LIVE BROADCASTER */}
         {activeTab === 'broadcast' && (
           <div className="max-w-2xl bg-gray-950/90 border border-cyan-500/30 p-6 sm:p-8 rounded-3xl space-y-4 font-mono text-xs shadow-2xl">
             <div>

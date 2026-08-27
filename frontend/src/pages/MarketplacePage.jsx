@@ -261,24 +261,37 @@ const MarketplacePage = () => {
             })}
           </div>
 
-          {/* Department Category Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
-            {departments.map((dept) => (
-              <button
-                key={dept}
-                onClick={() => {
-                  playClick();
-                  setSelectedCategory(dept === 'All Departments' ? 'All' : dept);
-                }}
-                className={`px-3 py-1.5 rounded-xl text-[11px] font-mono whitespace-nowrap transition-all cursor-pointer ${
-                  (selectedCategory === dept || (dept === 'All Departments' && selectedCategory === 'All'))
-                    ? 'bg-purple-500 text-white font-bold shadow-md shadow-purple-500/20 border border-purple-400'
-                    : 'bg-gray-900/90 border border-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                {dept}
-              </button>
-            ))}
+          {/* Department Category Pills with Framer Motion Layout Animation */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
+            {departments.map((dept) => {
+              const isSelected =
+                selectedCategory === dept || (dept === 'All Departments' && selectedCategory === 'All');
+              return (
+                <button
+                  key={dept}
+                  onClick={() => {
+                    playClick();
+                    setSelectedCategory(dept === 'All Departments' ? 'All' : dept);
+                  }}
+                  className={`relative px-4 py-2 rounded-xl text-xs font-mono transition-all cursor-pointer whitespace-nowrap ${
+                    isSelected
+                      ? 'text-black font-extrabold'
+                      : 'text-slate-400 hover:text-white bg-slate-900/60 border border-white/5 hover:border-white/20'
+                  }`}
+                >
+                  {isSelected && (
+                    <motion.div
+                      layoutId="activeCategoryPill"
+                      className="absolute inset-0 rounded-xl bg-gradient-to-r from-[#00ffaa] via-[#33ffbb] to-[#00ffaa] shadow-[0_0_20px_rgba(0,255,170,0.45)]"
+                      transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+                    />
+                  )}
+                  <span className="relative z-10 flex items-center gap-1.5">
+                    {dept}
+                  </span>
+                </button>
+              );
+            })}
           </div>
 
           {/* Filters Bar: Sort & Max Price & Own Listings */}
