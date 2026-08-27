@@ -582,11 +582,11 @@ const ChatPage = () => {
   });
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col pt-3 pb-10 font-mono text-xs">
-      <div className="max-w-7xl mx-auto w-full px-2 sm:px-6 lg:px-8 flex-1 flex flex-col relative z-10">
+    <div className="relative h-[calc(100vh-4.5rem)] sm:h-[calc(100vh-5rem)] flex flex-col py-1.5 sm:py-2.5 font-mono text-xs overflow-hidden">
+      <div className="max-w-[1600px] mx-auto w-full px-2 sm:px-4 lg:px-6 flex-1 flex flex-col h-full relative z-10 overflow-hidden">
         
-        {/* WHATSAPP MAIN CONTAINER */}
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 rounded-3xl bg-[#0b141a] border border-[#00a884]/30 backdrop-blur-2xl overflow-hidden shadow-2xl min-h-[480px] md:min-h-[650px] max-h-[calc(100vh-5.5rem)]">
+        {/* DIRECT CHAT MAIN CONTAINER */}
+        <div className="w-full h-full grid grid-cols-1 md:grid-cols-12 rounded-2xl md:rounded-3xl bg-[#0b141a] border border-[#00a884]/30 backdrop-blur-2xl overflow-hidden shadow-2xl">
           
           {/* ============================================================ */}
           {/* LEFT: WHATSAPP CHAT LIST SIDEBAR */}
