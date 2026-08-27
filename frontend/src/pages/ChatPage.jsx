@@ -116,16 +116,45 @@ const ChatPage = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
+  const getUserKey = () => {
+    return (user?.email || user?._id || user?.id || 'guest').toLowerCase().trim();
+  };
+
   const fetchConversations = async () => {
+    const userKey = getUserKey();
+    let cachedConvs = [];
+
+    // Load from local storage cache first for 0ms instant recovery
+    try {
+      const stored = localStorage.getItem(`px_convs_${userKey}`);
+      if (stored) {
+        cachedConvs = JSON.parse(stored);
+        if (Array.isArray(cachedConvs) && cachedConvs.length > 0) {
+          setConversations(cachedConvs);
+          if (!activeConv) {
+            setActiveConv(cachedConvs[0]);
+            fetchMessages(cachedConvs[0]._id);
+          }
+        }
+      }
+    } catch (err) {}
+
     try {
       const res = await api.get('/chat/conversations');
-      let convList = res.data.conversations || [];
+      let apiConvs = res.data.conversations || [];
+
+      // Merge API conversations with cached conversations so past history is preserved
+      const convMap = new Map();
+      [...apiConvs, ...cachedConvs].forEach((c) => {
+        if (c && c._id) convMap.set(String(c._id), c);
+      });
+      let mergedConvs = Array.from(convMap.values());
 
       if (location.state?.creatorId || location.state?.conversationId) {
         const targetConvId = location.state.conversationId;
         const creatorId = location.state.creatorId;
 
-        let existing = convList.find((c) =>
+        let existing = mergedConvs.find((c) =>
           (targetConvId && c._id === targetConvId) ||
           (creatorId && c.participants?.some((p) => p.userId === creatorId))
         );
@@ -136,12 +165,14 @@ const ChatPage = () => {
             participants: [
               {
                 userId: user?._id || user?.id || 'user_001_buyer',
+                email: user?.email || '',
                 name: user?.name || 'Verified User',
                 avatar: user?.avatar,
                 role: 'user',
               },
               {
                 userId: creatorId || 'user_002_creator',
+                email: 'priya.creator@projectxia.io',
                 name: location.state.creatorName || 'Dr. Priya Venkatesh',
                 avatar: location.state.creatorAvatar,
                 role: 'creator',
@@ -153,19 +184,21 @@ const ChatPage = () => {
               createdAt: new Date(),
             },
           };
-          convList = [existing, ...convList];
+          mergedConvs = [existing, ...mergedConvs];
         }
 
-        setConversations(convList);
+        setConversations(mergedConvs);
         setActiveConv(existing);
         fetchMessages(existing._id);
       } else {
-        setConversations(convList);
-        if (convList.length > 0) {
-          setActiveConv(convList[0]);
-          fetchMessages(convList[0]._id);
+        setConversations(mergedConvs);
+        if (mergedConvs.length > 0 && !activeConv) {
+          setActiveConv(mergedConvs[0]);
+          fetchMessages(mergedConvs[0]._id);
         }
       }
+
+      localStorage.setItem(`px_convs_${userKey}`, JSON.stringify(mergedConvs));
     } catch (e) {
       console.error('Failed fetching conversations', e);
     }
@@ -173,24 +206,35 @@ const ChatPage = () => {
 
   const fetchMessages = async (convId) => {
     if (!convId) return;
+    const userKey = getUserKey();
+    let cachedMsgs = [];
 
     // Load from local storage cache first for 0ms instant display
     try {
-      const cached = localStorage.getItem(`px_msgs_${convId}`);
+      const cached = localStorage.getItem(`px_msgs_${userKey}_${convId}`);
       if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          setMessages(parsed);
+        cachedMsgs = JSON.parse(cached);
+        if (Array.isArray(cachedMsgs) && cachedMsgs.length > 0) {
+          setMessages(cachedMsgs);
         }
       }
     } catch (err) {}
 
     try {
       const res = await api.get(`/chat/messages/${convId}`);
-      const fetchedMsgs = res.data.messages || [];
-      if (fetchedMsgs.length > 0) {
-        setMessages(fetchedMsgs);
-        localStorage.setItem(`px_msgs_${convId}`, JSON.stringify(fetchedMsgs));
+      const apiMsgs = res.data.messages || [];
+
+      // Merge API messages with local cached messages
+      const msgMap = new Map();
+      [...cachedMsgs, ...apiMsgs].forEach((m) => {
+        const key = String(m._id || m.id);
+        if (key) msgMap.set(key, m);
+      });
+      const mergedMsgs = Array.from(msgMap.values());
+
+      if (mergedMsgs.length > 0) {
+        setMessages(mergedMsgs);
+        localStorage.setItem(`px_msgs_${userKey}_${convId}`, JSON.stringify(mergedMsgs));
       }
       setTimeout(scrollToBottom, 100);
     } catch (e) {
@@ -200,7 +244,26 @@ const ChatPage = () => {
 
   useEffect(() => {
     if (activeConv?._id && messages.length > 0) {
-      localStorage.setItem(`px_msgs_${activeConv._id}`, JSON.stringify(messages));
+      const userKey = getUserKey();
+      localStorage.setItem(`px_msgs_${userKey}_${activeConv._id}`, JSON.stringify(messages));
+
+      // Also update lastMessage in cached conversations
+      setConversations((prevConvs) => {
+        const updated = prevConvs.map((c) => {
+          if (c._id === activeConv._id) {
+            return {
+              ...c,
+              lastMessage: {
+                text: messages[messages.length - 1]?.text || c.lastMessage?.text || '',
+                createdAt: new Date(),
+              },
+            };
+          }
+          return c;
+        });
+        localStorage.setItem(`px_convs_${userKey}`, JSON.stringify(updated));
+        return updated;
+      });
     }
   }, [activeConv?._id, messages]);
 
@@ -369,10 +432,17 @@ const ChatPage = () => {
     if (e) e.stopPropagation();
     if (!window.confirm('Permanently delete this chat conversation and all history?')) return;
     playClick();
+    const userKey = getUserKey();
     try {
       await api.delete(`/chat/conversations/${convId}`);
-      localStorage.removeItem(`px_msgs_${convId}`);
-      setConversations((prev) => prev.filter((c) => c._id !== convId));
+      localStorage.removeItem(`px_msgs_${userKey}_${convId}`);
+      
+      setConversations((prev) => {
+        const updated = prev.filter((c) => c._id !== convId);
+        localStorage.setItem(`px_convs_${userKey}`, JSON.stringify(updated));
+        return updated;
+      });
+
       if (activeConv?._id === convId) {
         setActiveConv(null);
         setMessages([]);
