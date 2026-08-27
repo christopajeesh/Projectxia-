@@ -351,7 +351,8 @@ const ChatPage = () => {
       // 3. Emit via real-time WebSocket to recipient
       if (socket) {
         socket.emit('send_message', {
-          ...newMsg,
+          conversationId: activeConv._id,
+          message: newMsg,
           receiverId,
           receiverEmail,
           senderEmail: currentUserEmail,

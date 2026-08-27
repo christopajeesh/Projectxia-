@@ -27,7 +27,12 @@ export const SocketProvider = ({ children }) => {
     newSocket.on('connect', () => {
       console.log('[ProjectXia Socket] Connected with ID:', newSocket.id);
       if (user) {
-        newSocket.emit('join_presence', user);
+        newSocket.emit('join_presence', {
+          id: user._id || user.id,
+          _id: user._id || user.id,
+          email: user.email,
+          name: user.name,
+        });
       }
     });
 

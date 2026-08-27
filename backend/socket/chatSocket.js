@@ -1,3 +1,5 @@
+import { memoryStore } from '../seed/seedData.js';
+
 export const initChatSocket = (io) => {
   const onlineUsers = new Map(); // userId -> socketId
 
@@ -6,58 +8,93 @@ export const initChatSocket = (io) => {
 
     // User joins with authentication
     socket.on('join_presence', (user) => {
-      if (user && (user.id || user._id)) {
-        const uid = user.id || user._id;
+      if (user && (user.id || user._id || user.email)) {
+        const uid = String(user.id || user._id || user.email);
+        const email = String(user.email || '').toLowerCase().trim();
+
         onlineUsers.set(uid, socket.id);
         socket.userId = uid;
-        socket.userName = user.name;
+        socket.userEmail = email;
+        socket.userName = user.name || 'Verified User';
+
+        // Join individual user rooms by ID and Email for targeted messaging
+        if (uid) socket.join(uid);
+        if (email) socket.join(email);
+
         io.emit('online_users_update', Array.from(onlineUsers.keys()));
-        console.log(`[ProjectXia Socket] User ${user.name} is ONLINE`);
+        console.log(`[ProjectXia Socket] User ${user.name} (${email}) joined socket rooms: [${uid}, ${email}]`);
       }
     });
 
     // Join specific conversation room
     socket.on('join_conversation', (conversationId) => {
-      socket.join(conversationId);
-      console.log(`[ProjectXia Socket] Socket ${socket.id} joined room: ${conversationId}`);
+      if (conversationId) {
+        socket.join(String(conversationId));
+        console.log(`[ProjectXia Socket] Socket ${socket.id} joined conversation room: ${conversationId}`);
+      }
     });
 
-    // Real-time message dispatch
+    // Real-time message dispatch (Supports bidirectional reply)
     socket.on('send_message', (data) => {
-      const { conversationId, message } = data;
-      // Broadcast to room (excluding sender socket)
-      socket.to(conversationId).emit('receive_message', message);
-      
-      // Also notify receiver if online
-      if (message && message.receiverId) {
-        const receiverSocketId = onlineUsers.get(message.receiverId);
-        if (receiverSocketId) {
-          io.to(receiverSocketId).emit('new_message_notification', {
-            title: `New message from ${message.sender?.name || 'Creator'}`,
-            message: message.text || 'Sent an attachment',
-            conversationId,
-          });
-        }
+      if (!data) return;
+
+      const messageObj = data.message || data;
+      const convId = String(data.conversationId || messageObj.conversationId || '');
+      const recId = String(data.receiverId || messageObj.receiverId || '');
+      const recEmail = String(data.receiverEmail || messageObj.receiverEmail || '').toLowerCase().trim();
+
+      console.log(`[ProjectXia Socket] Relaying message in conv: ${convId} to recId: ${recId}, recEmail: ${recEmail}`);
+
+      // 1. Broadcast to conversation room (all open chat windows in this room)
+      if (convId) {
+        io.to(convId).emit('receive_message', messageObj);
+        io.to(convId).emit('conversation_updated', { conversationId: convId, message: messageObj });
+      }
+
+      // 2. Direct emit to receiver's user rooms if not currently in conversation room
+      if (recId) {
+        io.to(recId).emit('receive_message', messageObj);
+        io.to(recId).emit('new_message_notification', {
+          title: `New message from ${messageObj.sender?.name || 'Creator'}`,
+          message: messageObj.text || 'Sent an attachment',
+          conversationId: convId,
+          senderName: messageObj.sender?.name,
+        });
+      }
+
+      if (recEmail && recEmail !== recId) {
+        io.to(recEmail).emit('receive_message', messageObj);
+        io.to(recEmail).emit('new_message_notification', {
+          title: `New message from ${messageObj.sender?.name || 'Creator'}`,
+          message: messageObj.text || 'Sent an attachment',
+          conversationId: convId,
+          senderName: messageObj.sender?.name,
+        });
       }
     });
 
     // Typing indicators
     socket.on('typing_start', ({ conversationId, userName }) => {
-      socket.to(conversationId).emit('user_typing', { userName, isTyping: true });
+      if (conversationId) {
+        socket.to(String(conversationId)).emit('user_typing', { userName, isTyping: true });
+      }
     });
 
     socket.on('typing_stop', ({ conversationId }) => {
-      socket.to(conversationId).emit('user_typing', { isTyping: false });
+      if (conversationId) {
+        socket.to(String(conversationId)).emit('user_typing', { isTyping: false });
+      }
     });
 
     // WhatsApp Read Receipts (Blue Ticks trigger when recipient views conversation)
     socket.on('mark_read', ({ conversationId, userId }) => {
+      if (!conversationId) return;
       (memoryStore.messages || []).forEach((m) => {
         if (m.conversationId === conversationId && (m.receiverId === userId || m.sender?.id !== userId)) {
           m.isRead = true;
         }
       });
-      io.to(conversationId).emit('messages_read', { conversationId, userId });
+      io.to(String(conversationId)).emit('messages_read', { conversationId, userId });
     });
 
     // Handle disconnect
