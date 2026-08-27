@@ -498,7 +498,7 @@ const ChatPage = () => {
           {/* ============================================================ */}
           {/* LEFT: WHATSAPP CHAT LIST SIDEBAR */}
           {/* ============================================================ */}
-          <div className="md:col-span-4 border-r border-[#202c33] flex flex-col bg-[#111b21]">
+          <div className={`md:col-span-4 border-r border-[#202c33] flex flex-col bg-[#111b21] ${activeConv ? 'hidden md:flex' : 'flex'}`}>
             
             {/* Sidebar Header */}
             <div className="p-3.5 bg-[#202c33] flex items-center justify-between border-b border-[#202c33]">
@@ -538,7 +538,7 @@ const ChatPage = () => {
             </div>
 
             {/* Conversations List */}
-            <div className="flex-1 overflow-y-auto divide-y divide-[#202c33]/50 p-1.5 space-y-1">
+            <div className="flex-1 overflow-y-auto divide-y divide-[#202c33]/50 p-1.5 space-y-1 min-h-[300px]">
               {filteredConversations.map((conv) => {
                 const partner = getPartner(conv);
                 const isSelected = activeConv?._id === conv._id;
@@ -550,60 +550,69 @@ const ChatPage = () => {
                       playClick();
                       setActiveConv(conv);
                     }}
-                    className={`group p-3 rounded-2xl cursor-pointer transition-all flex items-center gap-3 relative ${
+                    className={`p-3 rounded-2xl transition-all cursor-pointer flex items-center justify-between gap-3 group relative ${
                       isSelected
-                        ? 'bg-[#2a3942] border border-[#00a884]/40 shadow-md'
-                        : 'hover:bg-[#202c33]/70'
+                        ? 'bg-[#2a3942] border border-[#00a884]/40 shadow-lg'
+                        : 'hover:bg-[#202c33] border border-transparent'
                     }`}
                   >
-                    <div className="relative shrink-0">
-                      <img
-                        src={partner.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(partner.name || 'Seller')}&backgroundColor=111b21,202c33&textColor=00a884`}
-                        alt={partner.name}
-                        className="w-12 h-12 rounded-full object-cover border border-[#00a884]/40 bg-gray-900"
-                      />
-                      <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#00a884] border-2 border-[#111b21] rounded-full" />
-                    </div>
-
-                    <div className="flex-1 min-w-0 pr-6">
-                      <div className="flex items-center justify-between">
-                        <h4 className="font-display font-bold text-xs text-[#e9edef] truncate">{partner.name}</h4>
-                        <span className="text-[10px] font-mono text-[#00a884] font-bold">Online</span>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className="relative shrink-0">
+                        <img
+                          src={partner.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(partner.name)}`}
+                          alt={partner.name}
+                          className="w-11 h-11 rounded-full object-cover border border-[#00a884]/30 bg-gray-900"
+                        />
+                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#00a884] border-2 border-[#111b21] rounded-full" />
                       </div>
-                      <p className="text-[11px] font-mono text-[#8696a0] truncate mt-0.5">
-                        {conv.lastMessage?.text || 'Direct inquiry active'}
-                      </p>
-                      {conv.projectContext && (
-                        <span className="inline-block text-[9px] font-mono text-[#00a884] bg-[#00a884]/15 px-2 py-0.5 rounded-md mt-1 font-bold">
-                          📦 {conv.projectContext.title?.substring(0, 20)}...
-                        </span>
-                      )}
+                      <div className="min-w-0">
+                        <div className="flex items-center justify-between gap-2">
+                          <h4 className="font-display font-bold text-xs text-[#e9edef] truncate group-hover:text-[#00a884] transition-colors">
+                            {partner.name}
+                          </h4>
+                        </div>
+                        <p className="text-[11px] font-mono text-[#8696a0] truncate mt-0.5">
+                          {conv.lastMessage?.text || 'Tap to chat with seller'}
+                        </p>
+                      </div>
                     </div>
 
-                    {/* DELETE CHAT BUTTON */}
                     <button
                       type="button"
                       onClick={(e) => handleDeleteConversation(conv._id, e)}
-                      className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-rose-500/20 text-slate-400 hover:text-rose-400 transition-all absolute right-2 top-3 cursor-pointer"
-                      title="Delete Chat Conversation"
+                      className="opacity-0 group-hover:opacity-100 p-2 hover:bg-rose-500/20 text-rose-400 rounded-xl transition-all cursor-pointer"
+                      title="Delete Conversation"
                     >
                       <Trash2 className="w-3.5 h-3.5" />
                     </button>
                   </div>
                 );
               })}
+
+              {filteredConversations.length === 0 && (
+                <div className="py-12 text-center text-[#8696a0] font-mono text-xs px-4">
+                  No active seller conversations found.
+                </div>
+              )}
             </div>
           </div>
 
           {/* ============================================================ */}
-          {/* RIGHT: ACTIVE CHAT ROOM */}
+          {/* RIGHT: ACTIVE CHAT MESSAGES WINDOW */}
           {/* ============================================================ */}
-          <div className="md:col-span-8 flex flex-col bg-[#0b141a] relative">
+          <div className={`md:col-span-8 flex flex-col bg-[#0b141a] relative ${!activeConv ? 'hidden md:flex' : 'flex'}`}>
             {activeConv ? (
               <>
                 {/* CHAT HEADER */}
                 <div className="p-3.5 bg-[#202c33] flex items-center justify-between border-b border-[#202c33] relative z-20">
                   <div className="flex items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setActiveConv(null)}
+                      className="md:hidden px-2 py-1 rounded-xl bg-[#111b21] hover:bg-[#374248] text-[#00a884] font-bold text-xs flex items-center gap-1 cursor-pointer"
+                    >
+                      ← Chats
+                    </button>
                     <div className="relative">
                       <img
                         src={getPartner(activeConv).avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(getPartner(activeConv).name)}`}

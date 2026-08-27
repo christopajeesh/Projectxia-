@@ -243,7 +243,7 @@ const Navbar = () => {
                   }
                 }}
                 title="Direct 1-on-1 Chat with Creators"
-                className={`hidden lg:flex items-center gap-2 px-3 py-2 rounded-xl border transition-all cursor-pointer text-left ${
+                className={`flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3 py-1.5 sm:py-2 rounded-xl border transition-all cursor-pointer text-left ${
                   location.pathname === '/chat'
                     ? 'bg-blue-500/20 border-blue-400/60 text-blue-300'
                     : 'bg-slate-900/60 hover:bg-slate-800/80 border-slate-800 hover:border-blue-500/40 text-slate-200 hover:text-white'
@@ -253,8 +253,8 @@ const Navbar = () => {
                   <MessageSquare className="w-3.5 h-3.5" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-display font-bold text-xs leading-tight">Creator Chat</span>
-                  <span className="text-[10px] text-slate-400 leading-none">Talk & Negotiate</span>
+                  <span className="font-display font-bold text-xs leading-tight">Chat</span>
+                  <span className="text-[9px] text-slate-400 leading-none hidden xs:inline">Direct Inbox</span>
                 </div>
               </button>
 
@@ -331,6 +331,14 @@ const Navbar = () => {
                           className="block px-4 py-2.5 text-xs text-slate-300 hover:bg-cyan-500/20 hover:text-cyan-300 font-medium"
                         >
                           👤 My Profile & Dashboard
+                        </Link>
+
+                        <Link
+                          to="/chat"
+                          onClick={() => setUserDropdownOpen(false)}
+                          className="block px-4 py-2.5 text-xs text-blue-300 hover:bg-blue-500/20 hover:text-blue-200 font-bold border-t border-cyan-500/10"
+                        >
+                          💬 Creator Chat & Direct Inbox
                         </Link>
 
                         <button
