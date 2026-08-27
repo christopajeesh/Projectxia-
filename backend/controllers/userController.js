@@ -67,7 +67,7 @@ export const updateUserProfile = async (req, res) => {
     const updateFields = {};
     if (name) updateFields.name = name.trim();
     if (bio) updateFields.bio = bio;
-    if (avatar) updateFields.avatar = avatar;
+    if (avatar !== undefined) updateFields.avatar = avatar;
     if (mobile) updateFields.mobile = mobile;
     if (education) updateFields.education = education;
     if (experience) updateFields.experience = experience;

@@ -18,6 +18,9 @@ import {
   DollarSign,
   Trash2,
   Save,
+  LogOut,
+  Image as ImageIcon,
+  X,
 } from 'lucide-react';
 import EditSellOrderModal from '../components/ui/EditSellOrderModal';
 import { useSound } from '../context/SoundContext';
@@ -30,22 +33,6 @@ const ProfilePage = () => {
   const { playClick, playSuccess } = useSound();
   const { user, isAuthenticated, logout, openAuthModal } = useAuth();
   const fileInputRef = useRef(null);
-
-  if (!user && !isAuthenticated) {
-    return (
-      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center space-y-4 font-mono text-xs text-slate-300">
-        <Shield className="w-12 h-12 text-cyan-400 animate-pulse" />
-        <h2 className="text-xl font-display font-bold text-white">Access Your Creator Profile</h2>
-        <p className="text-slate-400 max-w-sm">Please log in or register to view your creator dashboard, listed projects, and author tools.</p>
-        <button
-          onClick={() => openAuthModal('login')}
-          className="px-6 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-black font-display font-bold text-xs shadow-lg shadow-cyan-500/25 transition-all cursor-pointer"
-        >
-          Sign In / Register
-        </button>
-      </div>
-    );
-  }
 
   const [isEditing, setIsEditing] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
@@ -84,8 +71,8 @@ const ProfilePage = () => {
         portfolio: user.portfolio || '',
         skills: (Array.isArray(user.skills) ? user.skills : []).join(', '),
       });
+      fetchUserProjects();
     }
-    fetchUserProjects();
   }, [user]);
 
   const fetchUserProjects = async () => {
@@ -145,7 +132,7 @@ const ProfilePage = () => {
       setIsUploadingPhoto(true);
       const base64Photo = await compressImage(file);
 
-      const res = await api.put('/users/avatar', { avatar: base64Photo });
+      const res = await api.put('/users/profile', { avatar: base64Photo });
       if (res.data?.user) {
         sessionStorage.setItem('projectxia_user', JSON.stringify(res.data.user));
       }
@@ -158,6 +145,27 @@ const ProfilePage = () => {
     } catch (err) {
       console.error('Avatar update failed:', err);
       alert(err.response?.data?.message || 'Failed to update profile photo.');
+    } finally {
+      setIsUploadingPhoto(false);
+    }
+  };
+
+  const handleRemovePhoto = async () => {
+    if (!window.confirm('Are you sure you want to remove your profile picture?')) return;
+    try {
+      setIsUploadingPhoto(true);
+      const res = await api.put('/users/profile', { avatar: '' });
+      if (res.data?.user) {
+        sessionStorage.setItem('projectxia_user', JSON.stringify(res.data.user));
+      }
+
+      playSuccess();
+      setSaveMsg('Profile photo removed successfully.');
+      setTimeout(() => setSaveMsg(''), 4000);
+      window.location.reload();
+    } catch (err) {
+      console.error('Avatar remove failed:', err);
+      alert(err.response?.data?.message || 'Failed to remove profile photo.');
     } finally {
       setIsUploadingPhoto(false);
     }
@@ -197,6 +205,23 @@ const ProfilePage = () => {
     logout();
     navigate('/', { replace: true });
   };
+
+  // Unauthenticated Fallback UI (Strictly after all hooks declared)
+  if (!user && !isAuthenticated) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center space-y-4 font-mono text-xs text-slate-300">
+        <Shield className="w-12 h-12 text-cyan-400 animate-pulse" />
+        <h2 className="text-xl font-display font-bold text-white">Access Your Creator Profile</h2>
+        <p className="text-slate-400 max-w-sm">Please log in or register to view your creator dashboard, listed projects, and author tools.</p>
+        <button
+          onClick={() => openAuthModal('login')}
+          className="px-6 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-black font-display font-bold text-xs shadow-lg shadow-cyan-500/25 transition-all cursor-pointer"
+        >
+          Sign In / Register
+        </button>
+      </div>
+    );
+  }
 
   return (
     <div className="relative min-h-screen pt-8 pb-24 font-mono text-xs">
@@ -240,7 +265,7 @@ const ProfilePage = () => {
           <div className="flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6">
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 text-center sm:text-left">
               {/* Profile Picture with Upload Camera Overlay */}
-              <div className="relative group">
+              <div className="relative group flex-shrink-0">
                 <img
                   src={userAvatar}
                   alt={user?.name || 'User Avatar'}
@@ -286,16 +311,31 @@ const ProfilePage = () => {
               </div>
             </div>
 
-            {/* Profile Action Buttons: Upload Photo, Edit Profile & Prominent Logout */}
-            <div className="flex flex-wrap items-center justify-center gap-2">
+            {/* Profile Action Buttons: Upload Photo, Remove Photo, Edit Profile & Prominent Logout */}
+            <div className="flex flex-wrap items-center justify-center sm:justify-end gap-2">
               <button
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
+                disabled={isUploadingPhoto}
                 className="px-3.5 py-2.5 rounded-xl bg-cyan-500/20 hover:bg-cyan-500/30 border border-cyan-400/40 text-cyan-300 flex items-center gap-1.5 cursor-pointer text-xs transition-all"
+                title="Upload or Change Profile Photo"
               >
                 <Camera className="w-3.5 h-3.5" />
-                <span>Upload Photo</span>
+                <span>{user?.avatar ? 'Change Photo' : 'Upload Photo'}</span>
               </button>
+
+              {user?.avatar && (
+                <button
+                  type="button"
+                  onClick={handleRemovePhoto}
+                  disabled={isUploadingPhoto}
+                  className="px-3.5 py-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/40 text-rose-300 hover:text-white flex items-center gap-1.5 cursor-pointer text-xs transition-all"
+                  title="Remove Profile Photo"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Remove Photo</span>
+                </button>
+              )}
 
               <button
                 type="button"
