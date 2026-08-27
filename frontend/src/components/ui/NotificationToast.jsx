@@ -33,7 +33,7 @@ const NotificationToast = () => {
             </div>
             <div>
               <span className="text-[10px] font-bold text-[#00a884] uppercase tracking-wider block">
-                WhatsApp Chat Alert
+                Direct Creator Chat Alert
               </span>
               <h4 className="font-display font-bold text-sm text-white truncate max-w-[200px]">
                 {realtimeNotification.title || 'New Message Received'}
@@ -64,7 +64,7 @@ const NotificationToast = () => {
           }}
           className="w-full py-2.5 rounded-xl bg-[#00a884] hover:bg-[#02906f] text-black font-display font-black text-xs flex items-center justify-center gap-1.5 transition-all shadow-md cursor-pointer"
         >
-          <span>Open Direct WhatsApp Chat</span>
+          <span>Open Direct Creator Chat</span>
           <ArrowRight className="w-4 h-4" />
         </button>
       </motion.div>

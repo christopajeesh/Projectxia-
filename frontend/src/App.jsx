@@ -80,7 +80,7 @@ const AnimatedRoutes = () => {
           <Route
             path="/chat"
             element={
-              <ProtectedRoute reason="Please log in or register to use real-time WhatsApp-style creator messaging.">
+              <ProtectedRoute reason="Please log in or register to use real-time direct creator messaging.">
                 <ChatPage />
               </ProtectedRoute>
             }

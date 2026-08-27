@@ -1043,9 +1043,9 @@ const ChatPage = () => {
                 )}
               </>
             ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-[#8696a0] font-mono text-xs space-y-3">
+              <div className="flex-1 flex flex-col items-center justify-center text-[#8696a0] font-mono text-xs space-y-3 p-6 text-center">
                 <Shield className="w-12 h-12 text-[#00a884] animate-pulse" />
-                <p>Select a project seller on the left to start WhatsApp real-time messaging.</p>
+                <p>Select a project seller on the left to start direct real-time messaging.</p>
               </div>
             )}
           </div>

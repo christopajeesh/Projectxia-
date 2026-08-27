@@ -344,7 +344,7 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
                     <span>Need a custom software project, college capstone, or startup MVP?</span>
                   </p>
                   <p className="text-[11px] text-slate-300">
-                    Fill in your project idea below. Our senior engineering team will review your requirements and reach out to you directly via phone, WhatsApp, or email within 24 hours with a complete architecture blueprint and quote.
+                    Fill in your project idea below. Our senior engineering team will review your requirements and reach out to you directly via phone or email within 24 hours with a complete architecture blueprint and quote.
                   </p>
                 </div>
 
@@ -368,7 +368,7 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
                   <div>
                     <label className="text-slate-200 block mb-1.5 font-bold text-xs flex items-center gap-1">
                       <Phone className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Mobile / WhatsApp Number *</span>
+                      <span>Mobile Contact Number *</span>
                     </label>
                     <input
                       type="tel"

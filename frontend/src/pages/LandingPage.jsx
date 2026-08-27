@@ -214,7 +214,7 @@ const LandingPage = () => {
       a: 'To protect student and creator intellectual property and prevent automated scrapers, bots, or fraudulent entities, only registered and verified members can access full marketplace details, test plagiarism, and chat directly with creators.',
     },
     {
-      q: 'How does direct WhatsApp-style chat work between buyers and sellers?',
+      q: 'How does direct chat work between buyers and sellers?',
       a: 'When an authorized user views any project, clicking "Direct Chat with Creator" immediately opens a real-time messaging room with the seller. You can ask technical questions, request custom modifications, discuss hardware delivery, and finalize details directly through our secure platform.',
     },
     {
