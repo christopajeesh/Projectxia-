@@ -367,64 +367,157 @@ const ChatPage = () => {
   };
 
   // SEND VOICE NOTE (With instant optimistic rendering)
-  const sendVoiceNote = async () => {
-    if (!activeConv || isSending) return;
-    playClick();
-    setIsSending(true);
+  // ============================================================
+  // WHATSAPP-STYLE IN-APP WEB AUDIO VOICE RECORDING ENGINE
+  // ============================================================
+  const [isRecording, setIsRecording] = useState(false);
+  const [recordingTime, setRecordingTime] = useState(0);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef = useRef([]);
+  const recordingIntervalRef = useRef(null);
 
-    const currentUserId = user?._id || user?.id || 'user_001_buyer';
-    const tempId = `temp_voice_${Date.now()}`;
-
-    const optimisticMsg = {
-      _id: tempId,
-      conversationId: activeConv._id,
-      sender: {
-        id: currentUserId,
-        name: user?.name || 'Rohan Sharma',
-        avatar: user?.avatar || '',
-      },
-      receiverId: activeConv.participants?.find((p) => p.userId !== currentUserId)?.userId || 'user_002_creator',
-      text: 'Voice note (0:18s)',
-      messageType: 'voice',
-      audioDuration: 18,
-      projectData: activeConv.projectContext,
-      isRead: false,
-      createdAt: new Date(),
-    };
-
-    setMessages((prev) => [...prev, optimisticMsg]);
-    setTimeout(scrollToBottom, 50);
-
-    const payload = {
-      conversationId: activeConv._id,
-      receiverId: optimisticMsg.receiverId,
-      text: optimisticMsg.text,
-      messageType: 'voice',
-      audioDuration: 18,
-      projectData: activeConv.projectContext,
-    };
-
+  const startRecording = async () => {
     try {
-      const res = await api.post('/chat/messages', payload);
-      const newMsg = res.data.message || optimisticMsg;
+      playClick();
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioChunksRef.current = [];
+      const recorder = new MediaRecorder(stream);
 
-      setMessages((prev) =>
-        prev.map((m) => (m._id === tempId ? newMsg : m))
-      );
+      recorder.ondataavailable = (e) => {
+        if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data);
+      };
 
-      if (socket) {
-        socket.emit('send_message', {
-          conversationId: newMsg.conversationId || activeConv._id,
-          message: newMsg,
-        });
-      }
-      playSuccess();
-      setTimeout(scrollToBottom, 100);
-    } catch (e) {
-      console.error('Voice send error:', e);
-    } finally {
-      setIsSending(false);
+      recorder.start(100);
+      mediaRecorderRef.current = recorder;
+      setIsRecording(true);
+      setRecordingTime(0);
+
+      if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
+      recordingIntervalRef.current = setInterval(() => {
+        setRecordingTime((prev) => prev + 1);
+      }, 1000);
+    } catch (err) {
+      alert('Microphone permission is required to record voice notes. Please allow microphone access in your browser settings.');
     }
+  };
+
+  const cancelRecording = () => {
+    playClick();
+    if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
+    if (mediaRecorderRef.current) {
+      try {
+        if (mediaRecorderRef.current.stream) {
+          mediaRecorderRef.current.stream.getTracks().forEach((track) => track.stop());
+        }
+        if (mediaRecorderRef.current.state !== 'inactive') {
+          mediaRecorderRef.current.stop();
+        }
+      } catch (e) {}
+    }
+    setIsRecording(false);
+    setRecordingTime(0);
+    audioChunksRef.current = [];
+  };
+
+  const stopAndSendRecording = () => {
+    if (!mediaRecorderRef.current || !isRecording) return;
+    playClick();
+
+    const recorder = mediaRecorderRef.current;
+    if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
+    const duration = recordingTime > 0 ? recordingTime : 1;
+
+    recorder.onstop = async () => {
+      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+      const reader = new FileReader();
+
+      reader.onloadend = async () => {
+        const base64Audio = reader.result;
+        const currentUserId = String(user?._id || user?.id || 'user_guest');
+        const currentUserEmail = String(user?.email || '').toLowerCase();
+        const tempId = `temp_voice_${Date.now()}`;
+
+        const otherParticipant = activeConv.participants?.find(
+          (p) => String(p.userId) !== currentUserId && String(p.email || '').toLowerCase() !== currentUserEmail
+        );
+
+        const receiverId = otherParticipant?.userId || location.state?.creatorId || 'creator';
+        const receiverName = otherParticipant?.name || location.state?.creatorName || 'Project Seller';
+        const receiverEmail = otherParticipant?.email || location.state?.creatorEmail || '';
+        const receiverAvatar = otherParticipant?.avatar || location.state?.creatorAvatar || '';
+
+        const optimisticMsg = {
+          _id: tempId,
+          conversationId: activeConv._id,
+          sender: {
+            id: currentUserId,
+            email: currentUserEmail,
+            name: user?.name || 'Verified User',
+            avatar: user?.avatar || '',
+          },
+          receiverId,
+          receiverName,
+          receiverEmail,
+          receiverAvatar,
+          text: `🎤 Voice note (${duration}s)`,
+          messageType: 'voice',
+          mediaUrl: base64Audio,
+          audioDuration: duration,
+          projectData: activeConv.projectContext,
+          isRead: false,
+          createdAt: new Date(),
+        };
+
+        setMessages((prev) => [...prev, optimisticMsg]);
+        setTimeout(scrollToBottom, 50);
+
+        const payload = {
+          conversationId: activeConv._id,
+          receiverId,
+          receiverName,
+          receiverEmail,
+          receiverAvatar,
+          text: optimisticMsg.text,
+          messageType: 'voice',
+          mediaUrl: base64Audio,
+          audioDuration: duration,
+          projectData: activeConv.projectContext,
+        };
+
+        try {
+          const res = await api.post('/chat/messages', payload);
+          const newMsg = res.data.message || optimisticMsg;
+
+          setMessages((prev) => prev.map((m) => (m._id === tempId ? newMsg : m)));
+
+          if (socket) {
+            socket.emit('send_message', {
+              conversationId: activeConv._id,
+              message: newMsg,
+              receiverId,
+              receiverEmail,
+              senderEmail: currentUserEmail,
+            });
+          }
+          playSuccess();
+          setTimeout(scrollToBottom, 100);
+        } catch (e) {
+          console.error('Voice send error:', e);
+        }
+      };
+
+      reader.readAsDataURL(audioBlob);
+
+      if (recorder.stream) {
+        recorder.stream.getTracks().forEach((track) => track.stop());
+      }
+    };
+
+    if (recorder.state !== 'inactive') {
+      recorder.stop();
+    }
+    setIsRecording(false);
+    setRecordingTime(0);
   };
 
   // HANDLE FILE ATTACHMENT SELECTION
@@ -748,20 +841,35 @@ const ChatPage = () => {
                               )}
                             </div>
                           ) : msg.messageType === 'voice' ? (
-                            <div className="flex items-center gap-3 py-1">
-                              <button
-                                type="button"
-                                onClick={() => playSuccess()}
-                                className="w-9 h-9 rounded-full bg-[#00a884] text-black flex items-center justify-center shrink-0 cursor-pointer shadow-md"
-                              >
-                                <Play className="w-4 h-4 fill-current ml-0.5" />
-                              </button>
-                              <div className="flex-1 min-w-[140px]">
-                                <div className="h-1.5 bg-[#8696a0]/30 rounded-full overflow-hidden">
-                                  <div className="w-3/4 h-full bg-[#00a884]" />
+                            <div className="flex flex-col gap-1.5 py-1">
+                              {msg.mediaUrl ? (
+                                <audio
+                                  controls
+                                  src={msg.mediaUrl}
+                                  className="h-9 max-w-[220px] rounded-lg border border-[#00a884]/40"
+                                />
+                              ) : (
+                                <div className="flex items-center gap-3 py-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => playSuccess()}
+                                    className="w-9 h-9 rounded-full bg-[#00a884] text-black flex items-center justify-center shrink-0 cursor-pointer shadow-md"
+                                  >
+                                    <Play className="w-4 h-4 fill-current ml-0.5" />
+                                  </button>
+                                  <div className="flex-1 min-w-[140px]">
+                                    <div className="h-1.5 bg-[#8696a0]/30 rounded-full overflow-hidden">
+                                      <div className="w-3/4 h-full bg-[#00a884]" />
+                                    </div>
+                                    <span className="text-[10px] text-[#8696a0] mt-1 block">
+                                      🎤 Voice Note ({msg.audioDuration ? `${msg.audioDuration}s` : '18s'})
+                                    </span>
+                                  </div>
                                 </div>
-                                <span className="text-[10px] text-[#8696a0] mt-1 block">Voice Note (0:18s)</span>
-                              </div>
+                              )}
+                              <span className="text-[10px] text-[#00a884] font-mono font-bold">
+                                🎤 Voice Note ({msg.audioDuration ? `${msg.audioDuration}s` : '0:18s'})
+                              </span>
                             </div>
                           ) : (
                             <p className="leading-relaxed whitespace-pre-wrap text-xs">{msg.text}</p>
@@ -834,77 +942,105 @@ const ChatPage = () => {
                   </div>
                 )}
 
-                {/* WHATSAPP INPUT BAR */}
-                <form
-                  onSubmit={handleSendMessage}
-                  className="p-3 bg-[#202c33] flex items-center gap-2 border-t border-[#202c33] relative z-20"
-                >
-                  <button
-                    type="button"
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
-                    title="Quick Emojis"
+                {/* WHATSAPP INPUT BAR & ACTIVE RECORDING HUD */}
+                {isRecording ? (
+                  <div className="p-3 bg-[#202c33] flex items-center justify-between gap-3 border-t border-[#202c33] relative z-20">
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={cancelRecording}
+                        className="p-2.5 rounded-full bg-rose-500/20 text-rose-400 hover:bg-rose-500/40 transition-colors cursor-pointer"
+                        title="Cancel Recording"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                      <div className="flex items-center gap-2 text-rose-400 font-mono font-bold text-xs">
+                        <span className="w-3 h-3 rounded-full bg-rose-500 animate-ping" />
+                        <span>Recording... {Math.floor(recordingTime / 60)}:{String(recordingTime % 60).padStart(2, '0')}</span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={stopAndSendRecording}
+                      className="px-4 py-2 rounded-full bg-[#00a884] hover:bg-[#02906f] text-black font-display font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-lg"
+                    >
+                      <Send className="w-4 h-4" />
+                      <span>Send Voice Note</span>
+                    </button>
+                  </div>
+                ) : (
+                  <form
+                    onSubmit={handleSendMessage}
+                    className="p-3 bg-[#202c33] flex items-center gap-2 border-t border-[#202c33] relative z-20"
                   >
-                    <Smile className="w-5 h-5" />
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                      className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
+                      title="Quick Emojis"
+                    >
+                      <Smile className="w-5 h-5" />
+                    </button>
 
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    accept="image/*,.pdf,.zip,.py,.cpp"
-                    className="hidden"
-                  />
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={handleFileChange}
+                      accept="image/*,.pdf,.zip,.py,.cpp"
+                      className="hidden"
+                    />
 
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
-                    title="Attach Photo or Document"
-                  >
-                    <Paperclip className="w-5 h-5" />
-                  </button>
+                    <button
+                      type="button"
+                      onClick={() => fileInputRef.current?.click()}
+                      className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
+                      title="Attach Photo or Document"
+                    >
+                      <Paperclip className="w-5 h-5" />
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={sendVoiceNote}
-                    disabled={isSending}
-                    className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
-                    title="Send Voice Note"
-                  >
-                    <Mic className="w-5 h-5" />
-                  </button>
+                    <button
+                      type="button"
+                      onClick={startRecording}
+                      disabled={isSending}
+                      className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
+                      title="Record Voice Note"
+                    >
+                      <Mic className="w-5 h-5" />
+                    </button>
 
-                  <input
-                    type="text"
-                    value={inputMsg}
-                    disabled={isSending}
-                    onChange={(e) => {
-                      setInputMsg(e.target.value);
-                      if (socket && activeConv) {
-                        socket.emit('typing_start', {
-                          conversationId: activeConv._id,
-                          userName: user?.name,
-                        });
-                        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-                        typingTimeoutRef.current = setTimeout(
-                          () => socket.emit('typing_stop', { conversationId: activeConv._id }),
-                          2000
-                        );
-                      }
-                    }}
-                    placeholder="Type a direct message to seller..."
-                    className="flex-1 bg-[#2a3942] border-none rounded-xl px-4 py-2.5 text-xs font-mono text-white placeholder-[#8696a0] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
-                  />
+                    <input
+                      type="text"
+                      value={inputMsg}
+                      disabled={isSending}
+                      onChange={(e) => {
+                        setInputMsg(e.target.value);
+                        if (socket && activeConv) {
+                          socket.emit('typing_start', {
+                            conversationId: activeConv._id,
+                            userName: user?.name,
+                          });
+                          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                          typingTimeoutRef.current = setTimeout(
+                            () => socket.emit('typing_stop', { conversationId: activeConv._id }),
+                            2000
+                          );
+                        }
+                      }}
+                      placeholder="Type a direct message to seller..."
+                      className="flex-1 bg-[#2a3942] border-none rounded-xl px-4 py-2.5 text-xs font-mono text-white placeholder-[#8696a0] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
+                    />
 
-                  <button
-                    type="submit"
-                    disabled={isSending || (!inputMsg.trim() && !attachmentFile)}
-                    className="p-2.5 rounded-full bg-[#00a884] hover:bg-[#02906f] text-black font-bold shadow-md transition-all disabled:opacity-50 cursor-pointer"
-                  >
-                    <Send className="w-4 h-4" />
-                  </button>
-                </form>
+                    <button
+                      type="submit"
+                      disabled={isSending || (!inputMsg.trim() && !attachmentFile)}
+                      className="p-2.5 rounded-full bg-[#00a884] hover:bg-[#02906f] text-black font-bold shadow-md transition-all disabled:opacity-50 cursor-pointer"
+                    >
+                      <Send className="w-4 h-4" />
+                    </button>
+                  </form>
+                )}
               </>
             ) : (
               <div className="flex-1 flex flex-col items-center justify-center text-[#8696a0] font-mono text-xs space-y-3">
