@@ -416,6 +416,69 @@ const AdminPage = () => {
     confetti({ particleCount: 50, spread: 70 });
   };
 
+  const handleClearAllLogs = async () => {
+    playClick();
+    if (!window.confirm('Are you sure you want to permanently clear all website login and activity logs? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const token = sessionStorage.getItem('projectxia_token') || localStorage.getItem('projectxia_token');
+      await api.delete('/admin/activity-logs', {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+    } catch (e) {
+      console.warn('[Clear All Logs Fallback]:', e.message);
+    }
+
+    setAuditLogs([]);
+    confetti({ particleCount: 40, spread: 60 });
+  };
+
+  const handleDeleteSingleLog = async (logId) => {
+    playClick();
+    if (!window.confirm('Delete this audit log entry?')) {
+      return;
+    }
+
+    try {
+      const token = sessionStorage.getItem('projectxia_token') || localStorage.getItem('projectxia_token');
+      await api.delete(`/admin/activity-logs/${logId}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+    } catch (e) {
+      console.warn('[Delete Log Fallback]:', e.message);
+    }
+
+    setAuditLogs((prev) => prev.filter((l) => (l._id || l.id) !== logId));
+  };
+
+  const handleClearUserLogs = async (userEmail) => {
+    playClick();
+    if (!window.confirm(`Are you sure you want to wipe all login and activity history for ${userEmail}?`)) {
+      return;
+    }
+
+    const cleanEmail = String(userEmail || '').trim().toLowerCase();
+
+    try {
+      const token = sessionStorage.getItem('projectxia_token') || localStorage.getItem('projectxia_token');
+      await api.delete(`/admin/activity-logs/user/${encodeURIComponent(cleanEmail)}`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
+    } catch (e) {
+      console.warn('[Clear User Logs Fallback]:', e.message);
+    }
+
+    setAuditLogs((prev) =>
+      prev.filter(
+        (l) =>
+          (l.performedBy?.email || '').toLowerCase() !== cleanEmail &&
+          (l.details?.attemptedEmail || '').toLowerCase() !== cleanEmail
+      )
+    );
+  };
+
   const handleAdminClearanceLogin = async (e) => {
     e.preventDefault();
     playClick();
@@ -1428,6 +1491,14 @@ const AdminPage = () => {
               <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
                 <button
                   type="button"
+                  onClick={handleClearAllLogs}
+                  className="px-3.5 py-2 rounded-xl bg-rose-950/80 border border-rose-500/40 hover:bg-rose-900 text-rose-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+                >
+                  <Trash2 className="w-4 h-4 text-rose-400" />
+                  <span>Clear All Logs</span>
+                </button>
+                <button
+                  type="button"
                   onClick={handleExportLogsCSV}
                   className="px-3.5 py-2 rounded-xl bg-slate-900 border border-slate-700 hover:border-cyan-400 text-cyan-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
                 >
@@ -1455,7 +1526,8 @@ const AdminPage = () => {
                       <th className="pb-3">Activity / Action</th>
                       <th className="pb-3">Category</th>
                       <th className="pb-3">IP Address / Node</th>
-                      <th className="pb-3 text-right">Threat Level</th>
+                      <th className="pb-3">Threat Level</th>
+                      <th className="pb-3 text-right">Delete</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-900">
@@ -1510,7 +1582,7 @@ const AdminPage = () => {
                           <td className="py-3.5 text-slate-400 text-[11px]">
                             {log.ipAddress || '127.0.0.1'}
                           </td>
-                          <td className="py-3.5 text-right">
+                          <td className="py-3.5">
                             <span
                               className={`px-2 py-0.5 rounded text-[10px] font-bold ${
                                 log.threatLevel === 'CRITICAL_BLOCKED' || log.threatLevel === 'HIGH'
@@ -1522,6 +1594,16 @@ const AdminPage = () => {
                             >
                               {log.threatLevel || 'CLEAN'}
                             </span>
+                          </td>
+                          <td className="py-3.5 text-right">
+                            <button
+                              type="button"
+                              onClick={() => handleDeleteSingleLog(logId)}
+                              title="Delete this log entry"
+                              className="p-1.5 rounded-lg bg-rose-950/50 hover:bg-rose-900 border border-rose-500/30 text-rose-300 transition-all cursor-pointer inline-flex items-center justify-center"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           </td>
                         </tr>
                       );
@@ -1631,12 +1713,22 @@ const AdminPage = () => {
                       <p className="text-[11px] text-slate-400 font-mono">{selectedUserForModal.mobile || 'Contact on File'}</p>
                     </div>
                   </div>
-                  <button
-                    onClick={() => setSelectedUserForModal(null)}
-                    className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
-                  >
-                    <X className="w-5 h-5" />
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleClearUserLogs(selectedUserForModal.email)}
+                      className="px-3 py-1.5 rounded-xl bg-rose-950/80 border border-rose-500/40 hover:bg-rose-900 text-rose-300 text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer shrink-0"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                      <span>Clear User History</span>
+                    </button>
+                    <button
+                      onClick={() => setSelectedUserForModal(null)}
+                      className="p-2 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white transition-colors cursor-pointer"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
                 </div>
 
                 {/* Timestamps & Info Grid */}

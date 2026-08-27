@@ -441,3 +441,96 @@ export const broadcastAlert = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// ============================================================
+// CLEAR ALL AUDIT LOGS
+// ============================================================
+
+export const clearAllActivityLogs = async (req, res) => {
+  try {
+    try {
+      await AuditLog.deleteMany({});
+    } catch (dbErr) {
+      console.warn('[Clear Audit Logs DB Note]:', dbErr.message);
+    }
+
+    memoryStore.auditLogs = [];
+
+    return res.json({
+      success: true,
+      message: 'All activity and login logs have been cleared successfully.',
+    });
+  } catch (error) {
+    console.error('[Clear All Activity Logs Error]:', error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ============================================================
+// CLEAR SINGLE USER's AUDIT LOGS
+// ============================================================
+
+export const clearUserActivityLogs = async (req, res) => {
+  try {
+    const { email } = req.params;
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+
+    try {
+      await AuditLog.deleteMany({
+        $or: [
+          { 'performedBy.email': normalizedEmail },
+          { 'details.attemptedEmail': normalizedEmail },
+        ],
+      });
+    } catch (dbErr) {
+      console.warn('[Clear User Logs DB Note]:', dbErr.message);
+    }
+
+    if (memoryStore.auditLogs) {
+      memoryStore.auditLogs = memoryStore.auditLogs.filter(
+        (l) =>
+          (l.performedBy?.email || '').toLowerCase() !== normalizedEmail &&
+          (l.details?.attemptedEmail || '').toLowerCase() !== normalizedEmail
+      );
+    }
+
+    return res.json({
+      success: true,
+      message: `Activity logs for ${email} have been purged successfully.`,
+    });
+  } catch (error) {
+    console.error('[Clear User Activity Logs Error]:', error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// ============================================================
+// DELETE SINGLE AUDIT LOG BY ID
+// ============================================================
+
+export const deleteSingleAuditLog = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    try {
+      await AuditLog.findByIdAndDelete(id);
+      await AuditLog.deleteMany({ _id: id });
+    } catch (dbErr) {
+      console.warn('[Delete Single Log DB Note]:', dbErr.message);
+    }
+
+    if (memoryStore.auditLogs) {
+      memoryStore.auditLogs = memoryStore.auditLogs.filter(
+        (l) => String(l._id || l.id) !== String(id)
+      );
+    }
+
+    return res.json({
+      success: true,
+      message: 'Audit log entry removed successfully.',
+    });
+  } catch (error) {
+    console.error('[Delete Single Audit Log Error]:', error);
+    return res.status(500).json({ success: false, message: error.message });
+  }
+};
