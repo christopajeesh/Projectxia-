@@ -41,35 +41,35 @@ const BackgroundCanvas = () => {
     const particles = Array.from({ length: count }, () => ({
       x: Math.random() * width,
       y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.6,
-      vy: (Math.random() - 0.5) * 0.6,
-      size: Math.random() * 3.2 + 1.5,
-      color: Math.random() > 0.4 ? '#38bdf8' : Math.random() > 0.5 ? '#6366f1' : '#3b82f6',
+      vx: (Math.random() - 0.5) * 0.5,
+      vy: (Math.random() - 0.5) * 0.5,
+      size: Math.random() * 3.0 + 1.2,
+      color: Math.random() > 0.4 ? '#38bdf8' : Math.random() > 0.5 ? '#1e40af' : '#2563eb',
       symbol: Math.random() > 0.5 ? symbolTypes[Math.floor(Math.random() * symbolTypes.length)] : null,
-      alpha: Math.random() * 0.65 + 0.35,
+      alpha: Math.random() * 0.55 + 0.3,
     }));
 
     // Shooting Stars / Cyber Light Streaks
-    const shootingStars = Array.from({ length: 6 }, () => ({
+    const shootingStars = Array.from({ length: 5 }, () => ({
       x: Math.random() * width,
       y: Math.random() * (height * 0.6),
       length: Math.random() * 100 + 50,
-      speed: Math.random() * 7 + 5,
+      speed: Math.random() * 6 + 4,
       angle: Math.PI / 4,
-      alpha: Math.random() * 0.8 + 0.35,
+      alpha: Math.random() * 0.7 + 0.3,
     }));
 
     const render = () => {
       ctx.clearRect(0, 0, width, height);
-      rotationAngle += 0.008;
-      counterRotation -= 0.006;
+      rotationAngle += 0.007;
+      counterRotation -= 0.005;
 
       const centerX = width * 0.5;
       const centerY = height * 0.45;
 
       // 1. PRIMARY ROTATING 3D WIREFRAME WAVE MESH
       ctx.save();
-      ctx.lineWidth = 1.6;
+      ctx.lineWidth = 1.4;
       const radiusX = Math.min(width * 0.45, 520);
       const radiusY = Math.min(height * 0.35, 300);
 
@@ -110,20 +110,20 @@ const BackgroundCanvas = () => {
           ctx.beginPath();
           ctx.moveTo(p1.x, p1.y);
           ctx.lineTo(p2.x, p2.y);
-          ctx.strokeStyle = `rgba(99, 102, 241, ${0.48 * p1.scale})`;
+          ctx.strokeStyle = `rgba(30, 58, 138, ${0.45 * p1.scale})`;
           ctx.stroke();
 
           ctx.beginPath();
           ctx.moveTo(p1.x, p1.y);
           ctx.lineTo(p3.x, p3.y);
-          ctx.strokeStyle = `rgba(56, 189, 248, ${0.42 * p1.scale})`;
+          ctx.strokeStyle = `rgba(56, 189, 248, ${0.35 * p1.scale})`;
           ctx.stroke();
 
           if ((r + c) % 3 === 0) {
             ctx.beginPath();
-            ctx.arc(p1.x, p1.y, 3 * p1.scale, 0, Math.PI * 2);
-            ctx.fillStyle = (r % 2 === 0) ? '#38bdf8' : '#3b82f6';
-            ctx.globalAlpha = 0.85 * p1.scale;
+            ctx.arc(p1.x, p1.y, 2.5 * p1.scale, 0, Math.PI * 2);
+            ctx.fillStyle = (r % 2 === 0) ? '#38bdf8' : '#1d4ed8';
+            ctx.globalAlpha = 0.8 * p1.scale;
             ctx.fill();
           }
         }
@@ -132,7 +132,7 @@ const BackgroundCanvas = () => {
 
       // 2. SECONDARY COUNTER-ROTATING 3D SPHERICAL CORE ORBIT RING
       ctx.save();
-      ctx.lineWidth = 1.2;
+      ctx.lineWidth = 1.1;
       const coreRadius = Math.min(width * 0.2, 180);
       const coreCols = 16;
       const coreRows = 12;
@@ -153,7 +153,7 @@ const BackgroundCanvas = () => {
           if (j === 0) ctx.moveTo(px, py);
           else ctx.lineTo(px, py);
         }
-        ctx.strokeStyle = `rgba(59, 130, 246, ${0.35 * (i / coreRows)})`;
+        ctx.strokeStyle = `rgba(30, 58, 138, ${0.3 * (i / coreRows)})`;
         ctx.stroke();
       }
       ctx.restore();
@@ -167,7 +167,7 @@ const BackgroundCanvas = () => {
         if (s.x > width || s.y > height) {
           s.x = Math.random() * (width * 0.8);
           s.y = -20;
-          s.speed = Math.random() * 7 + 5;
+          s.speed = Math.random() * 6 + 4;
         }
 
         ctx.save();
@@ -179,11 +179,11 @@ const BackgroundCanvas = () => {
           s.y - Math.sin(s.angle) * s.length
         );
         gradient.addColorStop(0, '#38bdf8');
-        gradient.addColorStop(0.5, '#6366f1');
+        gradient.addColorStop(0.5, '#1e40af');
         gradient.addColorStop(1, 'transparent');
 
         ctx.strokeStyle = gradient;
-        ctx.lineWidth = 2.2;
+        ctx.lineWidth = 2.0;
         ctx.moveTo(s.x, s.y);
         ctx.lineTo(s.x - Math.cos(s.angle) * s.length, s.y - Math.sin(s.angle) * s.length);
         ctx.globalAlpha = s.alpha;
@@ -198,12 +198,12 @@ const BackgroundCanvas = () => {
           const pB = particles[j];
           const dist = Math.hypot(pA.x - pB.x, pA.y - pB.y);
 
-          if (dist < 170) {
+          if (dist < 160) {
             ctx.beginPath();
             ctx.moveTo(pA.x, pA.y);
             ctx.lineTo(pB.x, pB.y);
-            ctx.strokeStyle = `rgba(56, 189, 248, ${(1 - dist / 170) * 0.42})`;
-            ctx.lineWidth = 1.1;
+            ctx.strokeStyle = `rgba(30, 58, 138, ${(1 - dist / 160) * 0.4})`;
+            ctx.lineWidth = 1.0;
             ctx.stroke();
           }
         }
@@ -217,10 +217,10 @@ const BackgroundCanvas = () => {
         const dy = mouse.y - p.y;
         const dist = Math.hypot(dx, dy);
 
-        if (dist < 220 && dist > 0) {
-          const force = (220 - dist) / 220;
-          p.x -= (dx / dist) * force * 4.0;
-          p.y -= (dy / dist) * force * 4.0;
+        if (dist < 200 && dist > 0) {
+          const force = (200 - dist) / 200;
+          p.x -= (dx / dist) * force * 3.5;
+          p.y -= (dy / dist) * force * 3.5;
         }
 
         p.x += p.vx;
@@ -235,14 +235,14 @@ const BackgroundCanvas = () => {
         ctx.globalAlpha = p.alpha;
 
         if (p.symbol) {
-          ctx.font = '13px "Space Mono", monospace';
+          ctx.font = '12px "Space Mono", monospace';
           ctx.fillStyle = p.color;
           ctx.fillText(p.symbol, p.x, p.y);
         } else {
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
           ctx.fillStyle = p.color;
-          ctx.shadowBlur = 14;
+          ctx.shadowBlur = 12;
           ctx.shadowColor = p.color;
           ctx.fill();
         }
@@ -262,24 +262,24 @@ const BackgroundCanvas = () => {
   }, []);
 
   return (
-    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#020617]">
-      {/* 40px Sub-pixel Cyber Grid Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(rgba(56,189,248,0.035)_1px,transparent_1px),linear-gradient(90deg,rgba(56,189,248,0.035)_1px,transparent_1px)] bg-[size:40px_40px] z-[0]" />
+    <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden select-none bg-[#02040a]">
+      {/* Sub-pixel Dark Grid Pattern */}
+      <div className="absolute inset-0 bg-[linear-gradient(rgba(30,58,138,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(30,58,138,0.06)_1px,transparent_1px)] bg-[size:40px_40px] z-[0]" />
 
       {/* Tactile Digital Noise Grain Overlay */}
-      <div className="absolute inset-0 noise-bg-overlay opacity-50 z-[1]" />
+      <div className="absolute inset-0 noise-bg-overlay opacity-40 z-[1]" />
 
       {/* Dual 3D Wireframe Mesh & Shooting Star Canvas */}
-      <canvas ref={canvasRef} className="absolute inset-0 opacity-95 z-[2]" />
+      <canvas ref={canvasRef} className="absolute inset-0 opacity-90 z-[2]" />
 
-      {/* Low-Light Radial Aurora Mesh (Indigo, Sapphire, Deep Blue, Cyan) */}
-      <div className="absolute -top-32 -left-32 w-[750px] h-[750px] rounded-full bg-[#1e1b4b]/50 blur-[140px] animate-pulse-slow z-[3]" />
-      <div className="absolute top-1/4 -right-32 w-[700px] h-[700px] rounded-full bg-[#0369a1]/30 blur-[140px] animate-aurora-glow z-[3]" />
-      <div className="absolute bottom-10 left-1/3 w-[650px] h-[650px] rounded-full bg-[#1d4ed8]/30 blur-[140px] z-[3]" />
-      <div className="absolute top-2/3 right-1/4 w-[500px] h-[500px] rounded-full bg-[#0284c7]/25 blur-[130px] z-[3]" />
+      {/* Deep Dark Midnight Blue Ambient Radial Auroras */}
+      <div className="absolute -top-32 -left-32 w-[750px] h-[750px] rounded-full bg-[#0a1128]/60 blur-[140px] animate-pulse-slow z-[3]" />
+      <div className="absolute top-1/4 -right-32 w-[700px] h-[700px] rounded-full bg-[#071330]/50 blur-[140px] animate-aurora-glow z-[3]" />
+      <div className="absolute bottom-10 left-1/3 w-[650px] h-[650px] rounded-full bg-[#050c20]/50 blur-[140px] z-[3]" />
+      <div className="absolute top-2/3 right-1/4 w-[500px] h-[500px] rounded-full bg-[#030a1a]/45 blur-[130px] z-[3]" />
 
-      {/* Soft Edge Vignette */}
-      <div className="absolute inset-0 bg-gradient-to-b from-[#020617]/60 via-transparent to-[#020617]/85 z-[4]" />
+      {/* Dark Vignette */}
+      <div className="absolute inset-0 bg-gradient-to-b from-[#02040a]/70 via-transparent to-[#02040a]/90 z-[4]" />
     </div>
   );
 };
