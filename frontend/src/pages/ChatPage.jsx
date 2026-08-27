@@ -66,11 +66,13 @@ const ChatPage = () => {
       fetchMessages(activeConv._id);
       if (socket) {
         socket.emit('join_conversation', activeConv._id);
+        socket.emit('mark_read', { conversationId: activeConv._id, userId: user?._id || user?.id });
       }
+      api.put(`/chat/messages/read/${activeConv._id}`).catch(() => {});
     }
   }, [activeConv]);
 
-  // SOCKET LISTENERS (Deduplicated)
+  // SOCKET LISTENERS (Deduplicated & Realtime Blue Ticks)
   useEffect(() => {
     if (!socket) return;
 
@@ -81,6 +83,12 @@ const ChatPage = () => {
         if (exists) return prev;
         return [...prev, msg];
       });
+
+      // If viewing this active conversation, mark as read immediately
+      if (activeConv && msg.conversationId === activeConv._id) {
+        socket.emit('mark_read', { conversationId: activeConv._id, userId: user?._id || user?.id });
+      }
+
       playSuccess();
       setTimeout(scrollToBottom, 100);
     };
@@ -90,14 +98,22 @@ const ChatPage = () => {
       setTypingUser(userName || 'Seller');
     };
 
+    const handleMessagesRead = ({ conversationId }) => {
+      setMessages((prev) =>
+        prev.map((m) => ({ ...m, isRead: true }))
+      );
+    };
+
     socket.on('receive_message', handleReceiveMessage);
     socket.on('user_typing', handleUserTyping);
+    socket.on('messages_read', handleMessagesRead);
 
     return () => {
       socket.off('receive_message', handleReceiveMessage);
       socket.off('user_typing', handleUserTyping);
+      socket.off('messages_read', handleMessagesRead);
     };
-  }, [socket]);
+  }, [socket, activeConv]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -527,7 +543,13 @@ const ChatPage = () => {
                                 minute: '2-digit',
                               })}
                             </span>
-                            {isMe && <CheckCheck className="w-3.5 h-3.5 text-[#53bdeb]" />}
+                            {isMe && (
+                              msg.isRead ? (
+                                <CheckCheck className="w-3.5 h-3.5 text-[#53bdeb]" title="Read by recipient (Blue Ticks)" />
+                              ) : (
+                                <CheckCheck className="w-3.5 h-3.5 text-[#8696a0]" title="Delivered (Grey Ticks)" />
+                              )
+                            )}
                           </div>
                         </div>
                       </div>

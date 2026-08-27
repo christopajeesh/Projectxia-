@@ -50,6 +50,16 @@ export const initChatSocket = (io) => {
       socket.to(conversationId).emit('user_typing', { isTyping: false });
     });
 
+    // WhatsApp Read Receipts (Blue Ticks trigger when recipient views conversation)
+    socket.on('mark_read', ({ conversationId, userId }) => {
+      (memoryStore.messages || []).forEach((m) => {
+        if (m.conversationId === conversationId && (m.receiverId === userId || m.sender?.id !== userId)) {
+          m.isRead = true;
+        }
+      });
+      io.to(conversationId).emit('messages_read', { conversationId, userId });
+    });
+
     // Handle disconnect
     socket.on('disconnect', () => {
       if (socket.userId) {

@@ -164,3 +164,22 @@ export const reactMessage = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Mark all messages in conversation as read (WhatsApp Blue Ticks trigger)
+// @route   PUT /api/chat/messages/read/:conversationId
+export const markMessagesRead = async (req, res) => {
+  try {
+    const { conversationId } = req.params;
+    const userId = req.user?._id || req.user?.id || 'user_001_buyer';
+
+    (memoryStore.messages || []).forEach((m) => {
+      if (m.conversationId === conversationId && (m.receiverId === userId || m.sender?.id !== userId)) {
+        m.isRead = true;
+      }
+    });
+
+    res.json({ success: true, message: 'Conversation marked as read.' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

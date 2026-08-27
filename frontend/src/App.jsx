@@ -12,6 +12,7 @@ import Footer from './components/ui/Footer';
 import AuthModal from './components/ui/AuthModal';
 import CartDrawer from './components/ui/CartDrawer';
 import CheckoutModal from './components/ui/CheckoutModal';
+import NotificationToast from './components/ui/NotificationToast';
 import ProtectedRoute from './components/ProtectedRoute';
 import SmoothScroll from './components/ui/SmoothScroll';
 import SpotlightGlow from './components/ui/SpotlightGlow';
@@ -176,6 +177,7 @@ function App() {
                 {/* Engineering Cart Drawer & Instant Checkout */}
                 <CartDrawer />
                 <CheckoutModal />
+                <NotificationToast />
               </div>
             </SmoothScroll>
           </CartProvider>
