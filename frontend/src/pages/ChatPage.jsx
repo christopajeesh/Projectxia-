@@ -10,8 +10,6 @@ import {
   CheckCheck,
   Shield,
   Circle,
-  Phone,
-  Video,
   FileCode,
   Sparkles,
   ExternalLink,
@@ -22,7 +20,6 @@ import {
   Image as ImageIcon,
   X,
   Trash2,
-  PhoneOff,
   UserCheck,
 } from 'lucide-react';
 import { useSound } from '../context/SoundContext';
@@ -47,7 +44,6 @@ const ChatPage = () => {
 
   // Modals & Panels
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
-  const [activeCall, setActiveCall] = useState(null); // 'voice' | 'video' | null
   const [attachmentFile, setAttachmentFile] = useState(null);
   const [showMenu, setShowMenu] = useState(false);
 
@@ -419,32 +415,8 @@ const ChatPage = () => {
                     </div>
                   </div>
 
-                  {/* WHATSAPP CALL & MENU BUTTONS */}
+                  {/* MENU BUTTON */}
                   <div className="flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        playClick();
-                        setActiveCall('voice');
-                      }}
-                      className="p-2.5 rounded-full hover:bg-[#374248] text-[#00a884] transition-all cursor-pointer"
-                      title="Start WhatsApp Voice Call"
-                    >
-                      <Phone className="w-4 h-4" />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() => {
-                        playClick();
-                        setActiveCall('video');
-                      }}
-                      className="p-2.5 rounded-full hover:bg-[#374248] text-[#00a884] transition-all cursor-pointer"
-                      title="Start WhatsApp Video Call"
-                    >
-                      <Video className="w-4 h-4" />
-                    </button>
-
                     <div className="relative">
                       <button
                         type="button"
@@ -684,42 +656,6 @@ const ChatPage = () => {
         </div>
       </div>
 
-      {/* WHATSAPP SIMULATED CALL MODAL */}
-      {activeCall && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
-          <div className="p-8 rounded-3xl bg-[#111b21] border border-[#00a884]/40 max-w-sm w-full text-center space-y-6 shadow-2xl">
-            <div className="relative inline-block">
-              <img
-                src={getPartner(activeConv)?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(getPartner(activeConv)?.name)}`}
-                alt=""
-                className="w-24 h-24 rounded-full object-cover border-4 border-[#00a884] mx-auto animate-pulse"
-              />
-            </div>
-
-            <div>
-              <h3 className="font-display font-bold text-lg text-white">
-                {getPartner(activeConv)?.name}
-              </h3>
-              <p className="text-xs text-[#00a884] font-mono mt-1 animate-pulse">
-                WhatsApp {activeCall === 'video' ? 'Video' : 'Voice'} Call • Connecting...
-              </p>
-            </div>
-
-            <div className="flex items-center justify-center gap-4 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  playClick();
-                  setActiveCall(null);
-                }}
-                className="p-4 rounded-full bg-rose-600 hover:bg-rose-500 text-white shadow-xl hover:scale-110 transition-transform cursor-pointer flex items-center justify-center"
-              >
-                <PhoneOff className="w-6 h-6" />
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
