@@ -17,6 +17,7 @@ import {
   Sliders,
   DollarSign,
   Trash2,
+  Save,
 } from 'lucide-react';
 import EditSellOrderModal from '../components/ui/EditSellOrderModal';
 import { useSound } from '../context/SoundContext';
@@ -27,8 +28,24 @@ import confetti from 'canvas-confetti';
 const ProfilePage = () => {
   const navigate = useNavigate();
   const { playClick, playSuccess } = useSound();
-  const { user, logout } = useAuth();
+  const { user, isAuthenticated, logout, openAuthModal } = useAuth();
   const fileInputRef = useRef(null);
+
+  if (!user && !isAuthenticated) {
+    return (
+      <div className="min-h-[70vh] flex flex-col items-center justify-center p-6 text-center space-y-4 font-mono text-xs text-slate-300">
+        <Shield className="w-12 h-12 text-cyan-400 animate-pulse" />
+        <h2 className="text-xl font-display font-bold text-white">Access Your Creator Profile</h2>
+        <p className="text-slate-400 max-w-sm">Please log in or register to view your creator dashboard, listed projects, and author tools.</p>
+        <button
+          onClick={() => openAuthModal('login')}
+          className="px-6 py-3 rounded-2xl bg-cyan-500 hover:bg-cyan-400 text-black font-display font-bold text-xs shadow-lg shadow-cyan-500/25 transition-all cursor-pointer"
+        >
+          Sign In / Register
+        </button>
+      </div>
+    );
+  }
 
   const [isEditing, setIsEditing] = useState(false);
   const [saveMsg, setSaveMsg] = useState('');
