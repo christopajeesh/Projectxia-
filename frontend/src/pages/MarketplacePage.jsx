@@ -35,109 +35,6 @@ import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
 import api from '../services/api';
 
-const DEFAULT_PROJECTS = [
-  {
-    _id: 'proj_001_retina_ai',
-    title: 'DiabeticRetina-AI: Deep CNN for Retinopathy Detection',
-    tagline: 'PyTorch ResNet-50 & Grad-CAM visual heatmaps for fundus image classification.',
-    description: 'Production-ready ResNet-50 & EfficientNet-B4 PyTorch model for automated diabetic retinopathy classification from fundus photography. Includes Kaggle dataset scripts and Grad-CAM interpretability.',
-    category: 'AI & Data Science (AI / ML)',
-    price: 3499,
-    projectType: 'Software Only',
-    seller: {
-      id: 'user_002_creator',
-      name: 'Dr. Priya Venkatesh',
-      email: 'priya.creator@projectxia.io',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-    },
-    screenshots: [
-      'https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=800&auto=format&fit=crop&q=80',
-    ],
-    techStack: ['PyTorch', 'Grad-CAM', 'Python', 'Flask'],
-    tags: ['AI', 'Medical Vision', 'Deep Learning', 'PyTorch'],
-    demoVideoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    githubUrl: 'https://github.com',
-    isVerified: true,
-    trustScore: 98,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    _id: 'proj_002_smartagri_lora',
-    title: 'LoRaAgri: ESP32 LoRaWAN Long-Range Smart Irrigation',
-    tagline: 'Sub-GHz 868MHz mesh sensor node with solar charging & KiCad PCB.',
-    description: 'Long-range sub-GHz soil moisture & solar weather station node using ESP32, SX1276 LoRa, and KiCad PCB schematics. Tested in agricultural fields.',
-    category: 'Electronics & Comm (ECE)',
-    price: 4999,
-    projectType: 'Hardware + Software',
-    seller: {
-      id: 'user_002_creator',
-      name: 'Dr. Priya Venkatesh',
-      email: 'priya.creator@projectxia.io',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-    },
-    screenshots: [
-      'https://images.unsplash.com/photo-1518770660439-4636190af475?w=800&auto=format&fit=crop&q=80',
-    ],
-    techStack: ['ESP32', 'LoRaWAN', 'FreeRTOS', 'KiCad PCB'],
-    tags: ['IoT', 'LoRa', 'Embedded', 'ECE'],
-    demoVideoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    githubUrl: 'https://github.com',
-    isVerified: true,
-    trustScore: 96,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    _id: 'proj_003_neuromesh',
-    title: 'NeuroMesh AI: Autonomous Edge Vision & Object Tracker',
-    tagline: 'TensorRT C++ 120 FPS object detector optimized for Jetson Nano.',
-    description: 'TensorRT C++ accelerated Real-Time YOLOv8 object detector for Jetson Nano with OpenCV live video pipeline. Features sub-10ms inference latency.',
-    category: 'Computer Science (CSE / IT)',
-    price: 5999,
-    projectType: 'Software Only',
-    seller: {
-      id: 'user_002_creator',
-      name: 'Dr. Priya Venkatesh',
-      email: 'priya.creator@projectxia.io',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-    },
-    screenshots: [
-      'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80',
-    ],
-    techStack: ['C++', 'TensorRT', 'YOLOv8', 'OpenCV'],
-    tags: ['Edge AI', 'Computer Vision', 'Jetson', 'C++'],
-    demoVideoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    githubUrl: 'https://github.com',
-    isVerified: true,
-    trustScore: 99,
-    createdAt: new Date().toISOString(),
-  },
-  {
-    _id: 'proj_004_bms_battery',
-    title: 'SmartBMS: Active Cell Balancing Electric Vehicle BMS',
-    tagline: 'STM32 Lithium BMS with CAN-Bus telemetry and active cell balancing.',
-    description: 'STM32F4-based Lithium Battery Management System with CAN-Bus telemetry, active flying-capacitor cell balancing, and OLED display.',
-    category: 'Electrical Engineering (EEE)',
-    price: 6499,
-    projectType: 'Hardware + Software',
-    seller: {
-      id: 'user_002_creator',
-      name: 'Dr. Priya Venkatesh',
-      email: 'priya.creator@projectxia.io',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-    },
-    screenshots: [
-      'https://images.unsplash.com/photo-1558441719-aa34ff501f21?w=800&auto=format&fit=crop&q=80',
-    ],
-    techStack: ['STM32', 'CAN-Bus', 'KiCad', 'Embedded C'],
-    tags: ['EV', 'BMS', 'Battery', 'EEE'],
-    demoVideoUrl: 'https://www.youtube.com/embed/dQw4w9WgXcQ',
-    githubUrl: 'https://github.com',
-    isVerified: true,
-    trustScore: 97,
-    createdAt: new Date().toISOString(),
-  },
-];
-
 const MarketplacePage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -149,15 +46,14 @@ const MarketplacePage = () => {
 
   const [allProjects, setAllProjects] = useState(() => {
     try {
-      const cached = localStorage.getItem('px_cached_marketplace_projects');
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) return parsed;
-      }
-    } catch (e) {}
-    return DEFAULT_PROJECTS;
+      const localList = JSON.parse(localStorage.getItem('projectxia_uploaded_projects') || '[]');
+      const deletedList = JSON.parse(localStorage.getItem('projectxia_admin_deleted_projects') || '[]');
+      return localList.filter((p) => (p._id || p.id) && !deletedList.includes(p._id || p.id));
+    } catch (e) {
+      return [];
+    }
   });
-  const [projects, setProjects] = useState(DEFAULT_PROJECTS);
+  const [projects, setProjects] = useState([]);
   const [loading, setLoading] = useState(false);
   const [activeVideoModal, setActiveVideoModal] = useState(null);
   const [activePeekProject, setActivePeekProject] = useState(null);
@@ -207,6 +103,11 @@ const MarketplacePage = () => {
 
   // Initial fetch on mount
   useEffect(() => {
+    // Purge old cached fake demo projects if any
+    try {
+      localStorage.removeItem('px_cached_marketplace_projects');
+    } catch (e) {}
+
     fetchMarketplaceProjects();
     window.addEventListener('storage', fetchMarketplaceProjects);
     return () => {
@@ -256,16 +157,8 @@ const MarketplacePage = () => {
       const localList = JSON.parse(localStorage.getItem('projectxia_uploaded_projects') || '[]');
       const deletedList = JSON.parse(localStorage.getItem('projectxia_admin_deleted_projects') || '[]');
 
-      // Merge local, default, and server lists
+      // Merge local and server lists
       const combinedMap = new Map();
-
-      // Load defaults first
-      DEFAULT_PROJECTS.forEach((p) => {
-        const id = p._id || p.id;
-        if (id && !deletedList.includes(id)) {
-          combinedMap.set(id, p);
-        }
-      });
 
       // Load user local uploads
       localList.forEach((p) => {
@@ -275,17 +168,16 @@ const MarketplacePage = () => {
         }
       });
 
-      // Load server projects
+      // Load server projects (excluding fake demo IDs)
       serverList.forEach((p) => {
         const id = p._id || p.id;
-        if (id && !deletedList.includes(id)) {
+        if (id && !deletedList.includes(id) && !id.startsWith('proj_001_') && !id.startsWith('proj_002_') && !id.startsWith('proj_003_') && !id.startsWith('proj_004_')) {
           combinedMap.set(id, p);
         }
       });
 
       let fetchedList = Array.from(combinedMap.values());
       setAllProjects(fetchedList);
-      localStorage.setItem('px_cached_marketplace_projects', JSON.stringify(fetchedList));
     } catch (e) {
       console.warn('[Marketplace Fetch Warning]:', e.message);
     } finally {
