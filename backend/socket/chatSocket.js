@@ -25,8 +25,8 @@ export const initChatSocket = (io) => {
     // Real-time message dispatch
     socket.on('send_message', (data) => {
       const { conversationId, message } = data;
-      // Broadcast to room
-      io.to(conversationId).emit('receive_message', message);
+      // Broadcast to room (excluding sender socket)
+      socket.to(conversationId).emit('receive_message', message);
       
       // Also notify receiver if online
       if (message && message.receiverId) {

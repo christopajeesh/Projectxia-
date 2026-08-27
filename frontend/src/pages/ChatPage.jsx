@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send,
   Paperclip,
@@ -19,6 +19,11 @@ import {
   Check,
   Play,
   Volume2,
+  Image as ImageIcon,
+  X,
+  Trash2,
+  PhoneOff,
+  UserCheck,
 } from 'lucide-react';
 import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
@@ -38,8 +43,19 @@ const ChatPage = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [typingUser, setTypingUser] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSending, setIsSending] = useState(false);
+
+  // Modals & Panels
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [activeCall, setActiveCall] = useState(null); // 'voice' | 'video' | null
+  const [attachmentFile, setAttachmentFile] = useState(null);
+  const [showMenu, setShowMenu] = useState(false);
 
   const messagesEndRef = useRef(null);
+  const fileInputRef = useRef(null);
+  const typingTimeoutRef = useRef(null);
+
+  const quickEmojis = ['😊', '👍', '❤️', '🔥', '🚀', '🙏', '💯', '⚡', '👏', '🎉'];
 
   useEffect(() => {
     fetchConversations();
@@ -54,23 +70,32 @@ const ChatPage = () => {
     }
   }, [activeConv]);
 
+  // SOCKET LISTENERS (Deduplicated)
   useEffect(() => {
     if (!socket) return;
 
-    socket.on('receive_message', (msg) => {
-      setMessages((prev) => [...prev, msg]);
+    const handleReceiveMessage = (msg) => {
+      if (!msg) return;
+      setMessages((prev) => {
+        const exists = prev.some((m) => (m._id || m.id) === (msg._id || msg.id));
+        if (exists) return prev;
+        return [...prev, msg];
+      });
       playSuccess();
-      scrollToBottom();
-    });
+      setTimeout(scrollToBottom, 100);
+    };
 
-    socket.on('user_typing', ({ userName, isTyping }) => {
-      setIsTyping(isTyping);
+    const handleUserTyping = ({ userName, isTyping: typingState }) => {
+      setIsTyping(typingState);
       setTypingUser(userName || 'Seller');
-    });
+    };
+
+    socket.on('receive_message', handleReceiveMessage);
+    socket.on('user_typing', handleUserTyping);
 
     return () => {
-      socket.off('receive_message');
-      socket.off('user_typing');
+      socket.off('receive_message', handleReceiveMessage);
+      socket.off('user_typing', handleUserTyping);
     };
   }, [socket]);
 
@@ -133,36 +158,60 @@ const ChatPage = () => {
     } catch (e) {}
   };
 
+  // SEND TEXT MESSAGE (Strictly single emit & deduplicated)
   const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!inputMsg.trim() || !activeConv) return;
+    if (e) e.preventDefault();
+    if ((!inputMsg.trim() && !attachmentFile) || !activeConv || isSending) return;
     playClick();
+    setIsSending(true);
+
+    const messageText = inputMsg;
+    setInputMsg('');
 
     const payload = {
       conversationId: activeConv._id,
       receiverId: activeConv.participants?.find((p) => p.userId !== (user?._id || user?.id))?.userId || 'user_002_creator',
-      text: inputMsg,
-      messageType: 'text',
+      text: messageText,
+      messageType: attachmentFile ? 'media' : 'text',
+      mediaUrl: attachmentFile?.preview || null,
+      fileName: attachmentFile?.name || null,
       projectData: activeConv.projectContext,
     };
 
+    setAttachmentFile(null);
+    setShowEmojiPicker(false);
+
     try {
       const res = await api.post('/chat/messages', payload);
-      setMessages((prev) => [...prev, res.data.message]);
+      const newMsg = res.data.message;
+
+      // Add to local state ONCE
+      setMessages((prev) => {
+        const exists = prev.some((m) => (m._id || m.id) === (newMsg._id || newMsg.id));
+        if (exists) return prev;
+        return [...prev, newMsg];
+      });
+
+      // Emit socket to partner ONLY (partner receives it via socket.to)
       if (socket) {
         socket.emit('send_message', {
           conversationId: activeConv._id,
-          message: res.data.message,
+          message: newMsg,
         });
       }
-      setInputMsg('');
-      scrollToBottom();
-    } catch (e) {}
+      setTimeout(scrollToBottom, 100);
+    } catch (err) {
+      console.error('Send error:', err);
+    } finally {
+      setIsSending(false);
+    }
   };
 
+  // SEND VOICE NOTE
   const sendVoiceNote = async () => {
+    if (!activeConv || isSending) return;
     playClick();
-    if (!activeConv) return;
+    setIsSending(true);
 
     const payload = {
       conversationId: activeConv._id,
@@ -175,13 +224,46 @@ const ChatPage = () => {
 
     try {
       const res = await api.post('/chat/messages', payload);
-      setMessages((prev) => [...prev, res.data.message]);
+      const newMsg = res.data.message;
+
+      setMessages((prev) => {
+        const exists = prev.some((m) => (m._id || m.id) === (newMsg._id || newMsg.id));
+        if (exists) return prev;
+        return [...prev, newMsg];
+      });
+
       if (socket) {
-        socket.emit('send_message', { conversationId: activeConv._id, message: res.data.message });
+        socket.emit('send_message', { conversationId: activeConv._id, message: newMsg });
       }
       playSuccess();
-      scrollToBottom();
-    } catch (e) {}
+      setTimeout(scrollToBottom, 100);
+    } catch (e) {
+    } finally {
+      setIsSending(false);
+    }
+  };
+
+  // HANDLE FILE ATTACHMENT SELECTION
+  const handleFileChange = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (evt) => {
+        setAttachmentFile({ name: file.name, preview: evt.target.result, type: 'image' });
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setAttachmentFile({ name: file.name, preview: null, type: 'file' });
+    }
+  };
+
+  const clearChatLocal = () => {
+    if (window.confirm('Clear messages in this conversation view?')) {
+      setMessages([]);
+      setShowMenu(false);
+    }
   };
 
   const getPartner = (conv) => {
@@ -197,25 +279,37 @@ const ChatPage = () => {
   });
 
   return (
-    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col pt-4 pb-12">
-      <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex-1 flex flex-col relative z-10">
-        {/* WhatsApp Cyber Chat Interface */}
-        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 rounded-3xl bg-[#0b141a]/95 border border-[#00a884]/30 backdrop-blur-2xl overflow-hidden shadow-2xl min-h-[640px]">
+    <div className="relative min-h-[calc(100vh-4rem)] flex flex-col pt-3 pb-10 font-mono text-xs">
+      <div className="max-w-7xl mx-auto w-full px-2 sm:px-6 lg:px-8 flex-1 flex flex-col relative z-10">
+        
+        {/* WHATSAPP MAIN CONTAINER */}
+        <div className="flex-1 grid grid-cols-1 md:grid-cols-12 rounded-3xl bg-[#0b141a] border border-[#00a884]/30 backdrop-blur-2xl overflow-hidden shadow-2xl min-h-[660px]">
           
-          {/* LEFT: WhatsApp Sidebar */}
+          {/* ============================================================ */}
+          {/* LEFT: WHATSAPP CHAT LIST SIDEBAR */}
+          {/* ============================================================ */}
           <div className="md:col-span-4 border-r border-[#202c33] flex flex-col bg-[#111b21]">
-            {/* Header */}
-            <div className="p-3.5 bg-[#202c33] flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <img
-                  src={user?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user?.name || user?.email || 'User')}&backgroundColor=080e1e,101f4e&textColor=00f0ff`}
-                  alt=""
-                  className="w-9 h-9 rounded-full object-cover border border-[#00a884] bg-gray-900"
-                />
-                <span className="font-display font-bold text-xs text-white">Direct Seller Chats</span>
+            
+            {/* Sidebar Header */}
+            <div className="p-3.5 bg-[#202c33] flex items-center justify-between border-b border-[#202c33]">
+              <div className="flex items-center gap-3">
+                <div className="relative">
+                  <img
+                    src={user?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user?.name || user?.email || 'User')}&backgroundColor=080e1e,101f4e&textColor=00f0ff`}
+                    alt="User Avatar"
+                    className="w-10 h-10 rounded-full object-cover border-2 border-[#00a884] bg-gray-900"
+                  />
+                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#00a884] border-2 border-[#111b21] rounded-full" />
+                </div>
+                <div>
+                  <h3 className="font-display font-bold text-xs text-white truncate max-w-[140px]">
+                    {user?.name || 'Verified Innovator'}
+                  </h3>
+                  <span className="text-[10px] text-[#00a884] block font-mono">WhatsApp Realtime P2P</span>
+                </div>
               </div>
-              <span className="text-[10px] font-mono text-[#00a884] bg-[#00a884]/15 px-2 py-0.5 rounded-full border border-[#00a884]/30">
-                P2P Encrypted
+              <span className="text-[10px] font-mono text-[#00a884] bg-[#00a884]/15 px-2.5 py-1 rounded-full border border-[#00a884]/30 font-bold">
+                ✓ Encrypted
               </span>
             </div>
 
@@ -227,14 +321,14 @@ const ChatPage = () => {
                   type="text"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search chats, sellers, projects..."
+                  placeholder="Search seller chats..."
                   className="w-full bg-[#202c33] border-none rounded-xl pl-9 pr-3 py-2 text-xs font-mono text-white placeholder-[#8696a0] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
                 />
               </div>
             </div>
 
-            {/* Chat List */}
-            <div className="flex-1 overflow-y-auto divide-y divide-[#202c33]/60 p-1.5 space-y-1">
+            {/* Conversations List */}
+            <div className="flex-1 overflow-y-auto divide-y divide-[#202c33]/50 p-1.5 space-y-1">
               {filteredConversations.map((conv) => {
                 const partner = getPartner(conv);
                 const isSelected = activeConv?._id === conv._id;
@@ -248,7 +342,7 @@ const ChatPage = () => {
                     }}
                     className={`p-3 rounded-2xl cursor-pointer transition-all flex items-center gap-3 ${
                       isSelected
-                        ? 'bg-[#2a3942] border border-[#00a884]/40'
+                        ? 'bg-[#2a3942] border border-[#00a884]/40 shadow-md'
                         : 'hover:bg-[#202c33]/70'
                     }`}
                   >
@@ -256,22 +350,22 @@ const ChatPage = () => {
                       <img
                         src={partner.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(partner.name || 'Seller')}&backgroundColor=111b21,202c33&textColor=00a884`}
                         alt={partner.name}
-                        className="w-11 h-11 rounded-full object-cover border border-[#00a884]/40 bg-gray-900"
+                        className="w-12 h-12 rounded-full object-cover border border-[#00a884]/40 bg-gray-900"
                       />
-                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#00a884] border-2 border-[#111b21] rounded-full" />
+                      <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-[#00a884] border-2 border-[#111b21] rounded-full" />
                     </div>
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between">
                         <h4 className="font-display font-bold text-xs text-[#e9edef] truncate">{partner.name}</h4>
-                        <span className="text-[10px] font-mono text-[#8696a0]">Live</span>
+                        <span className="text-[10px] font-mono text-[#00a884] font-bold">Online</span>
                       </div>
                       <p className="text-[11px] font-mono text-[#8696a0] truncate mt-0.5">
-                        {conv.lastMessage?.text || 'Direct project inquiry active'}
+                        {conv.lastMessage?.text || 'Direct inquiry active'}
                       </p>
                       {conv.projectContext && (
-                        <span className="inline-block text-[9px] font-mono text-[#00a884] bg-[#00a884]/15 px-1.5 py-0.2 rounded mt-1">
-                          {conv.projectContext.title?.substring(0, 24)}...
+                        <span className="inline-block text-[9px] font-mono text-[#00a884] bg-[#00a884]/15 px-2 py-0.5 rounded-md mt-1 font-bold">
+                          📦 {conv.projectContext.title?.substring(0, 20)}...
                         </span>
                       )}
                     </div>
@@ -281,85 +375,151 @@ const ChatPage = () => {
             </div>
           </div>
 
-          {/* RIGHT: Active WhatsApp Chat Conversation Room */}
-          <div className="md:col-span-8 flex flex-col bg-[#0b141a]">
+          {/* ============================================================ */}
+          {/* RIGHT: WHATSAPP ACTIVE CHAT ROOM */}
+          {/* ============================================================ */}
+          <div className="md:col-span-8 flex flex-col bg-[#0b141a] relative">
             {activeConv ? (
               <>
-                {/* Chat Room Top Bar */}
-                <div className="p-3.5 bg-[#202c33] flex items-center justify-between border-b border-[#202c33]">
+                {/* WHATSAPP CHAT HEADER */}
+                <div className="p-3.5 bg-[#202c33] flex items-center justify-between border-b border-[#202c33] relative z-20">
                   <div className="flex items-center gap-3">
-                    <img
-                      src={getPartner(activeConv).avatar}
-                      alt={getPartner(activeConv).name}
-                      className="w-10 h-10 rounded-full object-cover border border-[#00a884]"
-                    />
+                    <div className="relative">
+                      <img
+                        src={getPartner(activeConv).avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(getPartner(activeConv).name)}`}
+                        alt={getPartner(activeConv).name}
+                        className="w-10 h-10 rounded-full object-cover border-2 border-[#00a884]"
+                      />
+                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#00a884] border-2 border-[#202c33] rounded-full animate-pulse" />
+                    </div>
                     <div>
                       <h3 className="font-display font-bold text-sm text-[#e9edef]">
                         {getPartner(activeConv).name}
                       </h3>
                       <p className="text-[10px] font-mono text-[#00a884] flex items-center gap-1">
                         <span className="w-1.5 h-1.5 rounded-full bg-[#00a884]" />
-                        <span>Online • Direct Creator Node</span>
+                        <span>{isTyping ? `${typingUser} is typing...` : 'Online • WhatsApp Verified Creator'}</span>
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex items-center gap-2 text-xs font-mono text-[#8696a0]">
-                    <span className="hidden sm:inline bg-[#111b21] px-2.5 py-1 rounded-lg border border-[#202c33]">
-                      End-to-End Verified
-                    </span>
+                  {/* WHATSAPP CALL & MENU BUTTONS */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        playClick();
+                        setActiveCall('voice');
+                      }}
+                      className="p-2.5 rounded-full hover:bg-[#374248] text-[#00a884] transition-all cursor-pointer"
+                      title="Start WhatsApp Voice Call"
+                    >
+                      <Phone className="w-4 h-4" />
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        playClick();
+                        setActiveCall('video');
+                      }}
+                      className="p-2.5 rounded-full hover:bg-[#374248] text-[#00a884] transition-all cursor-pointer"
+                      title="Start WhatsApp Video Call"
+                    >
+                      <Video className="w-4 h-4" />
+                    </button>
+
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setShowMenu(!showMenu)}
+                        className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-white transition-all cursor-pointer"
+                      >
+                        <MoreVertical className="w-4 h-4" />
+                      </button>
+
+                      {showMenu && (
+                        <div className="absolute right-0 top-11 w-44 bg-[#233138] border border-[#374248] rounded-2xl shadow-2xl py-2 z-50 text-xs font-mono text-[#e9edef]">
+                          <button
+                            onClick={clearChatLocal}
+                            className="w-full px-4 py-2 text-left hover:bg-[#111b21] flex items-center gap-2 text-rose-400 cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                            <span>Clear Chat View</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
-                {/* Messages Stream */}
-                <div className="flex-1 overflow-y-auto p-4 space-y-3 font-mono text-xs">
-                  {/* Pinned Project Card Header */}
+                {/* MESSAGES STREAM WITH WHATSAPP DOODLE BACKGROUND */}
+                <div
+                  className="flex-1 overflow-y-auto p-4 space-y-3 font-mono text-xs relative"
+                  style={{
+                    backgroundImage: 'radial-gradient(#00a884 0.5px, transparent 0.5px)',
+                    backgroundSize: '24px 24px',
+                    opacity: 0.95,
+                  }}
+                >
+                  {/* PINNED PROJECT INQUIRY BANNER */}
                   {activeConv.projectContext && (
-                    <div className="p-3 rounded-2xl bg-[#1f2c34] border border-[#00a884]/40 flex items-center justify-between text-xs">
+                    <div className="p-3.5 rounded-2xl bg-[#1f2c34]/95 border border-[#00a884]/40 flex items-center justify-between text-xs shadow-lg backdrop-blur-md">
                       <div>
-                        <span className="text-[10px] text-[#00a884] uppercase font-bold">Project Inquiry:</span>
-                        <p className="font-bold text-[#e9edef] font-display">{activeConv.projectContext.title}</p>
+                        <span className="text-[10px] text-[#00a884] uppercase font-bold">Inquiring About Project:</span>
+                        <p className="font-bold text-[#e9edef] font-display text-sm">{activeConv.projectContext.title}</p>
                       </div>
-                      <span className="text-[#00a884] font-bold font-display text-sm">
-                        ₹{activeConv.projectContext.price?.toLocaleString('en-IN')}
+                      <span className="text-[#00a884] font-bold font-display text-base bg-[#00a884]/15 px-3 py-1 rounded-xl border border-[#00a884]/30">
+                        ₹{Number(activeConv.projectContext.price || 0).toLocaleString('en-IN')}
                       </span>
                     </div>
                   )}
 
+                  {/* CHAT MESSAGES */}
                   {messages.map((msg) => {
                     const isMe = msg.sender?.id === (user?._id || user?.id || 'user_001_buyer');
 
                     return (
                       <div
-                        key={msg._id}
+                        key={msg._id || msg.id || Math.random()}
                         className={`flex items-end gap-1.5 ${isMe ? 'justify-end' : 'justify-start'}`}
                       >
                         <div
-                          className={`max-w-md p-3 rounded-2xl ${
+                          className={`max-w-md p-3.5 rounded-2xl shadow-md ${
                             isMe
                               ? 'bg-[#005c4b] text-[#e9edef] rounded-tr-none'
-                              : 'bg-[#202c33] text-[#e9edef] rounded-tl-none'
+                              : 'bg-[#202c33] text-[#e9edef] rounded-tl-none border border-[#233138]'
                           }`}
                         >
+                          {/* MEDIA / IMAGE ATTACHMENT */}
+                          {msg.messageType === 'media' && msg.mediaUrl && (
+                            <div className="mb-2 rounded-xl overflow-hidden border border-black/30">
+                              <img src={msg.mediaUrl} alt="Attachment" className="max-h-60 w-full object-cover" />
+                            </div>
+                          )}
+
+                          {/* VOICE NOTE MESSAGE */}
                           {msg.messageType === 'voice' ? (
                             <div className="flex items-center gap-3 py-1">
                               <button
                                 type="button"
-                                className="w-8 h-8 rounded-full bg-[#00a884] text-black flex items-center justify-center shrink-0"
+                                onClick={() => playSuccess()}
+                                className="w-9 h-9 rounded-full bg-[#00a884] text-black flex items-center justify-center shrink-0 cursor-pointer shadow-md"
                               >
                                 <Play className="w-4 h-4 fill-current ml-0.5" />
                               </button>
-                              <div className="flex-1">
+                              <div className="flex-1 min-w-[140px]">
                                 <div className="h-1.5 bg-[#8696a0]/30 rounded-full overflow-hidden">
-                                  <div className="w-2/3 h-full bg-[#00a884]" />
+                                  <div className="w-3/4 h-full bg-[#00a884]" />
                                 </div>
-                                <span className="text-[10px] text-[#8696a0] mt-1 block">0:18s Voice Note</span>
+                                <span className="text-[10px] text-[#8696a0] mt-1 block">Voice Note (0:18s)</span>
                               </div>
                             </div>
                           ) : (
-                            <p className="leading-relaxed whitespace-pre-wrap">{msg.text}</p>
+                            <p className="leading-relaxed whitespace-pre-wrap text-xs">{msg.text}</p>
                           )}
 
+                          {/* WHATSAPP READ RECEIPTS & TIMESTAMP */}
                           <div className="flex items-center justify-end gap-1 mt-1 text-[9px] text-[#8696a0]">
                             <span>
                               {new Date(msg.createdAt || Date.now()).toLocaleTimeString([], {
@@ -367,34 +527,96 @@ const ChatPage = () => {
                                 minute: '2-digit',
                               })}
                             </span>
-                            {isMe && (
-                              <CheckCheck className="w-3.5 h-3.5 text-[#53bdeb]" />
-                            )}
+                            {isMe && <CheckCheck className="w-3.5 h-3.5 text-[#53bdeb]" />}
                           </div>
                         </div>
                       </div>
                     );
                   })}
 
+                  {/* REALTIME TYPING INDICATOR */}
                   {isTyping && (
-                    <div className="text-[10px] font-mono text-[#00a884] animate-pulse">
-                      {typingUser} is typing...
+                    <div className="flex items-center gap-2 p-2 rounded-xl bg-[#202c33]/80 w-fit text-[11px] text-[#00a884] font-bold animate-pulse">
+                      <span className="w-2 h-2 rounded-full bg-[#00a884]" />
+                      <span>{typingUser} is typing...</span>
                     </div>
                   )}
 
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* Input Bar */}
+                {/* ATTACHMENT PREVIEW STRIP */}
+                {attachmentFile && (
+                  <div className="px-4 py-2 bg-[#111b21] border-t border-[#202c33] flex items-center justify-between text-xs">
+                    <div className="flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4 text-[#00a884]" />
+                      <span className="text-white truncate max-w-xs">{attachmentFile.name}</span>
+                    </div>
+                    <button
+                      onClick={() => setAttachmentFile(null)}
+                      className="p-1 rounded-full bg-rose-500/20 text-rose-300 hover:bg-rose-500/40"
+                    >
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                )}
+
+                {/* QUICK EMOJI BAR */}
+                {showEmojiPicker && (
+                  <div className="px-4 py-2 bg-[#111b21] border-t border-[#202c33] flex items-center gap-2 overflow-x-auto">
+                    {quickEmojis.map((emoji) => (
+                      <button
+                        key={emoji}
+                        type="button"
+                        onClick={() => {
+                          setInputMsg((prev) => prev + emoji);
+                          setShowEmojiPicker(false);
+                        }}
+                        className="p-1.5 rounded-lg hover:bg-[#202c33] text-lg transition-transform hover:scale-125 cursor-pointer"
+                      >
+                        {emoji}
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* WHATSAPP INPUT BAR */}
                 <form
                   onSubmit={handleSendMessage}
-                  className="p-3 bg-[#202c33] flex items-center gap-2 border-t border-[#202c33]"
+                  className="p-3 bg-[#202c33] flex items-center gap-2 border-t border-[#202c33] relative z-20"
                 >
                   <button
                     type="button"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
+                    title="Quick Emojis"
+                  >
+                    <Smile className="w-5 h-5" />
+                  </button>
+
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*,.pdf,.zip,.py,.cpp"
+                    className="hidden"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
+                    title="Attach Photo or Document"
+                  >
+                    <Paperclip className="w-5 h-5" />
+                  </button>
+
+                  <button
+                    type="button"
                     onClick={sendVoiceNote}
+                    disabled={isSending}
+                    className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
                     title="Send Voice Note"
-                    className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors"
                   >
                     <Mic className="w-5 h-5" />
                   </button>
@@ -402,6 +624,7 @@ const ChatPage = () => {
                   <input
                     type="text"
                     value={inputMsg}
+                    disabled={isSending}
                     onChange={(e) => {
                       setInputMsg(e.target.value);
                       if (socket && activeConv) {
@@ -409,7 +632,8 @@ const ChatPage = () => {
                           conversationId: activeConv._id,
                           userName: user?.name,
                         });
-                        setTimeout(
+                        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                        typingTimeoutRef.current = setTimeout(
                           () => socket.emit('typing_stop', { conversationId: activeConv._id }),
                           2000
                         );
@@ -421,20 +645,59 @@ const ChatPage = () => {
 
                   <button
                     type="submit"
-                    className="p-2.5 rounded-full bg-[#00a884] hover:bg-[#02906f] text-black font-bold shadow-md transition-all"
+                    disabled={isSending || (!inputMsg.trim() && !attachmentFile)}
+                    className="p-2.5 rounded-full bg-[#00a884] hover:bg-[#02906f] text-black font-bold shadow-md transition-all disabled:opacity-50 cursor-pointer"
                   >
                     <Send className="w-4 h-4" />
                   </button>
                 </form>
               </>
             ) : (
-              <div className="flex-1 flex items-center justify-center text-[#8696a0] font-mono text-xs">
-                Select a project seller to begin real-time messaging.
+              <div className="flex-1 flex flex-col items-center justify-center text-[#8696a0] font-mono text-xs space-y-3">
+                <Shield className="w-12 h-12 text-[#00a884] animate-pulse" />
+                <p>Select a project seller on the left to start WhatsApp real-time messaging.</p>
               </div>
             )}
           </div>
         </div>
       </div>
+
+      {/* WHATSAPP SIMULATED CALL MODAL */}
+      {activeCall && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="p-8 rounded-3xl bg-[#111b21] border border-[#00a884]/40 max-w-sm w-full text-center space-y-6 shadow-2xl">
+            <div className="relative inline-block">
+              <img
+                src={getPartner(activeConv)?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(getPartner(activeConv)?.name)}`}
+                alt=""
+                className="w-24 h-24 rounded-full object-cover border-4 border-[#00a884] mx-auto animate-pulse"
+              />
+            </div>
+
+            <div>
+              <h3 className="font-display font-bold text-lg text-white">
+                {getPartner(activeConv)?.name}
+              </h3>
+              <p className="text-xs text-[#00a884] font-mono mt-1 animate-pulse">
+                WhatsApp {activeCall === 'video' ? 'Video' : 'Voice'} Call • Connecting...
+              </p>
+            </div>
+
+            <div className="flex items-center justify-center gap-4 pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  playClick();
+                  setActiveCall(null);
+                }}
+                className="p-4 rounded-full bg-rose-600 hover:bg-rose-500 text-white shadow-xl hover:scale-110 transition-transform cursor-pointer flex items-center justify-center"
+              >
+                <PhoneOff className="w-6 h-6" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
