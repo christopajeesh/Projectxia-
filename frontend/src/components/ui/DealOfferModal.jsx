@@ -1,13 +1,18 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, Handshake, Clock, MessageSquare, Send, CheckCircle2, ShieldCheck, Sparkles } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useSound } from '../../context/SoundContext';
+import { useSocket } from '../../context/SocketContext';
+import api from '../../services/api';
 import confetti from 'canvas-confetti';
 
 const DealOfferModal = ({ isOpen, onClose, project, onOfferSubmitted }) => {
+  const navigate = useNavigate();
   const { user, isAuthenticated, openAuthModal } = useAuth();
   const { playClick, playSuccess } = useSound();
+  const { socket } = useSocket();
 
   const askingPrice = Number(project?.price || 2999);
   const [offerPrice, setOfferPrice] = useState(Math.round(askingPrice * 0.85)); // Default 15% discount negotiation
@@ -18,7 +23,7 @@ const DealOfferModal = ({ isOpen, onClose, project, onOfferSubmitted }) => {
 
   if (!isOpen || !project) return null;
 
-  const handleSubmitOffer = (e) => {
+  const handleSubmitOffer = async (e) => {
     e.preventDefault();
     if (!isAuthenticated) {
       openAuthModal('login', 'Please log in to submit a deal proposal to the project seller.');
@@ -42,11 +47,41 @@ const DealOfferModal = ({ isOpen, onClose, project, onOfferSubmitted }) => {
     confetti({ particleCount: 80, spread: 70, origin: { y: 0.6 } });
     setSubmitted(true);
 
+    const sellerId = project.seller?.id || project.seller?._id || 'user_002_creator';
+    const conversationId = `conv_${project._id || project.id}_${user._id || user.id}`;
+    const offerText = `🤝 PROPOSED NEGOTIATION DEAL OFFER\n\n• Project: ${project.title}\n• Asking Price: ₹${askingPrice.toLocaleString('en-IN')}\n• Proposed Offer: ₹${Number(offerPrice).toLocaleString('en-IN')}\n• Timeline: ${deliveryDays} Days\n• Scope: ${customRequirements || 'Standard Deliverables'}\n• Message: ${buyerNote || 'Interested in finalizing terms.'}`;
+
+    const payload = {
+      conversationId,
+      receiverId: sellerId,
+      text: offerText,
+      messageType: 'deal_offer',
+      projectData: {
+        projectId: project._id || project.id,
+        title: project.title,
+        price: askingPrice,
+        offerPrice: Number(offerPrice),
+        deliveryDays,
+      },
+    };
+
+    try {
+      const res = await api.post('/chat/messages', payload);
+      if (socket) {
+        socket.emit('send_message', {
+          conversationId,
+          message: res.data.message,
+        });
+      }
+    } catch (err) {
+      console.log('Failed sending chat offer', err);
+    }
+
     if (onOfferSubmitted) {
       onOfferSubmitted({
         projectId: project._id,
         projectTitle: project.title,
-        sellerId: project.seller?.id || 'seller_default',
+        sellerId,
         sellerName: project.seller?.name || 'Project Creator',
         askingPrice,
         offerPrice: Number(offerPrice),
@@ -61,7 +96,20 @@ const DealOfferModal = ({ isOpen, onClose, project, onOfferSubmitted }) => {
     setTimeout(() => {
       setSubmitted(false);
       onClose();
-    }, 2200);
+      navigate('/chat', {
+        state: {
+          creatorId: sellerId,
+          creatorName: project.seller?.name || 'Project Creator',
+          creatorAvatar: project.seller?.avatar,
+          projectContext: {
+            projectId: project._id || project.id,
+            title: project.title,
+            price: askingPrice,
+            offerPrice: Number(offerPrice),
+          },
+        },
+      });
+    }, 1800);
   };
 
   return (

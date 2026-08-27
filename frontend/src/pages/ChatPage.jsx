@@ -21,6 +21,7 @@ import {
   X,
   Trash2,
   UserCheck,
+  Handshake,
 } from 'lucide-react';
 import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
@@ -271,11 +272,12 @@ const ChatPage = () => {
     }
   };
 
-  const clearChatLocal = () => {
-    if (window.confirm('Clear messages in this conversation view?')) {
-      setMessages([]);
-      setShowMenu(false);
+  const refreshChatHistory = () => {
+    playClick();
+    if (activeConv) {
+      fetchMessages(activeConv._id);
     }
+    setShowMenu(false);
   };
 
   const getPartner = (conv) => {
@@ -429,11 +431,11 @@ const ChatPage = () => {
                       {showMenu && (
                         <div className="absolute right-0 top-11 w-44 bg-[#233138] border border-[#374248] rounded-2xl shadow-2xl py-2 z-50 text-xs font-mono text-[#e9edef]">
                           <button
-                            onClick={clearChatLocal}
-                            className="w-full px-4 py-2 text-left hover:bg-[#111b21] flex items-center gap-2 text-rose-400 cursor-pointer"
+                            onClick={refreshChatHistory}
+                            className="w-full px-4 py-2 text-left hover:bg-[#111b21] flex items-center gap-2 text-[#00a884] cursor-pointer font-bold"
                           >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            <span>Clear Chat View</span>
+                            <Sparkles className="w-3.5 h-3.5" />
+                            <span>Sync Chat History</span>
                           </button>
                         </div>
                       )}
@@ -486,8 +488,42 @@ const ChatPage = () => {
                             </div>
                           )}
 
-                          {/* VOICE NOTE MESSAGE */}
-                          {msg.messageType === 'voice' ? (
+                          {/* NEGOTIATION DEAL OFFER CARD */}
+                          {msg.messageType === 'deal_offer' || msg.projectData || (msg.text && msg.text.includes('PROPOSED NEGOTIATION DEAL')) ? (
+                            <div className="space-y-2.5 p-3.5 bg-[#111b21]/90 rounded-2xl border border-[#00a884]/50 shadow-inner my-1">
+                              <div className="flex items-center gap-2 text-[#00a884] font-bold text-xs">
+                                <Handshake className="w-4.5 h-4.5 shrink-0 text-[#00a884]" />
+                                <span className="uppercase tracking-wider">PROPOSED NEGOTIATION DEAL</span>
+                              </div>
+                              <p className="text-xs text-white leading-relaxed font-mono whitespace-pre-wrap bg-[#1a2730] p-2.5 rounded-xl border border-[#263742]">
+                                {msg.text}
+                              </p>
+                              {!isMe && (
+                                <div className="flex items-center gap-2 pt-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      playSuccess();
+                                      alert('🎉 Deal Offer Accepted! The agreed negotiated rate will be applied at checkout.');
+                                    }}
+                                    className="flex-1 py-2 rounded-xl bg-[#00a884] text-black font-bold text-[11px] text-center hover:bg-[#02906f] transition-all cursor-pointer shadow-md"
+                                  >
+                                    Accept Deal
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      playClick();
+                                      setInputMsg(`Counter Offer: I can offer ₹${Math.round((msg.projectData?.offerPrice || 2500) * 1.1)} for this project.`);
+                                    }}
+                                    className="px-3.5 py-2 rounded-xl bg-[#202c33] text-slate-200 font-bold text-[11px] hover:text-white transition-all cursor-pointer border border-[#374248]"
+                                  >
+                                    Counter
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ) : msg.messageType === 'voice' ? (
                             <div className="flex items-center gap-3 py-1">
                               <button
                                 type="button"
