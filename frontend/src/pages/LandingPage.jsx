@@ -567,54 +567,78 @@ const LandingPage = () => {
         />
       )}
 
-      {/* FAQS SECTION */}
-      <section className="py-20 relative z-10 border-t border-cyan-500/20 bg-gray-950/60 content-auto">
+      {/* FAQS SECTION - STYLISH FUTURISTIC NEON KNOWLEDGE BASE */}
+      <section className="py-24 relative z-10 border-t border-white/10">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <span className="text-xs font-mono font-bold text-cyan-400 uppercase tracking-widest">
-              Platform Information
-            </span>
-            <h2 className="text-3xl font-display font-black text-white mt-1">
-              Frequently Asked Questions
+          <div className="text-center max-w-3xl mx-auto mb-14 space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.03] border border-[#00ffaa]/40 text-[#00ffaa] text-xs font-mono font-bold tracking-wider uppercase shadow-[0_0_20px_rgba(0,255,170,0.2)]">
+              <HelpCircle className="w-3.5 h-3.5 text-[#00ffaa] animate-pulse" />
+              <span>Platform Knowledge Base • FAQ</span>
+            </div>
+            <h2 className="text-3xl sm:text-5xl font-display font-black text-white tracking-tight leading-tight">
+              Frequently Asked <span className="text-gradient-pixellon">Questions</span>
             </h2>
-            <p className="text-xs font-mono text-slate-400 mt-1">
-              Everything you need to know about project ownership, verification, and custom engineering.
+            <p className="text-xs sm:text-sm font-sans text-neutral-300 leading-relaxed max-w-xl mx-auto">
+              Everything you need to know about project ownership, verification, instant checkout, and custom engineering.
             </p>
           </div>
 
           <div className="space-y-4">
-            {faqs.map((faq, idx) => (
-              <div
-                key={idx}
-                className="rounded-2xl bg-gray-950/80 border border-slate-800 overflow-hidden transition-all backdrop-blur-xl"
-              >
-                <button
-                  type="button"
-                  onClick={() => {
-                    playClick();
-                    setActiveFaq(activeFaq === idx ? null : idx);
-                  }}
-                  className="w-full p-5 text-left flex items-center justify-between gap-4 font-display font-bold text-white hover:text-cyan-300 transition-colors cursor-pointer"
+            {faqs.map((faq, idx) => {
+              const isOpen = activeFaq === idx;
+              return (
+                <motion.div
+                  key={idx}
+                  initial={{ opacity: 0, y: 15 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.4, delay: idx * 0.08 }}
+                  className={`rounded-3xl border transition-all duration-300 backdrop-blur-2xl overflow-hidden shadow-2xl ${
+                    isOpen
+                      ? 'bg-gradient-to-r from-emerald-950/80 via-slate-900 to-teal-950/80 border-[#00ffaa] shadow-[0_0_35px_rgba(0,255,170,0.3)]'
+                      : 'bg-white/[0.02] border-white/10 hover:border-[#00ffaa]/50 hover:bg-white/[0.04] hover:shadow-[0_0_25px_rgba(0,255,170,0.15)]'
+                  }`}
                 >
-                  <span className="text-sm sm:text-base">{faq.q}</span>
-                  <ChevronDown
-                    className={`w-4 h-4 text-cyan-400 transition-transform duration-300 shrink-0 ${
-                      activeFaq === idx ? 'rotate-180 text-cyan-300' : ''
-                    }`}
-                  />
-                </button>
-
-                {activeFaq === idx && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    className="px-5 pb-5 text-xs font-mono text-slate-300 leading-relaxed border-t border-slate-900 pt-3"
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playClick();
+                      setActiveFaq(isOpen ? null : idx);
+                    }}
+                    className="w-full p-5 sm:p-6 text-left flex items-center justify-between gap-4 cursor-pointer group"
                   >
-                    {faq.a}
-                  </motion.div>
-                )}
-              </div>
-            ))}
+                    <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+                      <span className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-mono font-black shrink-0 transition-colors ${
+                        isOpen ? 'bg-[#00ffaa] text-black shadow-md' : 'bg-white/5 text-[#00ffaa] border border-[#00ffaa]/30 group-hover:bg-[#00ffaa]/20'
+                      }`}>
+                        0{idx + 1}
+                      </span>
+                      <h3 className={`font-display font-bold text-sm sm:text-base leading-snug transition-colors ${
+                        isOpen ? 'text-[#00ffaa]' : 'text-white group-hover:text-[#00ffaa]'
+                      }`}>
+                        {faq.q}
+                      </h3>
+                    </div>
+
+                    <div className={`p-2 rounded-xl transition-all shrink-0 ${
+                      isOpen ? 'bg-[#00ffaa]/20 text-[#00ffaa] rotate-180' : 'bg-white/5 text-slate-400 group-hover:text-white'
+                    }`}>
+                      <ChevronDown className="w-4 h-4 transition-transform duration-300" />
+                    </div>
+                  </button>
+
+                  {isOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      className="px-6 pb-6 pt-1 text-xs sm:text-sm font-sans text-neutral-300 leading-relaxed border-t border-[#00ffaa]/20 space-y-2"
+                    >
+                      <p>{faq.a}</p>
+                    </motion.div>
+                  )}
+                </motion.div>
+              );
+            })}
           </div>
         </div>
       </section>

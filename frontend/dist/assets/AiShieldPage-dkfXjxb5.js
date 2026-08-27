@@ -1,4 +1,4 @@
-import{r as a,j as e,S as v,aA as k,i as A,B as w}from"./vendor-react-dyerpzx1.js";import{a as C,b as I,c as E}from"./index-DE-y5YT2.js";import{c as P}from"./vendor-utils-Ah9gvVdk.js";import{m as T}from"./vendor-motion-ChIXarLL.js";import"./vendor-misc-GC9UObjN.js";import"./vendor-firebase-DJVAx6uS.js";import"./vendor-socket-DzFfeMEw.js";const z=()=>{const{playClick:R,playSuccess:d,playShield:b}=C(),{user:r,isAuthenticated:h,openAuthModal:g}=I(),[l,f]=a.useState(`// ESP32-S3 IoT Autonomous Edge Sensor Node
+import{r as a,j as e,S as v,a6 as k,i as A,B as w}from"./vendor-react-CrYhySQ6.js";import{a as C,b as I,c as E}from"./index-tIaRG0lS.js";import{c as P}from"./vendor-utils-Ah9gvVdk.js";import{m as T}from"./vendor-motion-3ibLp_eW.js";import"./vendor-misc-GC9UObjN.js";import"./vendor-firebase-DJVAx6uS.js";import"./vendor-socket-DzFfeMEw.js";const z=()=>{const{playClick:R,playSuccess:d,playShield:b}=C(),{user:r,isAuthenticated:h,openAuthModal:g}=I(),[l,f]=a.useState(`// ESP32-S3 IoT Autonomous Edge Sensor Node
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include "esp_camera.h"
