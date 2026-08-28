@@ -652,215 +652,7 @@ const ChatPage = () => {
     }
   };
 
-  // ============================================================
-  // WHATSAPP VOICE RECORDING ENGINE WITH THROTTLED SPECTRUM
-  // ============================================================
-  const [isRecording, setIsRecording] = useState(false);
-  const [recordingTime, setRecordingTime] = useState(0);
-  const [audioLevels, setAudioLevels] = useState([30, 60, 40, 80, 50, 90, 40, 70, 30, 60, 80, 40]);
-  const mediaRecorderRef = useRef(null);
-  const audioChunksRef = useRef([]);
-  const recordingIntervalRef = useRef(null);
-  const audioContextRef = useRef(null);
-  const analyserRef = useRef(null);
-  const animFrameRef = useRef(null);
 
-  const cleanupAudioContext = () => {
-    if (animFrameRef.current) cancelAnimationFrame(animFrameRef.current);
-    if (audioContextRef.current && audioContextRef.current.state !== 'closed') {
-      try { audioContextRef.current.close(); } catch (e) {}
-    }
-    audioContextRef.current = null;
-    analyserRef.current = null;
-  };
-
-  const startRecording = async () => {
-    setIsRecording(true);
-    setRecordingTime(0);
-
-    let stream = null;
-    try {
-      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        try {
-          stream = await navigator.mediaDevices.getUserMedia({
-            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
-          });
-        } catch (e) {
-          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        }
-      }
-    } catch (err) {
-      console.warn('Microphone hardware stream not available:', err);
-    }
-
-    if (stream) {
-      audioChunksRef.current = [];
-      let recorder;
-      try {
-        if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported) {
-          if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
-            recorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
-          } else if (MediaRecorder.isTypeSupported('audio/webm')) {
-            recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
-          } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
-            recorder = new MediaRecorder(stream, { mimeType: 'audio/mp4' });
-          } else {
-            recorder = new MediaRecorder(stream);
-          }
-        } else {
-          recorder = new MediaRecorder(stream);
-        }
-      } catch (recErr) {
-        recorder = new MediaRecorder(stream);
-      }
-
-      recorder.ondataavailable = (e) => {
-        if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data);
-      };
-
-      recorder.start(100);
-      mediaRecorderRef.current = recorder;
-    }
-
-    // Clean UI spectrum visualizer without speaker audio loops
-    const interval = setInterval(() => {
-      setAudioLevels((prev) => prev.map(() => Math.floor(Math.random() * 70 + 20)));
-    }, 120);
-    animFrameRef.current = interval;
-
-    if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
-    recordingIntervalRef.current = setInterval(() => {
-      setRecordingTime((prev) => prev + 1);
-    }, 1000);
-  };
-
-  const cancelRecording = () => {
-    cleanupAudioContext();
-    if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
-    if (mediaRecorderRef.current) {
-      try {
-        if (mediaRecorderRef.current.stream) {
-          mediaRecorderRef.current.stream.getTracks().forEach((track) => track.stop());
-        }
-        if (mediaRecorderRef.current.state !== 'inactive') {
-          mediaRecorderRef.current.stop();
-        }
-      } catch (e) {}
-    }
-    setIsRecording(false);
-    setRecordingTime(0);
-    audioChunksRef.current = [];
-  };
-
-  const stopAndSendRecording = async () => {
-    cleanupAudioContext();
-    if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
-    const duration = recordingTime > 0 ? recordingTime : 1;
-
-    setIsRecording(false);
-    setRecordingTime(0);
-
-    const recorder = mediaRecorderRef.current;
-
-    const createAndSendVoiceNote = async (base64Audio) => {
-      if (!activeConv || !base64Audio) return;
-      const currentUserId = String(user?._id || user?.id || 'user_guest');
-      const currentUserEmail = String(user?.email || '').toLowerCase();
-      const tempId = `temp_voice_${Date.now()}`;
-
-      const otherParticipant = activeConv.participants?.find(
-        (p) => String(p.userId) !== currentUserId && String(p.email || '').toLowerCase() !== currentUserEmail
-      );
-
-      const receiverId = otherParticipant?.userId || location.state?.creatorId || 'creator';
-      const receiverName = otherParticipant?.name || location.state?.creatorName || 'Project Seller';
-      const receiverEmail = otherParticipant?.email || location.state?.creatorEmail || '';
-      const receiverAvatar = otherParticipant?.avatar || location.state?.creatorAvatar || '';
-
-      const optimisticMsg = {
-        _id: tempId,
-        conversationId: activeConv._id,
-        sender: {
-          id: currentUserId,
-          email: currentUserEmail,
-          name: user?.name || 'Verified User',
-          avatar: user?.avatar || '',
-        },
-        receiverId,
-        receiverName,
-        receiverEmail,
-        receiverAvatar,
-        text: '',
-        messageType: 'voice',
-        mediaUrl: base64Audio,
-        audioDuration: duration,
-        projectData: activeConv.projectContext,
-        isRead: false,
-        createdAt: new Date(),
-      };
-
-      setMessages((prev) => [...prev, optimisticMsg]);
-      shouldAutoScrollRef.current = true;
-      setTimeout(() => scrollToBottom(true), 50);
-
-      const payload = {
-        conversationId: activeConv._id,
-        receiverId,
-        receiverName,
-        receiverEmail,
-        receiverAvatar,
-        text: '',
-        messageType: 'voice',
-        mediaUrl: base64Audio,
-        audioDuration: duration,
-        projectData: activeConv.projectContext,
-      };
-
-      try {
-        const res = await api.post('/chat/messages', payload);
-        const newMsg = res.data.message || optimisticMsg;
-
-        setMessages((prev) => prev.map((m) => (m._id === tempId ? newMsg : m)));
-
-        if (socket) {
-          socket.emit('send_message', {
-            conversationId: activeConv._id,
-            message: newMsg,
-            receiverId,
-            receiverEmail,
-            senderEmail: currentUserEmail,
-          });
-        }
-        setTimeout(() => scrollToBottom(true), 100);
-      } catch (e) {
-        console.error('Voice send error:', e);
-      }
-    };
-
-    const processAudioChunks = () => {
-      if (audioChunksRef.current && audioChunksRef.current.length > 0) {
-        const mimeType = recorder?.mimeType || 'audio/webm';
-        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-        if (audioBlob.size > 0) {
-          const reader = new FileReader();
-          reader.onloadend = () => createAndSendVoiceNote(reader.result);
-          reader.readAsDataURL(audioBlob);
-        }
-      }
-      if (recorder && recorder.stream) {
-        try {
-          recorder.stream.getTracks().forEach((track) => track.stop());
-        } catch (e) {}
-      }
-    };
-
-    if (recorder && recorder.state !== 'inactive') {
-      recorder.onstop = processAudioChunks;
-      recorder.stop();
-    } else {
-      processAudioChunks();
-    }
-  };
 
   const handleFileChange = (e) => {
     const file = e.target.files?.[0];
@@ -1431,116 +1223,67 @@ const ChatPage = () => {
                 </div>
               )}
 
-              {/* WHATSAPP INPUT BAR & ACTIVE RECORDING HUD */}
-              {isRecording ? (
-                <div className="p-3 bg-[#202c33] flex items-center justify-between gap-3 border-t border-[#202c33] relative z-20 shrink-0">
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <button
-                      type="button"
-                      onClick={cancelRecording}
-                      className="p-2.5 rounded-full bg-rose-500/20 text-rose-400 hover:bg-rose-500/40 transition-colors cursor-pointer shrink-0"
-                      title="Cancel Recording"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                    <div className="flex items-center gap-2 text-rose-400 font-mono font-bold text-xs shrink-0">
-                      <span className="w-3 h-3 rounded-full bg-rose-500 animate-ping" />
-                      <span>Recording... {Math.floor(recordingTime / 60)}:{String(recordingTime % 60).padStart(2, '0')}</span>
-                    </div>
-
-                    {/* Animated Real-time Audio Frequency Waves */}
-                    <div className="hidden sm:flex items-center gap-0.5 h-5 flex-1 max-w-xs px-2">
-                      {audioLevels.map((lvl, idx) => (
-                        <div
-                          key={idx}
-                          className="flex-1 bg-rose-500/80 rounded-full transition-all duration-75"
-                          style={{ height: `${lvl}%` }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={stopAndSendRecording}
-                    className="px-4 py-2.5 rounded-full bg-[#00a884] hover:bg-[#02906f] text-black font-display font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-lg shrink-0"
-                  >
-                    <Send className="w-4 h-4" />
-                    <span>Send Voice Note</span>
-                  </button>
-                </div>
-              ) : (
-                <form
-                  onSubmit={handleSendMessage}
-                  className="p-2 sm:p-3 pb-3 bg-[#202c33] flex items-center gap-1 sm:gap-2 border-t border-[#202c33] relative z-20 shrink-0 w-full"
+              {/* WHATSAPP INPUT BAR */}
+              <form
+                onSubmit={handleSendMessage}
+                className="p-2 sm:p-3 pb-3 bg-[#202c33] flex items-center gap-1 sm:gap-2 border-t border-[#202c33] relative z-20 shrink-0 w-full"
+              >
+                <button
+                  type="button"
+                  onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                  className="p-2 sm:p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer shrink-0"
+                  title="Quick Emojis"
                 >
-                  <button
-                    type="button"
-                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    className="p-2 sm:p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer shrink-0"
-                    title="Quick Emojis"
-                  >
-                    <Smile className="w-5 h-5" />
-                  </button>
+                  <Smile className="w-5 h-5" />
+                </button>
 
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    accept="image/*,.pdf,.zip,.py,.cpp"
-                    className="hidden"
-                  />
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  accept="image/*,.pdf,.zip,.py,.cpp"
+                  className="hidden"
+                />
 
-                  <button
-                    type="button"
-                    onClick={() => fileInputRef.current?.click()}
-                    className="p-2 sm:p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer shrink-0"
-                    title="Attach Photo or Document"
-                  >
-                    <Paperclip className="w-5 h-5" />
-                  </button>
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="p-2 sm:p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer shrink-0"
+                  title="Attach Photo or Document"
+                >
+                  <Paperclip className="w-5 h-5" />
+                </button>
 
-                  <button
-                    type="button"
-                    onClick={startRecording}
-                    disabled={isSending}
-                    className="p-2 sm:p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer shrink-0"
-                    title="Record Voice Note"
-                  >
-                    <Mic className="w-5 h-5 text-[#00a884]" />
-                  </button>
+                <input
+                  type="text"
+                  value={inputMsg}
+                  disabled={isSending}
+                  onChange={(e) => {
+                    setInputMsg(e.target.value);
+                    if (socket && activeConv) {
+                      socket.emit('typing_start', {
+                        conversationId: activeConv._id,
+                        userName: user?.name,
+                      });
+                      if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                      typingTimeoutRef.current = setTimeout(
+                        () => socket.emit('typing_stop', { conversationId: activeConv._id }),
+                        2000
+                      );
+                    }
+                  }}
+                  placeholder="Type a direct message to seller..."
+                  className="flex-1 min-w-0 bg-[#2a3942] border-none rounded-xl px-3 sm:px-4 py-2.5 text-xs font-mono text-white placeholder-[#8696a0] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
+                />
 
-                  <input
-                    type="text"
-                    value={inputMsg}
-                    disabled={isSending}
-                    onChange={(e) => {
-                      setInputMsg(e.target.value);
-                      if (socket && activeConv) {
-                        socket.emit('typing_start', {
-                          conversationId: activeConv._id,
-                          userName: user?.name,
-                        });
-                        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-                        typingTimeoutRef.current = setTimeout(
-                          () => socket.emit('typing_stop', { conversationId: activeConv._id }),
-                          2000
-                        );
-                      }
-                    }}
-                    placeholder="Type a direct message to seller..."
-                    className="flex-1 min-w-0 bg-[#2a3942] border-none rounded-xl px-3 sm:px-4 py-2.5 text-xs font-mono text-white placeholder-[#8696a0] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
-                  />
-
-                  <button
-                    type="submit"
-                    disabled={isSending || (!inputMsg.trim() && !attachmentFile)}
-                    className="p-2.5 rounded-full bg-[#00a884] hover:bg-[#02906f] text-black font-bold shadow-md transition-all disabled:opacity-50 cursor-pointer shrink-0"
-                  >
-                    <Send className="w-4 h-4" />
-                  </button>
-                </form>
-              )}
+                <button
+                  type="submit"
+                  disabled={isSending || (!inputMsg.trim() && !attachmentFile)}
+                  className="p-2.5 rounded-full bg-[#00a884] hover:bg-[#02906f] text-black font-bold shadow-md transition-all disabled:opacity-50 cursor-pointer shrink-0"
+                >
+                  <Send className="w-4 h-4" />
+                </button>
+              </form>
             </>
           ) : (
             <div className="flex-1 flex flex-col items-center justify-center text-[#8696a0] font-mono text-xs space-y-4 p-6 text-center">
