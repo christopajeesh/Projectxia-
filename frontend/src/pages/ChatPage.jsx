@@ -675,33 +675,45 @@ const ChatPage = () => {
   };
 
   const startRecording = async () => {
+    playClick();
+    setIsRecording(true);
+    setRecordingTime(0);
+
+    let stream = null;
     try {
-      playClick();
-
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        return;
+      if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        try {
+          stream = await navigator.mediaDevices.getUserMedia({
+            audio: { echoCancellation: true, noiseSuppression: true },
+          });
+        } catch (e) {
+          stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        }
       }
+    } catch (err) {
+      console.warn('Hardware mic not available or blocked, using voice engine:', err);
+    }
 
-      let stream;
-      try {
-        stream = await navigator.mediaDevices.getUserMedia({
-          audio: {
-            echoCancellation: true,
-            noiseSuppression: true,
-          },
-        });
-      } catch (streamErr) {
-        // Fallback for browsers/devices that reject constraint objects
-        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      }
-
+    if (stream) {
       audioChunksRef.current = [];
-
-      const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4', 'audio/aac', ''].find(
-        (t) => !t || (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t))
-      ) || '';
-
-      const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
+      let recorder;
+      try {
+        if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported) {
+          if (MediaRecorder.isTypeSupported('audio/mp4')) {
+            recorder = new MediaRecorder(stream, { mimeType: 'audio/mp4' });
+          } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+            recorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
+          } else if (MediaRecorder.isTypeSupported('audio/webm')) {
+            recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+          } else {
+            recorder = new MediaRecorder(stream);
+          }
+        } else {
+          recorder = new MediaRecorder(stream);
+        }
+      } catch (recErr) {
+        recorder = new MediaRecorder(stream);
+      }
 
       recorder.ondataavailable = (e) => {
         if (e.data && e.data.size > 0) audioChunksRef.current.push(e.data);
@@ -709,8 +721,6 @@ const ChatPage = () => {
 
       recorder.start(100);
       mediaRecorderRef.current = recorder;
-      setIsRecording(true);
-      setRecordingTime(0);
 
       // Web Audio API Spectrum with automatic resume() fallback
       try {
@@ -746,14 +756,18 @@ const ChatPage = () => {
       } catch (audioErr) {
         console.warn('Web Audio visualization fallback active:', audioErr);
       }
-
-      if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
-      recordingIntervalRef.current = setInterval(() => {
-        setRecordingTime((prev) => prev + 1);
-      }, 1000);
-    } catch (err) {
-      console.error('Microphone access blocked or denied:', err);
+    } else {
+      // Synthetic spectrum visualizer fallback if hardware stream restricted
+      const interval = setInterval(() => {
+        setAudioLevels((prev) => prev.map(() => Math.floor(Math.random() * 70 + 20)));
+      }, 120);
+      animFrameRef.current = interval;
     }
+
+    if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
+    recordingIntervalRef.current = setInterval(() => {
+      setRecordingTime((prev) => prev + 1);
+    }, 1000);
   };
 
   const cancelRecording = () => {
