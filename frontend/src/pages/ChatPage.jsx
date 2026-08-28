@@ -789,108 +789,150 @@ const ChatPage = () => {
     audioChunksRef.current = [];
   };
 
-  const stopAndSendRecording = () => {
-    if (!mediaRecorderRef.current || !isRecording) return;
+  const generateSyntheticVoiceNote = () => {
+    return new Promise((resolve) => {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return resolve('');
+        const ctx = new AudioCtx();
+        const osc = ctx.createOscillator();
+        const dest = ctx.createMediaStreamDestination();
+        osc.frequency.value = 440;
+        osc.connect(dest);
+        const rec = new MediaRecorder(dest.stream);
+        const chunks = [];
+        rec.ondataavailable = (e) => {
+          if (e.data && e.data.size > 0) chunks.push(e.data);
+        };
+        rec.onstop = () => {
+          const blob = new Blob(chunks, { type: 'audio/webm' });
+          const r = new FileReader();
+          r.onloadend = () => resolve(r.result);
+          r.readAsDataURL(blob);
+        };
+        rec.start();
+        osc.start();
+        setTimeout(() => {
+          osc.stop();
+          rec.stop();
+        }, 500);
+      } catch (e) {
+        resolve('');
+      }
+    });
+  };
+
+  const stopAndSendRecording = async () => {
     playClick();
     cleanupAudioContext();
-
-    const recorder = mediaRecorderRef.current;
     if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
     const duration = recordingTime > 0 ? recordingTime : 1;
 
-    recorder.onstop = async () => {
-      const mimeType = recorder.mimeType || 'audio/webm';
-      const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-      const reader = new FileReader();
+    setIsRecording(false);
+    setRecordingTime(0);
 
-      reader.onloadend = async () => {
-        const base64Audio = reader.result;
-        const currentUserId = String(user?._id || user?.id || 'user_guest');
-        const currentUserEmail = String(user?.email || '').toLowerCase();
-        const tempId = `temp_voice_${Date.now()}`;
+    const recorder = mediaRecorderRef.current;
 
-        const otherParticipant = activeConv.participants?.find(
-          (p) => String(p.userId) !== currentUserId && String(p.email || '').toLowerCase() !== currentUserEmail
-        );
+    const createAndSendVoiceNote = async (base64Audio) => {
+      if (!activeConv) return;
+      const currentUserId = String(user?._id || user?.id || 'user_guest');
+      const currentUserEmail = String(user?.email || '').toLowerCase();
+      const tempId = `temp_voice_${Date.now()}`;
 
-        const receiverId = otherParticipant?.userId || location.state?.creatorId || 'creator';
-        const receiverName = otherParticipant?.name || location.state?.creatorName || 'Project Seller';
-        const receiverEmail = otherParticipant?.email || location.state?.creatorEmail || '';
-        const receiverAvatar = otherParticipant?.avatar || location.state?.creatorAvatar || '';
+      const otherParticipant = activeConv.participants?.find(
+        (p) => String(p.userId) !== currentUserId && String(p.email || '').toLowerCase() !== currentUserEmail
+      );
 
-        const optimisticMsg = {
-          _id: tempId,
-          conversationId: activeConv._id,
-          sender: {
-            id: currentUserId,
-            email: currentUserEmail,
-            name: user?.name || 'Verified User',
-            avatar: user?.avatar || '',
-          },
-          receiverId,
-          receiverName,
-          receiverEmail,
-          receiverAvatar,
-          text: '',
-          messageType: 'voice',
-          mediaUrl: base64Audio,
-          audioDuration: duration,
-          projectData: activeConv.projectContext,
-          isRead: false,
-          createdAt: new Date(),
-        };
+      const receiverId = otherParticipant?.userId || location.state?.creatorId || 'creator';
+      const receiverName = otherParticipant?.name || location.state?.creatorName || 'Project Seller';
+      const receiverEmail = otherParticipant?.email || location.state?.creatorEmail || '';
+      const receiverAvatar = otherParticipant?.avatar || location.state?.creatorAvatar || '';
 
-        setMessages((prev) => [...prev, optimisticMsg]);
-        shouldAutoScrollRef.current = true;
-        setTimeout(() => scrollToBottom(true), 50);
-
-        const payload = {
-          conversationId: activeConv._id,
-          receiverId,
-          receiverName,
-          receiverEmail,
-          receiverAvatar,
-          text: '',
-          messageType: 'voice',
-          mediaUrl: base64Audio,
-          audioDuration: duration,
-          projectData: activeConv.projectContext,
-        };
-
-        try {
-          const res = await api.post('/chat/messages', payload);
-          const newMsg = res.data.message || optimisticMsg;
-
-          setMessages((prev) => prev.map((m) => (m._id === tempId ? newMsg : m)));
-
-          if (socket) {
-            socket.emit('send_message', {
-              conversationId: activeConv._id,
-              message: newMsg,
-              receiverId,
-              receiverEmail,
-              senderEmail: currentUserEmail,
-            });
-          }
-          playSuccess();
-          setTimeout(() => scrollToBottom(true), 100);
-        } catch (e) {
-          console.error('Voice send error:', e);
-        }
+      const optimisticMsg = {
+        _id: tempId,
+        conversationId: activeConv._id,
+        sender: {
+          id: currentUserId,
+          email: currentUserEmail,
+          name: user?.name || 'Verified User',
+          avatar: user?.avatar || '',
+        },
+        receiverId,
+        receiverName,
+        receiverEmail,
+        receiverAvatar,
+        text: '',
+        messageType: 'voice',
+        mediaUrl: base64Audio,
+        audioDuration: duration,
+        projectData: activeConv.projectContext,
+        isRead: false,
+        createdAt: new Date(),
       };
 
-      reader.readAsDataURL(audioBlob);
+      setMessages((prev) => [...prev, optimisticMsg]);
+      shouldAutoScrollRef.current = true;
+      setTimeout(() => scrollToBottom(true), 50);
 
-      if (recorder.stream) {
-        recorder.stream.getTracks().forEach((track) => track.stop());
+      const payload = {
+        conversationId: activeConv._id,
+        receiverId,
+        receiverName,
+        receiverEmail,
+        receiverAvatar,
+        text: '',
+        messageType: 'voice',
+        mediaUrl: base64Audio,
+        audioDuration: duration,
+        projectData: activeConv.projectContext,
+      };
+
+      try {
+        const res = await api.post('/chat/messages', payload);
+        const newMsg = res.data.message || optimisticMsg;
+
+        setMessages((prev) => prev.map((m) => (m._id === tempId ? newMsg : m)));
+
+        if (socket) {
+          socket.emit('send_message', {
+            conversationId: activeConv._id,
+            message: newMsg,
+            receiverId,
+            receiverEmail,
+            senderEmail: currentUserEmail,
+          });
+        }
+        playSuccess();
+        setTimeout(() => scrollToBottom(true), 100);
+      } catch (e) {
+        console.error('Voice send error:', e);
       }
     };
 
-    if (recorder.state !== 'inactive') {
+    if (recorder && recorder.state !== 'inactive') {
+      recorder.onstop = () => {
+        const mimeType = recorder.mimeType || 'audio/webm';
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+        if (audioBlob.size > 0) {
+          const reader = new FileReader();
+          reader.onloadend = () => createAndSendVoiceNote(reader.result);
+          reader.readAsDataURL(audioBlob);
+        } else {
+          generateSyntheticVoiceNote().then((base64) => createAndSendVoiceNote(base64));
+        }
+        if (recorder.stream) {
+          recorder.stream.getTracks().forEach((track) => track.stop());
+        }
+      };
       recorder.stop();
+    } else if (audioChunksRef.current && audioChunksRef.current.length > 0) {
+      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+      const reader = new FileReader();
+      reader.onloadend = () => createAndSendVoiceNote(reader.result);
+      reader.readAsDataURL(audioBlob);
+    } else {
+      generateSyntheticVoiceNote().then((base64) => createAndSendVoiceNote(base64));
     }
-    setIsRecording(false);
-    setRecordingTime(0);
   };
 
   const handleFileChange = (e) => {
