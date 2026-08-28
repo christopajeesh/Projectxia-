@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Send,
@@ -27,6 +27,12 @@ import {
   Filter,
   Phone,
   Video,
+  Code,
+  UploadCloud,
+  LogOut,
+  User as UserIcon,
+  Plus,
+  MessageSquare,
 } from 'lucide-react';
 import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
@@ -150,128 +156,11 @@ const WhatsAppVoicePlayer = ({ mediaUrl, audioDuration, isMe }) => {
   );
 };
 
-const DEFAULT_SELLER_CONVERSATIONS = [
-  {
-    _id: 'conv_default_1',
-    participants: [
-      { userId: 'user_001_buyer', name: 'Verified Innovator', email: 'buyer@projectxia.com' },
-      {
-        userId: 'creator_priya',
-        name: 'Dr. Priya Venkatesh',
-        email: 'priya@projectxia.com',
-        avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
-        role: 'creator',
-      },
-    ],
-    lastMessage: { text: 'Ntha mone 😄', createdAt: new Date(Date.now() - 3600000) },
-    projectContext: { title: 'IoT Smart Hydroponics System', price: 4999 },
-  },
-  {
-    _id: 'conv_default_2',
-    participants: [
-      { userId: 'user_001_buyer', name: 'Verified Innovator', email: 'buyer@projectxia.com' },
-      {
-        userId: 'creator_sukhno',
-        name: 'Sukhno',
-        email: 'sukhno@projectxia.com',
-        avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-        role: 'creator',
-      },
-    ],
-    lastMessage: { text: 'heheheeheee', createdAt: new Date(Date.now() - 7200000) },
-    projectContext: { title: 'AI WAF & Scam Guard Shield', price: 7999 },
-  },
-  {
-    _id: 'conv_default_3',
-    participants: [
-      { userId: 'user_001_buyer', name: 'Verified Innovator', email: 'buyer@projectxia.com' },
-      {
-        userId: 'creator_pinal',
-        name: 'Pinalahh',
-        email: 'pinal@projectxia.com',
-        avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-        role: 'creator',
-      },
-    ],
-    lastMessage: { text: 'Source code and video walkthrough sent!', createdAt: new Date(Date.now() - 86400000) },
-    projectContext: { title: 'zk-SNARK Web3 Privacy Protocol', price: 12500 },
-  },
-];
-
-const DEFAULT_MESSAGES_MAP = {
-  conv_default_1: [
-    {
-      _id: 'msg_def_101',
-      conversationId: 'conv_default_1',
-      sender: { id: 'creator_priya', name: 'Dr. Priya Venkatesh', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80' },
-      receiverId: 'user_001_buyer',
-      text: 'Ntha mone 😄',
-      messageType: 'text',
-      isRead: true,
-      createdAt: new Date(Date.now() - 3600000 * 2),
-    },
-    {
-      _id: 'msg_def_102',
-      conversationId: 'conv_default_1',
-      sender: { id: 'creator_priya', name: 'Dr. Priya Venkatesh', avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80' },
-      receiverId: 'user_001_buyer',
-      text: '',
-      messageType: 'voice',
-      audioDuration: 18,
-      isRead: true,
-      createdAt: new Date(Date.now() - 3600000),
-    },
-    {
-      _id: 'msg_def_103',
-      conversationId: 'conv_default_1',
-      sender: { id: 'user_001_buyer', name: 'Verified Innovator' },
-      receiverId: 'creator_priya',
-      text: 'heheheeheee',
-      messageType: 'text',
-      isRead: true,
-      createdAt: new Date(Date.now() - 1800000),
-    },
-  ],
-  conv_default_2: [
-    {
-      _id: 'msg_def_201',
-      conversationId: 'conv_default_2',
-      sender: { id: 'creator_sukhno', name: 'Sukhno', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80' },
-      receiverId: 'user_001_buyer',
-      text: 'Hey! The AI WAF Security project documentation is fully ready.',
-      messageType: 'text',
-      isRead: true,
-      createdAt: new Date(Date.now() - 7200000),
-    },
-    {
-      _id: 'msg_def_202',
-      conversationId: 'conv_default_2',
-      sender: { id: 'user_001_buyer', name: 'Verified Innovator' },
-      receiverId: 'creator_sukhno',
-      text: 'Awesome! Does it include the Python Flask backdoor detector module?',
-      messageType: 'text',
-      isRead: true,
-      createdAt: new Date(Date.now() - 3600000),
-    },
-  ],
-  conv_default_3: [
-    {
-      _id: 'msg_def_301',
-      conversationId: 'conv_default_3',
-      sender: { id: 'creator_pinal', name: 'Pinalahh', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80' },
-      receiverId: 'user_001_buyer',
-      text: 'Source code and video walkthrough sent for zk-SNARK Web3 Privacy Protocol!',
-      messageType: 'text',
-      isRead: true,
-      createdAt: new Date(Date.now() - 86400000),
-    },
-  ],
-};
-
 const ChatPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { playClick, playSuccess } = useSound();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const { socket, onlineUsers } = useSocket();
 
   const [conversations, setConversations] = useState([]);
@@ -284,6 +173,12 @@ const ChatPage = () => {
   const [isSending, setIsSending] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
 
+  // New Chat User Picker Modal
+  const [showNewChatModal, setShowNewChatModal] = useState(false);
+  const [availableUsers, setAvailableUsers] = useState([]);
+  const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [loadingUsers, setLoadingUsers] = useState(false);
+
   // Modals & Panels
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [attachmentFile, setAttachmentFile] = useState(null);
@@ -294,6 +189,7 @@ const ChatPage = () => {
   const typingTimeoutRef = useRef(null);
 
   const quickEmojis = ['😊', '👍', '❤️', '🔥', '🚀', '🙏', '💯', '⚡', '👏', '🎉'];
+  const reactionEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 
   useEffect(() => {
     fetchConversations();
@@ -362,10 +258,10 @@ const ChatPage = () => {
 
   const getPartner = (conv) => {
     const defaultPartner = {
-      userId: 'creator_priya',
-      name: 'Dr. Priya Venkatesh',
-      email: 'priya@projectxia.com',
-      avatar: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150&auto=format&fit=crop&q=80',
+      userId: 'creator_seller',
+      name: 'Project Creator',
+      email: 'seller@projectxia.com',
+      avatar: 'https://api.dicebear.com/7.x/initials/svg?seed=Seller&backgroundColor=080e1e,101f4e&textColor=00f0ff',
       role: 'creator',
     };
 
@@ -407,8 +303,9 @@ const ChatPage = () => {
       const stored = localStorage.getItem(`px_convs_${userKey}`);
       if (stored) {
         const parsed = JSON.parse(stored);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          cachedConvs = parsed;
+        if (Array.isArray(parsed)) {
+          // Filter out old fake mock conversation IDs
+          cachedConvs = parsed.filter((c) => c && c._id && !String(c._id).startsWith('conv_default_'));
         }
       }
     } catch (err) {}
@@ -420,14 +317,8 @@ const ChatPage = () => {
     } catch (e) {}
 
     const convMap = new Map();
-    [...DEFAULT_SELLER_CONVERSATIONS, ...apiConvs, ...cachedConvs].forEach((c) => {
-      if (c && c._id) {
-        if (!c.participants || c.participants.length === 0) {
-          c.participants = [
-            { userId: user?._id || 'user_001_buyer', name: user?.name || 'Verified Innovator', email: user?.email || '' },
-            { userId: 'creator_priya', name: 'Dr. Priya Venkatesh', email: 'priya@projectxia.com' },
-          ];
-        }
+    [...apiConvs, ...cachedConvs].forEach((c) => {
+      if (c && c._id && !String(c._id).startsWith('conv_default_')) {
         convMap.set(String(c._id), c);
       }
     });
@@ -494,14 +385,12 @@ const ChatPage = () => {
     if (!convId) return;
     const userKey = getUserKey();
 
-    let cachedMsgs = DEFAULT_MESSAGES_MAP[convId] || [];
+    let cachedMsgs = [];
     try {
       const cached = localStorage.getItem(`px_msgs_${userKey}_${convId}`);
       if (cached) {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          cachedMsgs = parsed;
-        }
+        if (Array.isArray(parsed)) cachedMsgs = parsed;
       }
     } catch (err) {}
 
@@ -516,17 +405,72 @@ const ChatPage = () => {
       });
       const mergedMsgs = Array.from(msgMap.values());
 
-      if (mergedMsgs.length > 0) {
-        setMessages(mergedMsgs);
-        localStorage.setItem(`px_msgs_${userKey}_${convId}`, JSON.stringify(mergedMsgs));
-      } else {
-        setMessages(cachedMsgs);
-      }
+      setMessages(mergedMsgs);
+      try { localStorage.setItem(`px_msgs_${userKey}_${convId}`, JSON.stringify(mergedMsgs)); } catch (e) {}
       setTimeout(scrollToBottom, 100);
     } catch (e) {
       setMessages(cachedMsgs);
       setTimeout(scrollToBottom, 100);
     }
+  };
+
+  // Fetch registered users for starting a new chat
+  const handleOpenNewChatModal = async () => {
+    playClick();
+    setShowNewChatModal(true);
+    setLoadingUsers(true);
+    try {
+      const res = await api.get('/chat/users');
+      setAvailableUsers(res.data.users || []);
+    } catch (err) {
+      console.error('Failed to fetch available users', err);
+    } finally {
+      setLoadingUsers(false);
+    }
+  };
+
+  const handleStartChatWithUser = (targetUser) => {
+    playClick();
+    setShowNewChatModal(false);
+
+    const currentUserId = String(user?._id || user?.id || 'user_guest');
+    const currentUserEmail = String(user?.email || '').toLowerCase();
+    const targetUserId = String(targetUser._id || targetUser.id);
+    const targetEmail = String(targetUser.email || '').toLowerCase();
+
+    let existing = conversations.find((c) =>
+      c.participants?.some((p) => String(p.userId) === targetUserId || (targetEmail && String(p.email).toLowerCase() === targetEmail))
+    );
+
+    if (!existing) {
+      existing = {
+        _id: `conv_${Date.now()}_${Math.random().toString(36).substring(2, 6)}`,
+        participants: [
+          {
+            userId: currentUserId,
+            email: currentUserEmail,
+            name: user?.name || 'Verified User',
+            avatar: user?.avatar || '',
+            role: user?.role || 'user',
+          },
+          {
+            userId: targetUserId,
+            email: targetEmail,
+            name: targetUser.name || 'Project Seller',
+            avatar: targetUser.avatar || '',
+            role: targetUser.role || 'creator',
+          },
+        ],
+        lastMessage: {
+          text: 'Started direct conversation',
+          createdAt: new Date(),
+        },
+      };
+      setConversations((prev) => [existing, ...prev]);
+    }
+
+    setActiveConv(existing);
+    fetchMessages(existing._id);
   };
 
   useEffect(() => {
@@ -642,6 +586,33 @@ const ChatPage = () => {
     } finally {
       setIsSending(false);
     }
+  };
+
+  // Toggle reaction on message
+  const handleReactMessage = async (msgId, emoji) => {
+    playClick();
+    const currentUserId = String(user?._id || user?.id || 'user_guest');
+
+    setMessages((prev) =>
+      prev.map((m) => {
+        if ((m._id || m.id) === msgId) {
+          const reactions = m.reactions || [];
+          const existing = reactions.find((r) => r.userId === currentUserId && r.emoji === emoji);
+          let updated = [];
+          if (existing) {
+            updated = reactions.filter((r) => !(r.userId === currentUserId && r.emoji === emoji));
+          } else {
+            updated = [...reactions, { emoji, userId: currentUserId }];
+          }
+          return { ...m, reactions: updated };
+        }
+        return m;
+      })
+    );
+
+    try {
+      await api.post(`/chat/messages/${msgId}/react`, { emoji });
+    } catch (err) {}
   };
 
   // ============================================================
@@ -895,6 +866,11 @@ const ChatPage = () => {
     return pName.includes(q);
   });
 
+  const filteredUsersForModal = availableUsers.filter((u) => {
+    const q = userSearchQuery.toLowerCase();
+    return (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q);
+  });
+
   const partner = activeConv ? getPartner(activeConv) : getPartner(null);
   const partnerId = String(partner?.userId || partner?.id || '').toLowerCase();
   const partnerEmail = String(partner?.email || '').toLowerCase();
@@ -904,515 +880,697 @@ const ChatPage = () => {
   });
 
   return (
-    <div className="relative pt-28 sm:pt-32 pb-4 h-screen min-h-screen max-h-screen flex flex-col font-mono text-xs overflow-hidden">
-      <div className="max-w-[1700px] mx-auto w-full px-2 sm:px-4 lg:px-6 flex-1 flex flex-col h-full relative z-10 min-h-0 overflow-hidden">
+    <div className="fixed inset-0 z-40 w-screen h-screen bg-[#111b21] flex flex-col font-sans text-xs overflow-hidden select-none">
 
-        {/* DIRECT CHAT MAIN CONTAINER (EXACT WHATSAPP WEB FRAME) */}
-        <div className="w-full h-full grid grid-cols-1 md:grid-cols-12 rounded-2xl bg-[#0b141a] border border-[#202c33] shadow-2xl min-h-0 overflow-hidden">
+      {/* WHATSAPP WEB GREEN ACCENT HEADER STRIP */}
+      <div className="h-1 bg-[#00a884] shrink-0" />
 
-          {/* ============================================================ */}
-          {/* LEFT: WHATSAPP CHAT LIST SIDEBAR */}
-          {/* ============================================================ */}
-          <div className={`md:col-span-4 border-r border-[#202c33] flex flex-col h-full min-h-0 bg-[#111b21] ${activeConv ? 'hidden md:flex' : 'flex'}`}>
+      {/* WHATSAPP WEB INTEGRATED APP BAR */}
+      <header className="bg-[#202c33] border-b border-[#202c33] px-4 py-2 flex items-center justify-between shrink-0 text-white z-50">
+        <div className="flex items-center gap-3">
+          <Link to="/" className="flex items-center gap-2 group cursor-pointer">
+            <div className="p-1.5 rounded-full bg-[#00a884] text-black font-black">
+              <Shield className="w-4 h-4" />
+            </div>
+            <span className="font-display font-black text-sm tracking-tight">
+              PROJECT<span className="text-[#00a884]">XIA</span>
+            </span>
+          </Link>
+          <span className="text-[11px] text-[#8696a0] font-mono border-l border-[#374248] pl-3 hidden sm:inline">
+            WhatsApp Web Engine • Realtime Encrypted Node
+          </span>
+        </div>
 
-            {/* Sidebar Header */}
-            <div className="p-3.5 bg-[#202c33] flex items-center justify-between border-b border-[#202c33]">
-              <div className="flex items-center gap-3">
-                <div className="relative">
-                  <img
-                    src={user?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user?.name || user?.email || 'User')}&backgroundColor=080e1e,101f4e&textColor=00f0ff`}
-                    alt="User Avatar"
-                    className="w-10 h-10 rounded-full object-cover border border-[#00a884] bg-gray-900"
-                  />
-                  <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#00a884] border-2 border-[#111b21] rounded-full" />
-                </div>
-                <div>
-                  <h3 className="font-display font-bold text-xs text-white truncate max-w-[140px]">
-                    {user?.name || 'Verified Innovator'}
-                  </h3>
-                  <span className="text-[10px] text-[#00a884] block font-mono">WhatsApp Web Direct</span>
-                </div>
-              </div>
+        {/* TOP NAV SHORTCUTS */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => navigate('/marketplace')}
+            className="px-3 py-1.5 rounded-full bg-[#111b21] hover:bg-[#374248] text-[#e9edef] font-mono text-[11px] flex items-center gap-1.5 transition-colors cursor-pointer border border-[#374248]/50"
+          >
+            <Code className="w-3.5 h-3.5 text-[#00a884]" />
+            <span className="hidden sm:inline">Marketplace</span>
+          </button>
 
-              <div className="flex items-center gap-1.5 text-[#8696a0]">
-                <button
-                  type="button"
-                  title="New Direct Chat"
-                  onClick={() => fetchConversations()}
-                  className="p-2 rounded-full hover:bg-[#374248] hover:text-white transition-colors cursor-pointer"
-                >
-                  <MessageSquarePlus className="w-4 h-4" />
-                </button>
-                <span className="text-[10px] font-mono text-[#00a884] bg-[#00a884]/15 px-2.5 py-1 rounded-full border border-[#00a884]/30 font-bold">
-                  ✓ Encrypted
-                </span>
+          <button
+            onClick={() => navigate('/upload')}
+            className="px-3 py-1.5 rounded-full bg-[#111b21] hover:bg-[#374248] text-[#e9edef] font-mono text-[11px] flex items-center gap-1.5 transition-colors cursor-pointer border border-[#374248]/50"
+          >
+            <UploadCloud className="w-3.5 h-3.5 text-[#00a884]" />
+            <span className="hidden sm:inline">Sell Code</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/ai-shield')}
+            className="px-3 py-1.5 rounded-full bg-[#111b21] hover:bg-[#374248] text-[#e9edef] font-mono text-[11px] flex items-center gap-1.5 transition-colors cursor-pointer border border-[#374248]/50"
+          >
+            <Shield className="w-3.5 h-3.5 text-purple-400" />
+            <span className="hidden sm:inline">Plagiarism Check</span>
+          </button>
+
+          <button
+            onClick={() => navigate('/profile')}
+            className="p-1.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-white transition-colors cursor-pointer"
+            title="Profile"
+          >
+            <UserIcon className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={() => {
+              logout();
+              navigate('/');
+            }}
+            className="p-1.5 rounded-full hover:bg-rose-500/20 text-rose-400 transition-colors cursor-pointer"
+            title="Logout & Lock Session"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
+        </div>
+      </header>
+
+      {/* MAIN WHATSAPP WEB FULL PAGE FRAME (0 MARGINS / 0 PADDING) */}
+      <div className="flex-1 flex min-h-0 w-full overflow-hidden relative">
+
+        {/* ============================================================ */}
+        {/* LEFT: WHATSAPP SIDEBAR (CHATS LIST) */}
+        {/* ============================================================ */}
+        <div className={`w-full md:w-[360px] lg:w-[420px] shrink-0 border-r border-[#202c33] flex flex-col h-full min-h-0 bg-[#111b21] ${activeConv ? 'hidden md:flex' : 'flex'}`}>
+
+          {/* SIDEBAR HEADER */}
+          <div className="p-3 bg-[#202c33] flex items-center justify-between border-b border-[#202c33]">
+            <div className="flex items-center gap-3">
+              <img
+                src={user?.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(user?.name || user?.email || 'User')}&backgroundColor=080e1e,101f4e&textColor=00f0ff`}
+                alt="User Avatar"
+                className="w-10 h-10 rounded-full object-cover border border-[#00a884] bg-gray-900"
+              />
+              <div className="min-w-0">
+                <h3 className="font-bold text-xs text-[#e9edef] truncate max-w-[150px]">
+                  {user?.name || 'Verified User'}
+                </h3>
+                <span className="text-[10px] text-[#00a884] font-mono block">online</span>
               </div>
             </div>
 
-            {/* Search Box & WhatsApp Filter Chips */}
-            <div className="p-3 border-b border-[#202c33] space-y-2.5">
-              <div className="relative">
-                <Search className="absolute left-3 top-2.5 w-4 h-4 text-[#8696a0]" />
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search or start new chat..."
-                  className="w-full bg-[#202c33] border-none rounded-xl pl-9 pr-3 py-2 text-xs font-mono text-white placeholder-[#8696a0] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
-                />
-              </div>
-
-              {/* WhatsApp Web Filter Pills */}
-              <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] font-mono">
-                {['All', 'Unread', 'Favorites', 'Groups'].map((filter) => (
-                  <button
-                    key={filter}
-                    type="button"
-                    onClick={() => setActiveFilter(filter)}
-                    className={`px-3 py-1 rounded-full border transition-all cursor-pointer ${
-                      activeFilter === filter
-                        ? 'bg-[#00a884]/20 border-[#00a884] text-[#00a884] font-bold'
-                        : 'bg-[#202c33]/50 border-transparent text-[#8696a0] hover:bg-[#202c33] hover:text-white'
-                    }`}
-                  >
-                    {filter}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Conversations List */}
-            <div className="flex-1 overflow-y-auto divide-y divide-[#202c33]/50 p-1.5 space-y-1 min-h-0">
-              {filteredConversations.map((conv) => {
-                const p = getPartner(conv);
-                const isSelected = activeConv?._id === conv._id;
-
-                return (
-                  <div
-                    key={conv._id}
-                    onClick={() => {
-                      playClick();
-                      setActiveConv(conv);
-                    }}
-                    className={`p-3 rounded-2xl transition-all cursor-pointer flex items-center justify-between gap-3 group relative ${
-                      isSelected
-                        ? 'bg-[#2a3942] border border-[#00a884]/40 shadow-lg'
-                        : 'hover:bg-[#202c33] border border-transparent'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div className="relative shrink-0">
-                        <img
-                          src={p.avatar}
-                          alt={p.name}
-                          className="w-11 h-11 rounded-full object-cover border border-[#00a884]/30 bg-gray-900"
-                        />
-                        <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#00a884] border-2 border-[#111b21] rounded-full" />
-                      </div>
-                      <div className="min-w-0">
-                        <div className="flex items-center justify-between gap-2">
-                          <h4 className="font-display font-bold text-xs text-[#e9edef] truncate group-hover:text-[#00a884] transition-colors">
-                            {p.name}
-                          </h4>
-                          <span className="text-[10px] text-[#8696a0] font-mono shrink-0">
-                            {new Date(conv.lastMessage?.createdAt || Date.now()).toLocaleTimeString([], {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </span>
-                        </div>
-                        <p className="text-[11px] font-mono text-[#8696a0] truncate mt-0.5">
-                          {conv.lastMessage?.text || 'Tap to chat with seller'}
-                        </p>
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={(e) => handleDeleteConversation(conv._id, e)}
-                      className="opacity-0 group-hover:opacity-100 p-2 hover:bg-rose-500/20 text-rose-400 rounded-xl transition-all cursor-pointer"
-                      title="Delete Conversation"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                );
-              })}
-
-              {filteredConversations.length === 0 && (
-                <div className="py-12 text-center text-[#8696a0] font-mono text-xs px-4">
-                  No active seller conversations found.
-                </div>
-              )}
+            {/* ACTION ICONS (NEW CHAT + MENU) */}
+            <div className="flex items-center gap-1 text-[#8696a0]">
+              <button
+                type="button"
+                onClick={handleOpenNewChatModal}
+                className="p-2.5 rounded-full hover:bg-[#374248] hover:text-[#00a884] transition-colors cursor-pointer"
+                title="Start New Direct Chat with User/Seller"
+              >
+                <Plus className="w-5 h-5" />
+              </button>
+              <button
+                type="button"
+                onClick={() => fetchConversations()}
+                className="p-2.5 rounded-full hover:bg-[#374248] hover:text-[#00a884] transition-colors cursor-pointer"
+                title="Refresh Conversations"
+              >
+                <Sparkles className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
-          {/* ============================================================ */}
-          {/* RIGHT: ACTIVE CHAT MESSAGES WINDOW */}
-          {/* ============================================================ */}
-          <div className={`md:col-span-8 flex flex-col h-full min-h-0 bg-[#0b141a] relative ${!activeConv ? 'hidden md:flex' : 'flex'}`}>
-            {activeConv ? (
-              <>
-                {/* CHAT HEADER */}
-                <div className="p-3.5 bg-[#202c33] flex items-center justify-between border-b border-[#202c33] relative z-20">
-                  <div className="flex items-center gap-3">
-                    <button
-                      type="button"
-                      onClick={() => setActiveConv(null)}
-                      className="md:hidden px-2 py-1 rounded-xl bg-[#111b21] hover:bg-[#374248] text-[#00a884] font-bold text-xs flex items-center gap-1 cursor-pointer"
-                    >
-                      ← Chats
-                    </button>
-                    <div className="relative">
+          {/* SEARCH & FILTER CHIPS */}
+          <div className="p-2.5 bg-[#111b21] border-b border-[#202c33] space-y-2">
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 w-4 h-4 text-[#8696a0]" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search or start new chat..."
+                className="w-full bg-[#202c33] border-none rounded-xl pl-9 pr-3 py-2 text-xs font-mono text-[#e9edef] placeholder-[#8696a0] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
+              />
+            </div>
+
+            {/* WHATSAPP FILTER CHIPS */}
+            <div className="flex items-center gap-1.5 overflow-x-auto text-[11px] font-mono">
+              {['All', 'Unread', 'Favorites', 'Groups'].map((filter) => (
+                <button
+                  key={filter}
+                  type="button"
+                  onClick={() => setActiveFilter(filter)}
+                  className={`px-3 py-1 rounded-full border transition-all cursor-pointer ${
+                    activeFilter === filter
+                      ? 'bg-[#00a884]/20 border-[#00a884] text-[#00a884] font-bold'
+                      : 'bg-[#202c33]/50 border-transparent text-[#8696a0] hover:bg-[#202c33] hover:text-white'
+                  }`}
+                >
+                  {filter}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* CONVERSATIONS STREAM */}
+          <div className="flex-1 overflow-y-auto divide-y divide-[#202c33]/40 p-1.5 space-y-0.5 min-h-0">
+            {filteredConversations.map((conv) => {
+              const p = getPartner(conv);
+              const isSelected = activeConv?._id === conv._id;
+
+              return (
+                <div
+                  key={conv._id}
+                  onClick={() => {
+                    playClick();
+                    setActiveConv(conv);
+                  }}
+                  className={`p-3 rounded-2xl transition-all cursor-pointer flex items-center justify-between gap-3 group relative ${
+                    isSelected
+                      ? 'bg-[#2a3942] border border-[#00a884]/40 shadow-lg'
+                      : 'hover:bg-[#202c33] border border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    <div className="relative shrink-0">
                       <img
-                        src={partner.avatar}
-                        alt={partner.name}
-                        className="w-10 h-10 rounded-full object-cover border-2 border-[#00a884]"
+                        src={p.avatar}
+                        alt={p.name}
+                        className="w-11 h-11 rounded-full object-cover border border-[#00a884]/30 bg-gray-900"
                       />
-                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#00a884] border-2 border-[#202c33] rounded-full animate-pulse" />
+                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#00a884] border-2 border-[#111b21] rounded-full" />
                     </div>
-                    <div>
-                      <h3 className="font-display font-bold text-sm text-[#e9edef]">
-                        {partner.name}
-                      </h3>
-                      <p className="text-[10px] font-mono text-[#00a884] flex items-center gap-1">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#00a884]" />
-                        <span>{isTyping ? `${typingUser} is typing...` : isRecipientOnline ? 'Online • Project Creator' : 'Online'}</span>
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center justify-between gap-2">
+                        <h4 className="font-bold text-xs text-[#e9edef] truncate group-hover:text-[#00a884] transition-colors">
+                          {p.name}
+                        </h4>
+                        <span className="text-[10px] text-[#8696a0] font-mono shrink-0">
+                          {new Date(conv.lastMessage?.createdAt || Date.now()).toLocaleTimeString([], {
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </span>
+                      </div>
+                      <p className="text-[11px] font-mono text-[#8696a0] truncate mt-0.5">
+                        {conv.lastMessage?.text || 'Tap to chat'}
                       </p>
                     </div>
                   </div>
 
-                  {/* MENU & CALL BUTTONS */}
-                  <div className="flex items-center gap-1.5 text-[#8696a0]">
-                    <button
-                      type="button"
-                      onClick={() => alert('📞 Voice Calling feature is connected via WebRTC node.')}
-                      className="p-2.5 rounded-full hover:bg-[#374248] hover:text-white transition-colors cursor-pointer"
-                      title="Start Voice Call"
-                    >
-                      <Phone className="w-4 h-4" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => alert('📹 Video Calling feature is connected via WebRTC node.')}
-                      className="p-2.5 rounded-full hover:bg-[#374248] hover:text-white transition-colors cursor-pointer"
-                      title="Start Video Call"
-                    >
-                      <Video className="w-4 h-4" />
-                    </button>
-
-                    <div className="relative">
-                      <button
-                        type="button"
-                        onClick={() => setShowMenu(!showMenu)}
-                        className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-white transition-all cursor-pointer"
-                      >
-                        <MoreVertical className="w-4 h-4" />
-                      </button>
-
-                      {showMenu && (
-                        <div className="absolute right-0 top-11 w-48 bg-[#233138] border border-[#374248] rounded-2xl shadow-2xl py-2 z-50 text-xs font-mono text-[#e9edef] space-y-1">
-                          <button
-                            onClick={refreshChatHistory}
-                            className="w-full px-4 py-2 text-left hover:bg-[#111b21] flex items-center gap-2 text-[#00a884] cursor-pointer font-bold"
-                          >
-                            <Sparkles className="w-3.5 h-3.5" />
-                            <span>Sync Chat History</span>
-                          </button>
-                          <button
-                            onClick={() => handleDeleteConversation(activeConv._id)}
-                            className="w-full px-4 py-2 text-left hover:bg-[#111b21] flex items-center gap-2 text-rose-400 cursor-pointer font-bold border-t border-[#374248]/50"
-                          >
-                            <Trash2 className="w-3.5 h-3.5" />
-                            <span>Delete Chat</span>
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* MESSAGES STREAM WITH DOODLE BACKGROUND */}
-                <div
-                  className="flex-1 overflow-y-auto p-4 space-y-3 font-mono text-xs relative min-h-0"
-                  style={{
-                    backgroundImage: 'radial-gradient(#00a884 0.5px, transparent 0.5px)',
-                    backgroundSize: '24px 24px',
-                    opacity: 0.95,
-                  }}
-                >
-                  {/* PINNED PROJECT INQUIRY BANNER */}
-                  {activeConv.projectContext && (
-                    <div className="p-3.5 rounded-2xl bg-[#1f2c34]/95 border border-[#00a884]/40 flex items-center justify-between text-xs shadow-lg backdrop-blur-md">
-                      <div>
-                        <span className="text-[10px] text-[#00a884] uppercase font-bold">Inquiring About Project:</span>
-                        <p className="font-bold text-[#e9edef] font-display text-sm">{activeConv.projectContext.title}</p>
-                      </div>
-                      <span className="text-[#00a884] font-bold font-display text-base bg-[#00a884]/15 px-3 py-1 rounded-xl border border-[#00a884]/30">
-                        ₹{Number(activeConv.projectContext.price || 0).toLocaleString('en-IN')}
-                      </span>
-                    </div>
-                  )}
-
-                  {/* CHAT MESSAGES */}
-                  {messages.map((msg) => {
-                    const currentUid = String(user?._id || user?.id || 'user_001_buyer').trim();
-                    const msgSenderId = String(msg.sender?.id || msg.sender?._id || '').trim();
-                    const isMe = msgSenderId === currentUid || (user?.email && msg.sender?.email === user.email);
-
-                    return (
-                      <div
-                        key={msg._id || msg.id || Math.random()}
-                        className={`flex items-end gap-1.5 ${isMe ? 'justify-end' : 'justify-start'}`}
-                      >
-                        <div
-                          className={`max-w-md p-3.5 rounded-2xl shadow-md ${
-                            isMe
-                              ? 'bg-[#005c4b] text-[#e9edef] rounded-tr-none'
-                              : 'bg-[#202c33] text-[#e9edef] rounded-tl-none border border-[#233138]'
-                          }`}
-                        >
-                          {/* MEDIA / IMAGE ATTACHMENT */}
-                          {msg.messageType === 'media' && msg.mediaUrl && (
-                            <div className="mb-2 rounded-xl overflow-hidden border border-black/30">
-                              <img src={msg.mediaUrl} alt="Attachment" className="max-h-60 w-full object-cover" />
-                            </div>
-                          )}
-
-                          {/* NEGOTIATION DEAL OFFER CARD */}
-                          {msg.messageType === 'deal_offer' || (msg.text && msg.text.includes('PROPOSED NEGOTIATION DEAL')) ? (
-                            <div className="space-y-2.5 p-3.5 bg-[#111b21]/90 rounded-2xl border border-[#00a884]/50 shadow-inner my-1">
-                              <div className="flex items-center gap-2 text-[#00a884] font-bold text-xs">
-                                <Handshake className="w-4.5 h-4.5 shrink-0 text-[#00a884]" />
-                                <span className="uppercase tracking-wider">PROPOSED NEGOTIATION DEAL</span>
-                              </div>
-                              <p className="text-xs text-white leading-relaxed font-mono whitespace-pre-wrap bg-[#1a2730] p-2.5 rounded-xl border border-[#263742]">
-                                {msg.text}
-                              </p>
-                              {!isMe && (
-                                <div className="flex items-center gap-2 pt-1">
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      playSuccess();
-                                      alert('🎉 Deal Offer Accepted! The agreed negotiated rate will be applied at checkout.');
-                                    }}
-                                    className="flex-1 py-2 rounded-xl bg-[#00a884] text-black font-bold text-[11px] text-center hover:bg-[#02906f] transition-all cursor-pointer shadow-md"
-                                  >
-                                    Accept Deal
-                                  </button>
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      playClick();
-                                      setInputMsg(`Counter Offer: I can offer ₹${Math.round((msg.projectData?.offerPrice || 2500) * 1.1)} for this project.`);
-                                    }}
-                                    className="px-3.5 py-2 rounded-xl bg-[#202c33] text-slate-200 font-bold text-[11px] hover:text-white transition-all cursor-pointer border border-[#374248]"
-                                  >
-                                    Counter
-                                  </button>
-                                </div>
-                              )}
-                            </div>
-                          ) : msg.messageType === 'voice' ? (
-                            <WhatsAppVoicePlayer
-                              mediaUrl={msg.mediaUrl}
-                              audioDuration={msg.audioDuration}
-                              isMe={isMe}
-                            />
-                          ) : (
-                            <p className="leading-relaxed whitespace-pre-wrap text-xs">{msg.text}</p>
-                          )}
-
-                          {/* WHATSAPP READ RECEIPTS & TIMESTAMP */}
-                          <div className="flex items-center justify-end gap-1 mt-1 text-[9px] text-[#8696a0]">
-                            <span>
-                              {new Date(msg.createdAt || Date.now()).toLocaleTimeString([], {
-                                hour: '2-digit',
-                                minute: '2-digit',
-                              })}
-                            </span>
-                            {isMe && (
-                              msg.isRead ? (
-                                <CheckCheck className="w-3.5 h-3.5 text-[#53bdeb]" title="Read by recipient (Double Blue Ticks)" />
-                              ) : isRecipientOnline ? (
-                                <CheckCheck className="w-3.5 h-3.5 text-[#8696a0]" title="Delivered to recipient (Double Grey Ticks)" />
-                              ) : (
-                                <Check className="w-3.5 h-3.5 text-[#8696a0]" title="Sent (Single Grey Tick - Recipient Offline)" />
-                              )
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-
-                  {/* REALTIME TYPING INDICATOR */}
-                  {isTyping && (
-                    <div className="flex items-center gap-2 p-2 rounded-xl bg-[#202c33]/80 w-fit text-[11px] text-[#00a884] font-bold animate-pulse">
-                      <span className="w-2 h-2 rounded-full bg-[#00a884]" />
-                      <span>{typingUser} is typing...</span>
-                    </div>
-                  )}
-
-                  <div ref={messagesEndRef} />
-                </div>
-
-                {/* ATTACHMENT PREVIEW STRIP */}
-                {attachmentFile && (
-                  <div className="px-4 py-2 bg-[#111b21] border-t border-[#202c33] flex items-center justify-between text-xs">
-                    <div className="flex items-center gap-2">
-                      <ImageIcon className="w-4 h-4 text-[#00a884]" />
-                      <span className="text-white truncate max-w-xs">{attachmentFile.name}</span>
-                    </div>
-                    <button
-                      onClick={() => setAttachmentFile(null)}
-                      className="p-1 rounded-full bg-rose-500/20 text-rose-300 hover:bg-rose-500/40"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                )}
-
-                {/* QUICK EMOJI BAR */}
-                {showEmojiPicker && (
-                  <div className="px-4 py-2 bg-[#111b21] border-t border-[#202c33] flex items-center gap-2 overflow-x-auto">
-                    {quickEmojis.map((emoji) => (
-                      <button
-                        key={emoji}
-                        type="button"
-                        onClick={() => {
-                          setInputMsg((prev) => prev + emoji);
-                          setShowEmojiPicker(false);
-                        }}
-                        className="p-1.5 rounded-lg hover:bg-[#202c33] text-lg transition-transform hover:scale-125 cursor-pointer"
-                      >
-                        {emoji}
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* WHATSAPP INPUT BAR & ACTIVE RECORDING HUD */}
-                {isRecording ? (
-                  <div className="p-3 bg-[#202c33] flex items-center justify-between gap-3 border-t border-[#202c33] relative z-20">
-                    <div className="flex items-center gap-3 flex-1 min-w-0">
-                      <button
-                        type="button"
-                        onClick={cancelRecording}
-                        className="p-2.5 rounded-full bg-rose-500/20 text-rose-400 hover:bg-rose-500/40 transition-colors cursor-pointer shrink-0"
-                        title="Cancel Recording"
-                      >
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                      <div className="flex items-center gap-2 text-rose-400 font-mono font-bold text-xs shrink-0">
-                        <span className="w-3 h-3 rounded-full bg-rose-500 animate-ping" />
-                        <span>Recording... {Math.floor(recordingTime / 60)}:{String(recordingTime % 60).padStart(2, '0')}</span>
-                      </div>
-
-                      {/* Animated Real-time Audio Frequency Waves */}
-                      <div className="hidden sm:flex items-center gap-0.5 h-5 flex-1 max-w-xs px-2">
-                        {audioLevels.map((lvl, idx) => (
-                          <div
-                            key={idx}
-                            className="flex-1 bg-rose-500/80 rounded-full transition-all duration-75"
-                            style={{ height: `${lvl}%` }}
-                          />
-                        ))}
-                      </div>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={stopAndSendRecording}
-                      className="px-4 py-2.5 rounded-full bg-[#00a884] hover:bg-[#02906f] text-black font-display font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-lg shrink-0"
-                    >
-                      <Send className="w-4 h-4" />
-                      <span>Send Voice Note</span>
-                    </button>
-                  </div>
-                ) : (
-                  <form
-                    onSubmit={handleSendMessage}
-                    className="p-3 bg-[#202c33] flex items-center gap-2 border-t border-[#202c33] relative z-20"
+                  <button
+                    type="button"
+                    onClick={(e) => handleDeleteConversation(conv._id, e)}
+                    className="opacity-0 group-hover:opacity-100 p-1.5 hover:bg-rose-500/20 text-rose-400 rounded-xl transition-all cursor-pointer shrink-0"
+                    title="Delete Conversation"
                   >
-                    <button
-                      type="button"
-                      onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                      className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
-                      title="Quick Emojis"
-                    >
-                      <Smile className="w-5 h-5" />
-                    </button>
+                    <Trash2 className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              );
+            })}
 
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      onChange={handleFileChange}
-                      accept="image/*,.pdf,.zip,.py,.cpp"
-                      className="hidden"
-                    />
-
-                    <button
-                      type="button"
-                      onClick={() => fileInputRef.current?.click()}
-                      className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
-                      title="Attach Photo or Document"
-                    >
-                      <Paperclip className="w-5 h-5" />
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={startRecording}
-                      disabled={isSending}
-                      className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
-                      title="Record Voice Note"
-                    >
-                      <Mic className="w-5 h-5 text-[#00a884]" />
-                    </button>
-
-                    <input
-                      type="text"
-                      value={inputMsg}
-                      disabled={isSending}
-                      onChange={(e) => {
-                        setInputMsg(e.target.value);
-                        if (socket && activeConv) {
-                          socket.emit('typing_start', {
-                            conversationId: activeConv._id,
-                            userName: user?.name,
-                          });
-                          if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
-                          typingTimeoutRef.current = setTimeout(
-                            () => socket.emit('typing_stop', { conversationId: activeConv._id }),
-                            2000
-                          );
-                        }
-                      }}
-                      placeholder="Type a direct message to seller..."
-                      className="flex-1 bg-[#2a3942] border-none rounded-xl px-4 py-2.5 text-xs font-mono text-white placeholder-[#8696a0] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
-                    />
-
-                    <button
-                      type="submit"
-                      disabled={isSending || (!inputMsg.trim() && !attachmentFile)}
-                      className="p-2.5 rounded-full bg-[#00a884] hover:bg-[#02906f] text-black font-bold shadow-md transition-all disabled:opacity-50 cursor-pointer"
-                    >
-                      <Send className="w-4 h-4" />
-                    </button>
-                  </form>
-                )}
-              </>
-            ) : (
-              <div className="flex-1 flex flex-col items-center justify-center text-[#8696a0] font-mono text-xs space-y-3 p-6 text-center">
-                <Shield className="w-12 h-12 text-[#00a884] animate-pulse" />
-                <p>Select a project seller on the left to start direct real-time messaging.</p>
+            {filteredConversations.length === 0 && (
+              <div className="py-16 text-center text-[#8696a0] font-mono text-xs px-4 space-y-3">
+                <MessageSquare className="w-10 h-10 mx-auto text-[#00a884]/60 animate-bounce" />
+                <p className="text-[#e9edef] font-bold">No active conversations found.</p>
+                <button
+                  onClick={handleOpenNewChatModal}
+                  className="px-4 py-2 rounded-full bg-[#00a884] hover:bg-[#02906f] text-black font-bold text-xs transition-all shadow-md cursor-pointer"
+                >
+                  Start New Chat (+)
+                </button>
               </div>
             )}
           </div>
         </div>
+
+        {/* ============================================================ */}
+        {/* RIGHT: ACTIVE CHAT MESSAGES WINDOW */}
+        {/* ============================================================ */}
+        <div className={`flex-1 flex flex-col h-full min-h-0 bg-[#0b141a] relative ${!activeConv ? 'hidden md:flex' : 'flex'}`}>
+          {activeConv ? (
+            <>
+              {/* CHAT HEADER */}
+              <div className="p-3 bg-[#202c33] flex items-center justify-between border-b border-[#202c33] relative z-20 shrink-0">
+                <div className="flex items-center gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setActiveConv(null)}
+                    className="md:hidden px-2 py-1 rounded-xl bg-[#111b21] hover:bg-[#374248] text-[#00a884] font-bold text-xs flex items-center gap-1 cursor-pointer"
+                  >
+                    ← Chats
+                  </button>
+                  <div className="relative">
+                    <img
+                      src={partner.avatar}
+                      alt={partner.name}
+                      className="w-10 h-10 rounded-full object-cover border-2 border-[#00a884]"
+                    />
+                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#00a884] border-2 border-[#202c33] rounded-full animate-pulse" />
+                  </div>
+                  <div>
+                    <h3 className="font-bold text-sm text-[#e9edef]">
+                      {partner.name}
+                    </h3>
+                    <p className="text-[10px] font-mono text-[#00a884] flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#00a884]" />
+                      <span>{isTyping ? `${typingUser} is typing...` : isRecipientOnline ? 'online' : 'online'}</span>
+                    </p>
+                  </div>
+                </div>
+
+                {/* MENU & SEARCH */}
+                <div className="flex items-center gap-1 text-[#8696a0]">
+                  <div className="relative">
+                    <button
+                      type="button"
+                      onClick={() => setShowMenu(!showMenu)}
+                      className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-white transition-all cursor-pointer"
+                    >
+                      <MoreVertical className="w-4 h-4" />
+                    </button>
+
+                    {showMenu && (
+                      <div className="absolute right-0 top-11 w-48 bg-[#233138] border border-[#374248] rounded-2xl shadow-2xl py-2 z-50 text-xs font-mono text-[#e9edef] space-y-1">
+                        <button
+                          onClick={refreshChatHistory}
+                          className="w-full px-4 py-2 text-left hover:bg-[#111b21] flex items-center gap-2 text-[#00a884] cursor-pointer font-bold"
+                        >
+                          <Sparkles className="w-3.5 h-3.5" />
+                          <span>Sync Messages</span>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteConversation(activeConv._id)}
+                          className="w-full px-4 py-2 text-left hover:bg-[#111b21] flex items-center gap-2 text-rose-400 cursor-pointer font-bold border-t border-[#374248]/50"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete Chat</span>
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
+              {/* MESSAGES STREAM WITH WHATSAPP DOODLE PATTERN & SMOOTH SCROLL */}
+              <div
+                className="flex-1 overflow-y-auto p-4 space-y-3 font-mono text-xs relative min-h-0"
+                style={{
+                  backgroundImage: 'radial-gradient(#00a884 0.4px, transparent 0.4px)',
+                  backgroundSize: '24px 24px',
+                  opacity: 0.96,
+                }}
+              >
+                {/* DATE STAMP DIVIDER */}
+                <div className="flex items-center justify-center my-2">
+                  <span className="bg-[#182229] text-[#8696a0] text-[10px] font-mono px-3 py-1 rounded-lg uppercase tracking-wider shadow-sm">
+                    Today
+                  </span>
+                </div>
+
+                {/* PINNED PROJECT INQUIRY BANNER */}
+                {activeConv.projectContext && (
+                  <div className="p-3.5 rounded-2xl bg-[#1f2c34]/95 border border-[#00a884]/40 flex items-center justify-between text-xs shadow-lg backdrop-blur-md mb-3">
+                    <div>
+                      <span className="text-[10px] text-[#00a884] uppercase font-bold">Inquiring About Project:</span>
+                      <p className="font-bold text-[#e9edef] font-display text-sm">{activeConv.projectContext.title}</p>
+                    </div>
+                    <span className="text-[#00a884] font-bold font-display text-base bg-[#00a884]/15 px-3 py-1 rounded-xl border border-[#00a884]/30">
+                      ₹{Number(activeConv.projectContext.price || 0).toLocaleString('en-IN')}
+                    </span>
+                  </div>
+                )}
+
+                {/* CHAT MESSAGES STREAM */}
+                {messages.map((msg) => {
+                  const currentUid = String(user?._id || user?.id || 'user_001_buyer').trim();
+                  const msgSenderId = String(msg.sender?.id || msg.sender?._id || '').trim();
+                  const isMe = msgSenderId === currentUid || (user?.email && msg.sender?.email === user.email);
+
+                  return (
+                    <div
+                      key={msg._id || msg.id || Math.random()}
+                      className={`flex items-end gap-1.5 group relative ${isMe ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-md p-3.5 rounded-2xl shadow-md relative ${
+                          isMe
+                            ? 'bg-[#005c4b] text-[#e9edef] rounded-tr-none'
+                            : 'bg-[#202c33] text-[#e9edef] rounded-tl-none border border-[#233138]'
+                        }`}
+                      >
+                        {/* EMOJI REACTION POPUP ON HOVER */}
+                        <div
+                          className={`absolute -top-7 hidden group-hover:flex items-center gap-1 bg-[#233138] border border-[#374248] rounded-full px-2 py-1 shadow-2xl z-30 ${
+                            isMe ? 'right-0' : 'left-0'
+                          }`}
+                        >
+                          {reactionEmojis.map((emoji) => (
+                            <button
+                              key={emoji}
+                              type="button"
+                              onClick={() => handleReactMessage(msg._id || msg.id, emoji)}
+                              className="hover:scale-125 transition-transform text-sm cursor-pointer p-0.5"
+                            >
+                              {emoji}
+                            </button>
+                          ))}
+                        </div>
+
+                        {/* MEDIA / IMAGE ATTACHMENT */}
+                        {msg.messageType === 'media' && msg.mediaUrl && (
+                          <div className="mb-2 rounded-xl overflow-hidden border border-black/30">
+                            <img src={msg.mediaUrl} alt="Attachment" className="max-h-60 w-full object-cover" />
+                          </div>
+                        )}
+
+                        {/* NEGOTIATION DEAL OFFER CARD */}
+                        {msg.messageType === 'deal_offer' || (msg.text && msg.text.includes('PROPOSED NEGOTIATION DEAL')) ? (
+                          <div className="space-y-2.5 p-3.5 bg-[#111b21]/90 rounded-2xl border border-[#00a884]/50 shadow-inner my-1">
+                            <div className="flex items-center gap-2 text-[#00a884] font-bold text-xs">
+                              <Handshake className="w-4.5 h-4.5 shrink-0 text-[#00a884]" />
+                              <span className="uppercase tracking-wider">PROPOSED NEGOTIATION DEAL</span>
+                            </div>
+                            <p className="text-xs text-white leading-relaxed font-mono whitespace-pre-wrap bg-[#1a2730] p-2.5 rounded-xl border border-[#263742]">
+                              {msg.text}
+                            </p>
+                            {!isMe && (
+                              <div className="flex items-center gap-2 pt-1">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    playSuccess();
+                                    alert('🎉 Deal Offer Accepted! The agreed rate will be applied at checkout.');
+                                  }}
+                                  className="flex-1 py-2 rounded-xl bg-[#00a884] text-black font-bold text-[11px] text-center hover:bg-[#02906f] transition-all cursor-pointer shadow-md"
+                                >
+                                  Accept Deal
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    playClick();
+                                    setInputMsg(`Counter Offer: I can offer ₹${Math.round((msg.projectData?.offerPrice || 2500) * 1.1)} for this project.`);
+                                  }}
+                                  className="px-3.5 py-2 rounded-xl bg-[#202c33] text-slate-200 font-bold text-[11px] hover:text-white transition-all cursor-pointer border border-[#374248]"
+                                >
+                                  Counter
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        ) : msg.messageType === 'voice' ? (
+                          <WhatsAppVoicePlayer
+                            mediaUrl={msg.mediaUrl}
+                            audioDuration={msg.audioDuration}
+                            isMe={isMe}
+                          />
+                        ) : (
+                          <p className="leading-relaxed whitespace-pre-wrap text-xs">{msg.text}</p>
+                        )}
+
+                        {/* MESSAGE REACTIONS DISPLAY */}
+                        {msg.reactions && msg.reactions.length > 0 && (
+                          <div className="flex items-center gap-1 mt-1 font-mono text-[10px] bg-black/40 px-2 py-0.5 rounded-full w-fit">
+                            {msg.reactions.map((r, i) => (
+                              <span key={i}>{r.emoji}</span>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* WHATSAPP READ RECEIPTS & TIMESTAMP */}
+                        <div className="flex items-center justify-end gap-1 mt-1 text-[9px] text-[#8696a0]">
+                          <span>
+                            {new Date(msg.createdAt || Date.now()).toLocaleTimeString([], {
+                              hour: '2-digit',
+                              minute: '2-digit',
+                            })}
+                          </span>
+                          {isMe && (
+                            msg.isRead ? (
+                              <CheckCheck className="w-3.5 h-3.5 text-[#53bdeb]" title="Read by recipient (Double Blue Ticks)" />
+                            ) : isRecipientOnline ? (
+                              <CheckCheck className="w-3.5 h-3.5 text-[#8696a0]" title="Delivered to recipient (Double Grey Ticks)" />
+                            ) : (
+                              <Check className="w-3.5 h-3.5 text-[#8696a0]" title="Sent (Single Grey Tick - Recipient Offline)" />
+                            )
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* REALTIME TYPING INDICATOR */}
+                {isTyping && (
+                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#202c33]/80 w-fit text-[11px] text-[#00a884] font-bold animate-pulse">
+                    <span className="w-2 h-2 rounded-full bg-[#00a884]" />
+                    <span>{typingUser} is typing...</span>
+                  </div>
+                )}
+
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* ATTACHMENT PREVIEW STRIP */}
+              {attachmentFile && (
+                <div className="px-4 py-2 bg-[#111b21] border-t border-[#202c33] flex items-center justify-between text-xs shrink-0">
+                  <div className="flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4 text-[#00a884]" />
+                    <span className="text-white truncate max-w-xs">{attachmentFile.name}</span>
+                  </div>
+                  <button
+                    onClick={() => setAttachmentFile(null)}
+                    className="p-1 rounded-full bg-rose-500/20 text-rose-300 hover:bg-rose-500/40"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+
+              {/* QUICK EMOJI BAR */}
+              {showEmojiPicker && (
+                <div className="px-4 py-2 bg-[#111b21] border-t border-[#202c33] flex items-center gap-2 overflow-x-auto shrink-0">
+                  {quickEmojis.map((emoji) => (
+                    <button
+                      key={emoji}
+                      type="button"
+                      onClick={() => {
+                        setInputMsg((prev) => prev + emoji);
+                        setShowEmojiPicker(false);
+                      }}
+                      className="p-1.5 rounded-lg hover:bg-[#202c33] text-lg transition-transform hover:scale-125 cursor-pointer"
+                    >
+                      {emoji}
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {/* WHATSAPP INPUT BAR & ACTIVE RECORDING HUD */}
+              {isRecording ? (
+                <div className="p-3 bg-[#202c33] flex items-center justify-between gap-3 border-t border-[#202c33] relative z-20 shrink-0">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <button
+                      type="button"
+                      onClick={cancelRecording}
+                      className="p-2.5 rounded-full bg-rose-500/20 text-rose-400 hover:bg-rose-500/40 transition-colors cursor-pointer shrink-0"
+                      title="Cancel Recording"
+                    >
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                    <div className="flex items-center gap-2 text-rose-400 font-mono font-bold text-xs shrink-0">
+                      <span className="w-3 h-3 rounded-full bg-rose-500 animate-ping" />
+                      <span>Recording... {Math.floor(recordingTime / 60)}:{String(recordingTime % 60).padStart(2, '0')}</span>
+                    </div>
+
+                    {/* Animated Real-time Audio Frequency Waves */}
+                    <div className="hidden sm:flex items-center gap-0.5 h-5 flex-1 max-w-xs px-2">
+                      {audioLevels.map((lvl, idx) => (
+                        <div
+                          key={idx}
+                          className="flex-1 bg-rose-500/80 rounded-full transition-all duration-75"
+                          style={{ height: `${lvl}%` }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={stopAndSendRecording}
+                    className="px-4 py-2.5 rounded-full bg-[#00a884] hover:bg-[#02906f] text-black font-display font-bold text-xs flex items-center gap-1.5 cursor-pointer shadow-lg shrink-0"
+                  >
+                    <Send className="w-4 h-4" />
+                    <span>Send Voice Note</span>
+                  </button>
+                </div>
+              ) : (
+                <form
+                  onSubmit={handleSendMessage}
+                  className="p-3 bg-[#202c33] flex items-center gap-2 border-t border-[#202c33] relative z-20 shrink-0"
+                >
+                  <button
+                    type="button"
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
+                    title="Quick Emojis"
+                  >
+                    <Smile className="w-5 h-5" />
+                  </button>
+
+                  <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileChange}
+                    accept="image/*,.pdf,.zip,.py,.cpp"
+                    className="hidden"
+                  />
+
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
+                    title="Attach Photo or Document"
+                  >
+                    <Paperclip className="w-5 h-5" />
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={startRecording}
+                    disabled={isSending}
+                    className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
+                    title="Record Voice Note"
+                  >
+                    <Mic className="w-5 h-5 text-[#00a884]" />
+                  </button>
+
+                  <input
+                    type="text"
+                    value={inputMsg}
+                    disabled={isSending}
+                    onChange={(e) => {
+                      setInputMsg(e.target.value);
+                      if (socket && activeConv) {
+                        socket.emit('typing_start', {
+                          conversationId: activeConv._id,
+                          userName: user?.name,
+                        });
+                        if (typingTimeoutRef.current) clearTimeout(typingTimeoutRef.current);
+                        typingTimeoutRef.current = setTimeout(
+                          () => socket.emit('typing_stop', { conversationId: activeConv._id }),
+                          2000
+                        );
+                      }
+                    }}
+                    placeholder="Type a direct message to seller..."
+                    className="flex-1 bg-[#2a3942] border-none rounded-xl px-4 py-2.5 text-xs font-mono text-white placeholder-[#8696a0] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
+                  />
+
+                  <button
+                    type="submit"
+                    disabled={isSending || (!inputMsg.trim() && !attachmentFile)}
+                    className="p-2.5 rounded-full bg-[#00a884] hover:bg-[#02906f] text-black font-bold shadow-md transition-all disabled:opacity-50 cursor-pointer shrink-0"
+                  >
+                    <Send className="w-4 h-4" />
+                  </button>
+                </form>
+              )}
+            </>
+          ) : (
+            <div className="flex-1 flex flex-col items-center justify-center text-[#8696a0] font-mono text-xs space-y-4 p-6 text-center">
+              <Shield className="w-16 h-16 text-[#00a884] animate-pulse" />
+              <div className="space-y-1 max-w-sm">
+                <h3 className="font-bold text-base text-[#e9edef]">ProjectXia Direct Chat</h3>
+                <p className="text-xs text-[#8696a0]">
+                  Send and receive end-to-end encrypted direct messages, voice notes, and project negotiation deals.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleOpenNewChatModal}
+                className="px-5 py-2.5 rounded-full bg-[#00a884] hover:bg-[#02906f] text-black font-bold text-xs flex items-center gap-2 cursor-pointer shadow-lg transition-all"
+              >
+                <Plus className="w-4 h-4" />
+                <span>Start New Direct Chat</span>
+              </button>
+            </div>
+          )}
+        </div>
       </div>
+
+      {/* ============================================================ */}
+      {/* NEW CHAT USER PICKER MODAL (START DIRECT CHAT WITH REAL USERS) */}
+      {/* ============================================================ */}
+      {showNewChatModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md">
+          <div className="relative w-full max-w-md bg-[#111b21] border border-[#202c33] rounded-3xl p-5 text-[#e9edef] space-y-4 shadow-2xl font-sans">
+            <div className="flex items-center justify-between border-b border-[#202c33] pb-3">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-2xl bg-[#00a884]/20 text-[#00a884]">
+                  <MessageSquarePlus className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-bold text-sm text-white">Start New Direct Chat</h3>
+                  <p className="text-[11px] text-[#8696a0] font-mono">Select a registered seller or innovator</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowNewChatModal(false)}
+                className="p-1.5 rounded-full hover:bg-[#202c33] text-[#8696a0] hover:text-white cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* SEARCH INPUT */}
+            <div className="relative">
+              <Search className="absolute left-3 top-2.5 w-4 h-4 text-[#8696a0]" />
+              <input
+                type="text"
+                value={userSearchQuery}
+                onChange={(e) => setUserSearchQuery(e.target.value)}
+                placeholder="Search by name or email..."
+                className="w-full bg-[#202c33] border-none rounded-xl pl-9 pr-3 py-2 text-xs font-mono text-white placeholder-[#8696a0] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
+              />
+            </div>
+
+            {/* USERS LIST */}
+            <div className="max-h-64 overflow-y-auto divide-y divide-[#202c33]/50 pr-1 space-y-1">
+              {loadingUsers ? (
+                <div className="py-8 text-center text-[#8696a0] text-xs font-mono">
+                  Loading ProjectXia users...
+                </div>
+              ) : filteredUsersForModal.length > 0 ? (
+                filteredUsersForModal.map((u) => (
+                  <div
+                    key={u._id || u.id}
+                    onClick={() => handleStartChatWithUser(u)}
+                    className="p-2.5 rounded-2xl hover:bg-[#202c33] transition-all cursor-pointer flex items-center justify-between gap-3 group"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <img
+                        src={u.avatar || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(u.name || u.email)}&backgroundColor=080e1e,101f4e&textColor=00f0ff`}
+                        alt={u.name}
+                        className="w-9 h-9 rounded-full object-cover border border-[#00a884]/40 bg-gray-900"
+                      />
+                      <div className="min-w-0">
+                        <h4 className="font-bold text-xs text-white truncate group-hover:text-[#00a884]">
+                          {u.name || u.email?.split('@')?.[0]}
+                        </h4>
+                        <p className="text-[10px] text-[#8696a0] font-mono truncate">{u.email}</p>
+                      </div>
+                    </div>
+                    <span className="text-[10px] font-mono text-[#00a884] bg-[#00a884]/15 px-2 py-0.5 rounded-full border border-[#00a884]/30 font-bold shrink-0">
+                      Chat →
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div className="py-8 text-center text-[#8696a0] text-xs font-mono">
+                  No other users found. Start a project inquiry from any Marketplace project card!
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

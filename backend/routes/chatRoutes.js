@@ -6,11 +6,13 @@ import {
   reactMessage,
   markMessagesRead,
   deleteConversation,
+  getAvailableUsers,
 } from '../controllers/chatController.js';
 import { protect } from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
+router.get('/users', protect, getAvailableUsers);
 router.get('/conversations', protect, getConversations);
 router.delete('/conversations/:id', protect, deleteConversation);
 router.get('/messages/:conversationId', protect, getMessages);

@@ -1,6 +1,40 @@
 import { memoryStore } from '../seed/seedData.js';
 import Message from '../models/Message.js';
 import Conversation from '../models/Conversation.js';
+import User from '../models/User.js';
+
+// @desc    Get all registered users for starting a new chat
+// @route   GET /api/chat/users
+export const getAvailableUsers = async (req, res) => {
+  try {
+    const currentUserId = String(req.user?._id || req.user?.id || '');
+    const currentUserEmail = String(req.user?.email || '').toLowerCase();
+
+    let users = [];
+    try {
+      users = await User.find({
+        $and: [
+          { _id: { $ne: currentUserId } },
+          { email: { $ne: currentUserEmail } }
+        ]
+      }).select('name email avatar role').lean();
+    } catch (dbErr) {
+      console.warn('User find fallback:', dbErr.message);
+    }
+
+    if (!users || users.length === 0) {
+      users = (memoryStore.users || []).filter(u => {
+        const uid = String(u._id || u.id || '');
+        const uEmail = String(u.email || '').toLowerCase();
+        return uid !== currentUserId && uEmail !== currentUserEmail;
+      });
+    }
+
+    res.json({ success: true, users });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 // @desc    Get all conversations for the active user
 // @route   GET /api/chat/conversations
