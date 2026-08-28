@@ -1180,22 +1180,16 @@ const ChatPage = () => {
                 </div>
               </div>
 
-              {/* MESSAGES CONTAINER WITH ABSOLUTE BOUNDED SCROLL VIEWPORT */}
-              <div className="flex-1 relative w-full min-h-0 bg-[#0b141a] overflow-hidden">
-                {/* STATIC WALLPAPER PATTERN LAYER */}
-                <div
-                  className="absolute inset-0 pointer-events-none opacity-40 z-0"
-                  style={{
-                    backgroundImage: 'radial-gradient(#00a884 0.5px, transparent 0.5px)',
-                    backgroundSize: '24px 24px',
-                  }}
-                />
-
-                {/* LIGHTWEIGHT ABSOLUTE BOUNDED NATIVE SCROLL STREAM */}
+              {/* MESSAGES CONTAINER (DIRECT FLEX-1 SCROLL STREAM MATCHING SIDEBAR) */}
+              <div className="flex-1 relative w-full min-h-0 bg-[#0b141a] overflow-hidden flex flex-col">
                 <div
                   ref={chatContainerRef}
                   onScroll={handleScroll}
-                  className="absolute inset-0 w-full h-full overflow-y-scroll p-4 space-y-3 font-mono text-xs z-10 scrollbar-thin scrollbar-thumb-[#374248] scrollbar-track-transparent scroll-smooth"
+                  className="flex-1 min-h-0 w-full overflow-y-auto p-4 space-y-3 font-mono text-xs z-10 scrollbar-thin scrollbar-thumb-[#374248] scrollbar-track-transparent"
+                  style={{
+                    backgroundImage: 'radial-gradient(rgba(0, 168, 132, 0.15) 0.5px, transparent 0.5px)',
+                    backgroundSize: '24px 24px',
+                  }}
                 >
                   {/* DATE STAMP DIVIDER */}
                   <div className="flex items-center justify-center my-2">
