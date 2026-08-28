@@ -675,7 +675,6 @@ const ChatPage = () => {
   };
 
   const startRecording = async () => {
-    playClick();
     setIsRecording(true);
     setRecordingTime(0);
 
@@ -684,14 +683,14 @@ const ChatPage = () => {
       if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
         try {
           stream = await navigator.mediaDevices.getUserMedia({
-            audio: { echoCancellation: true, noiseSuppression: true },
+            audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true },
           });
         } catch (e) {
           stream = await navigator.mediaDevices.getUserMedia({ audio: true });
         }
       }
     } catch (err) {
-      console.warn('Hardware mic not available or blocked, using voice engine:', err);
+      console.warn('Microphone hardware stream not available:', err);
     }
 
     if (stream) {
@@ -721,48 +720,13 @@ const ChatPage = () => {
 
       recorder.start(100);
       mediaRecorderRef.current = recorder;
-
-      // Web Audio API Spectrum with automatic resume() fallback
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (AudioCtx) {
-          const audioCtx = new AudioCtx();
-          if (audioCtx.state === 'suspended') {
-            await audioCtx.resume();
-          }
-          audioContextRef.current = audioCtx;
-          const source = audioCtx.createMediaStreamSource(stream);
-          const analyser = audioCtx.createAnalyser();
-          analyser.fftSize = 32;
-          source.connect(analyser);
-          analyserRef.current = analyser;
-
-          const dataArray = new Uint8Array(analyser.frequencyBinCount);
-          let lastUpdateTime = 0;
-          const updateLevels = () => {
-            if (analyserRef.current) {
-              const now = Date.now();
-              if (now - lastUpdateTime > 100) {
-                lastUpdateTime = now;
-                analyserRef.current.getByteFrequencyData(dataArray);
-                const levels = Array.from(dataArray.slice(0, 12)).map((v) => Math.max(15, Math.min(100, (v / 255) * 100)));
-                setAudioLevels(levels);
-              }
-              animFrameRef.current = requestAnimationFrame(updateLevels);
-            }
-          };
-          updateLevels();
-        }
-      } catch (audioErr) {
-        console.warn('Web Audio visualization fallback active:', audioErr);
-      }
-    } else {
-      // Synthetic spectrum visualizer fallback if hardware stream restricted
-      const interval = setInterval(() => {
-        setAudioLevels((prev) => prev.map(() => Math.floor(Math.random() * 70 + 20)));
-      }, 120);
-      animFrameRef.current = interval;
     }
+
+    // Clean UI spectrum visualizer without speaker audio loops
+    const interval = setInterval(() => {
+      setAudioLevels((prev) => prev.map(() => Math.floor(Math.random() * 70 + 20)));
+    }, 120);
+    animFrameRef.current = interval;
 
     if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
     recordingIntervalRef.current = setInterval(() => {
@@ -771,7 +735,6 @@ const ChatPage = () => {
   };
 
   const cancelRecording = () => {
-    playClick();
     cleanupAudioContext();
     if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
     if (mediaRecorderRef.current) {
@@ -790,7 +753,6 @@ const ChatPage = () => {
   };
 
   const stopAndSendRecording = async () => {
-    playClick();
     cleanupAudioContext();
     if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
     const duration = recordingTime > 0 ? recordingTime : 1;
@@ -869,7 +831,6 @@ const ChatPage = () => {
             senderEmail: currentUserEmail,
           });
         }
-        playSuccess();
         setTimeout(() => scrollToBottom(true), 100);
       } catch (e) {
         console.error('Voice send error:', e);
