@@ -918,7 +918,7 @@ const ChatPage = () => {
   const isRecipientOnline = checkIsOnline(partner);
 
   return (
-    <div data-lenis-prevent className="fixed inset-0 z-40 w-screen h-screen bg-[#111b21] flex flex-col font-sans text-xs overflow-hidden">
+    <div data-lenis-prevent className="fixed inset-0 z-40 w-full h-[100dvh] bg-[#111b21] flex flex-col font-sans text-xs overflow-hidden">
 
       {/* WHATSAPP WEB GREEN ACCENT HEADER STRIP */}
       <div className="h-1 bg-[#00a884] shrink-0" />
@@ -1463,12 +1463,12 @@ const ChatPage = () => {
               ) : (
                 <form
                   onSubmit={handleSendMessage}
-                  className="p-3 bg-[#202c33] flex items-center gap-2 border-t border-[#202c33] relative z-20 shrink-0"
+                  className="p-2 sm:p-3 pb-3 bg-[#202c33] flex items-center gap-1 sm:gap-2 border-t border-[#202c33] relative z-20 shrink-0 w-full"
                 >
                   <button
                     type="button"
                     onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-                    className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
+                    className="p-2 sm:p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer shrink-0"
                     title="Quick Emojis"
                   >
                     <Smile className="w-5 h-5" />
@@ -1485,7 +1485,7 @@ const ChatPage = () => {
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
+                    className="p-2 sm:p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer shrink-0"
                     title="Attach Photo or Document"
                   >
                     <Paperclip className="w-5 h-5" />
@@ -1495,7 +1495,7 @@ const ChatPage = () => {
                     type="button"
                     onClick={startRecording}
                     disabled={isSending}
-                    className="p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer"
+                    className="p-2 sm:p-2.5 rounded-full hover:bg-[#374248] text-[#8696a0] hover:text-[#00a884] transition-colors cursor-pointer shrink-0"
                     title="Record Voice Note"
                   >
                     <Mic className="w-5 h-5 text-[#00a884]" />
@@ -1520,7 +1520,7 @@ const ChatPage = () => {
                       }
                     }}
                     placeholder="Type a direct message to seller..."
-                    className="flex-1 bg-[#2a3942] border-none rounded-xl px-4 py-2.5 text-xs font-mono text-white placeholder-[#8696a0] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
+                    className="flex-1 min-w-0 bg-[#2a3942] border-none rounded-xl px-3 sm:px-4 py-2.5 text-xs font-mono text-white placeholder-[#8696a0] focus:outline-none focus:ring-1 focus:ring-[#00a884]"
                   />
 
                   <button
