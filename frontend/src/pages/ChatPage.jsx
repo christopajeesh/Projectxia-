@@ -677,11 +677,24 @@ const ChatPage = () => {
   const startRecording = async () => {
     try {
       playClick();
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert('Voice note recording is not supported in this browser. Please use Chrome, Safari, or Edge.');
+        return;
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        },
+      });
+
       audioChunksRef.current = [];
 
-      const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4', 'audio/aac'].find(
-        (t) => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t)
+      const mimeType = ['audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus', 'audio/mp4', 'audio/aac', ''].find(
+        (t) => !t || (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(t))
       ) || '';
 
       const recorder = mimeType ? new MediaRecorder(stream, { mimeType }) : new MediaRecorder(stream);
@@ -695,38 +708,48 @@ const ChatPage = () => {
       setIsRecording(true);
       setRecordingTime(0);
 
+      // Web Audio API Spectrum with automatic resume() fallback
       try {
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        audioContextRef.current = audioCtx;
-        const source = audioCtx.createMediaStreamSource(stream);
-        const analyser = audioCtx.createAnalyser();
-        analyser.fftSize = 32;
-        source.connect(analyser);
-        analyserRef.current = analyser;
-
-        const dataArray = new Uint8Array(analyser.frequencyBinCount);
-        let lastUpdateTime = 0;
-        const updateLevels = () => {
-          if (analyserRef.current) {
-            const now = Date.now();
-            if (now - lastUpdateTime > 120) {
-              lastUpdateTime = now;
-              analyserRef.current.getByteFrequencyData(dataArray);
-              const levels = Array.from(dataArray.slice(0, 12)).map((v) => Math.max(15, Math.min(100, (v / 255) * 100)));
-              setAudioLevels(levels);
-            }
-            animFrameRef.current = requestAnimationFrame(updateLevels);
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (AudioCtx) {
+          const audioCtx = new AudioCtx();
+          if (audioCtx.state === 'suspended') {
+            await audioCtx.resume();
           }
-        };
-        updateLevels();
-      } catch (audioErr) {}
+          audioContextRef.current = audioCtx;
+          const source = audioCtx.createMediaStreamSource(stream);
+          const analyser = audioCtx.createAnalyser();
+          analyser.fftSize = 32;
+          source.connect(analyser);
+          analyserRef.current = analyser;
+
+          const dataArray = new Uint8Array(analyser.frequencyBinCount);
+          let lastUpdateTime = 0;
+          const updateLevels = () => {
+            if (analyserRef.current) {
+              const now = Date.now();
+              if (now - lastUpdateTime > 100) {
+                lastUpdateTime = now;
+                analyserRef.current.getByteFrequencyData(dataArray);
+                const levels = Array.from(dataArray.slice(0, 12)).map((v) => Math.max(15, Math.min(100, (v / 255) * 100)));
+                setAudioLevels(levels);
+              }
+              animFrameRef.current = requestAnimationFrame(updateLevels);
+            }
+          };
+          updateLevels();
+        }
+      } catch (audioErr) {
+        console.warn('Web Audio visualization fallback active:', audioErr);
+      }
 
       if (recordingIntervalRef.current) clearInterval(recordingIntervalRef.current);
       recordingIntervalRef.current = setInterval(() => {
         setRecordingTime((prev) => prev + 1);
       }, 1000);
     } catch (err) {
-      alert('Microphone permission is required to record voice notes. Please allow microphone access in your browser settings.');
+      console.error('Microphone error:', err);
+      alert('Microphone permission required! Please tap Allow when your browser asks for microphone access.');
     }
   };
 
