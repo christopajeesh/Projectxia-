@@ -195,7 +195,6 @@ const ChatPage = () => {
   const typingTimeoutRef = useRef(null);
 
   const quickEmojis = ['😊', '👍', '❤️', '🔥', '🚀', '🙏', '💯', '⚡', '👏', '🎉'];
-  const reactionEmojis = ['👍', '❤️', '😂', '😮', '😢', '🙏'];
 
   useEffect(() => {
     fetchConversations();
@@ -615,31 +614,7 @@ const ChatPage = () => {
     }
   };
 
-  const handleReactMessage = async (msgId, emoji) => {
-    playClick();
-    const currentUserId = String(user?._id || user?.id || 'user_guest');
 
-    setMessages((prev) =>
-      prev.map((m) => {
-        if ((m._id || m.id) === msgId) {
-          const reactions = m.reactions || [];
-          const existing = reactions.find((r) => r.userId === currentUserId && r.emoji === emoji);
-          let updated = [];
-          if (existing) {
-            updated = reactions.filter((r) => !(r.userId === currentUserId && r.emoji === emoji));
-          } else {
-            updated = [...reactions, { emoji, userId: currentUserId }];
-          }
-          return { ...m, reactions: updated };
-        }
-        return m;
-      })
-    );
-
-    try {
-      await api.post(`/chat/messages/${msgId}/react`, { emoji });
-    } catch (err) {}
-  };
 
   // ============================================================
   // WHATSAPP VOICE RECORDING ENGINE WITH REAL-TIME SPECTRUM
@@ -1242,23 +1217,7 @@ const ChatPage = () => {
                             : 'bg-[#202c33] text-[#e9edef] rounded-tl-none border border-[#233138]'
                         }`}
                       >
-                        {/* EMOJI REACTION POPUP ON HOVER */}
-                        <div
-                          className={`absolute -top-7 hidden group-hover:flex items-center gap-1 bg-[#233138] border border-[#374248] rounded-full px-2 py-1 shadow-2xl z-30 ${
-                            isMe ? 'right-0' : 'left-0'
-                          }`}
-                        >
-                          {reactionEmojis.map((emoji) => (
-                            <button
-                              key={emoji}
-                              type="button"
-                              onClick={() => handleReactMessage(msg._id || msg.id, emoji)}
-                              className="hover:scale-125 transition-transform text-sm cursor-pointer p-0.5"
-                            >
-                              {emoji}
-                            </button>
-                          ))}
-                        </div>
+
 
                         {/* MEDIA / IMAGE ATTACHMENT */}
                         {msg.messageType === 'media' && msg.mediaUrl && (
@@ -1312,14 +1271,7 @@ const ChatPage = () => {
                           <p className="leading-relaxed whitespace-pre-wrap text-xs">{msg.text}</p>
                         )}
 
-                        {/* MESSAGE REACTIONS DISPLAY */}
-                        {msg.reactions && msg.reactions.length > 0 && (
-                          <div className="flex items-center gap-1 mt-1 font-mono text-[10px] bg-black/40 px-2 py-0.5 rounded-full w-fit">
-                            {msg.reactions.map((r, i) => (
-                              <span key={i}>{r.emoji}</span>
-                            ))}
-                          </div>
-                        )}
+
 
                         {/* WHATSAPP READ RECEIPTS & TIMESTAMP */}
                         <div className="flex items-center justify-end gap-1 mt-1 text-[9px] text-[#8696a0]">
