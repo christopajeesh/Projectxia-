@@ -179,10 +179,6 @@ const ChatPage = () => {
   const shouldAutoScrollRef = useRef(true);
   const [showScrollBottomButton, setShowScrollBottomButton] = useState(false);
 
-  // Touch Swipe Gesture Refs
-  const touchStartXRef = useRef(0);
-  const touchStartYRef = useRef(0);
-
   // New Chat User Picker Modal
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [availableUsers, setAvailableUsers] = useState([]);
@@ -282,27 +278,19 @@ const ChatPage = () => {
     }
   };
 
-  // TOUCH SWIPE BACK GESTURE HANDLERS
-  const handleTouchStart = (e) => {
-    if (e.touches && e.touches[0]) {
-      touchStartXRef.current = e.touches[0].clientX;
-      touchStartYRef.current = e.touches[0].clientY;
-    }
-  };
-
-  const handleTouchEnd = (e) => {
-    if (e.changedTouches && e.changedTouches[0]) {
-      const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
-      const deltaY = e.changedTouches[0].clientY - touchStartYRef.current;
-      if (deltaX > 80 && Math.abs(deltaY) < 60 && touchStartXRef.current < 100) {
-        playClick();
-        setActiveConv(null);
-      }
-    }
-  };
-
   const getUserKey = () => {
     return (user?.email || user?._id || user?.id || 'guest').toLowerCase().trim();
+  };
+
+  const checkIsOnline = (p) => {
+    if (!p || !Array.isArray(onlineUsers)) return false;
+    const pId = String(p.userId || p.id || p._id || '').toLowerCase().trim();
+    const pEmail = String(p.email || '').toLowerCase().trim();
+    return onlineUsers.some((u) => {
+      if (!u) return false;
+      const strU = String(u).toLowerCase().trim();
+      return (pId && strU === pId) || (pEmail && strU === pEmail);
+    });
   };
 
   const getPartner = (conv) => {
@@ -900,14 +888,7 @@ const ChatPage = () => {
   });
 
   const partner = activeConv ? getPartner(activeConv) : getPartner(null);
-  const partnerId = String(partner?.userId || partner?.id || partner?._id || '').toLowerCase().trim();
-  const partnerEmail = String(partner?.email || '').toLowerCase().trim();
-
-  const isRecipientOnline = Array.isArray(onlineUsers) && onlineUsers.some((u) => {
-    if (!u) return false;
-    const strU = String(u).toLowerCase().trim();
-    return (partnerId && strU === partnerId) || (partnerEmail && strU === partnerEmail);
-  });
+  const isRecipientOnline = checkIsOnline(partner);
 
   return (
     <div className="fixed inset-0 z-40 w-screen h-screen bg-[#111b21] flex flex-col font-sans text-xs overflow-hidden">
@@ -1056,16 +1037,11 @@ const ChatPage = () => {
           </div>
 
           {/* CONVERSATIONS STREAM (TOUCH & SCROLLABLE) */}
-          <div
-            className="flex-1 overflow-y-auto divide-y divide-[#202c33]/40 p-1.5 space-y-0.5 min-h-0 overscroll-contain"
-            style={{
-              WebkitOverflowScrolling: 'touch',
-              touchAction: 'pan-y',
-            }}
-          >
+          <div className="flex-1 overflow-y-auto divide-y divide-[#202c33]/40 p-1.5 space-y-0.5 min-h-0 overscroll-contain">
             {filteredConversations.map((conv) => {
               const p = getPartner(conv);
               const isSelected = activeConv?._id === conv._id;
+              const pOnline = checkIsOnline(p);
 
               return (
                 <div
@@ -1087,7 +1063,7 @@ const ChatPage = () => {
                         alt={p.name}
                         className="w-11 h-11 rounded-full object-cover border border-[#00a884]/30 bg-gray-900"
                       />
-                      <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#00a884] border-2 border-[#111b21] rounded-full" />
+                      <span className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-[#111b21] rounded-full ${pOnline ? 'bg-[#00a884]' : 'bg-[#8696a0]'}`} />
                     </div>
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
@@ -1137,11 +1113,7 @@ const ChatPage = () => {
         {/* ============================================================ */}
         {/* RIGHT: ACTIVE CHAT MESSAGES WINDOW */}
         {/* ============================================================ */}
-        <div
-          onTouchStart={handleTouchStart}
-          onTouchEnd={handleTouchEnd}
-          className={`flex-1 flex flex-col h-full min-h-0 bg-[#0b141a] relative ${!activeConv ? 'hidden md:flex' : 'flex'}`}
-        >
+        <div className={`flex-1 flex flex-col h-full min-h-0 bg-[#0b141a] relative ${!activeConv ? 'hidden md:flex' : 'flex'}`}>
           {activeConv ? (
             <>
               {/* CHAT HEADER */}
@@ -1160,7 +1132,7 @@ const ChatPage = () => {
                       alt={partner.name}
                       className="w-10 h-10 rounded-full object-cover border-2 border-[#00a884]"
                     />
-                    <span className="absolute bottom-0 right-0 w-3 h-3 bg-[#00a884] border-2 border-[#202c33] rounded-full animate-pulse" />
+                    <span className={`absolute bottom-0 right-0 w-3 h-3 border-2 border-[#202c33] rounded-full ${isRecipientOnline ? 'bg-[#00a884] animate-pulse' : 'bg-[#8696a0]'}`} />
                   </div>
                   <div>
                     <h3 className="font-bold text-sm text-[#e9edef]">
@@ -1219,15 +1191,11 @@ const ChatPage = () => {
                   }}
                 />
 
-                {/* LIGHTWEIGHT ABSOLUTE BOUNDED MESSAGES STREAM */}
+                {/* LIGHTWEIGHT ABSOLUTE BOUNDED NATIVE SCROLL STREAM */}
                 <div
                   ref={chatContainerRef}
                   onScroll={handleScroll}
-                  className="absolute inset-0 overflow-y-auto p-4 space-y-3 font-mono text-xs z-10 overscroll-contain scroll-smooth"
-                  style={{
-                    WebkitOverflowScrolling: 'touch',
-                    touchAction: 'pan-y',
-                  }}
+                  className="absolute inset-0 w-full h-full overflow-y-scroll p-4 space-y-3 font-mono text-xs z-10 scrollbar-thin scrollbar-thumb-[#374248] scrollbar-track-transparent scroll-smooth"
                 >
                   {/* DATE STAMP DIVIDER */}
                   <div className="flex items-center justify-center my-2">
