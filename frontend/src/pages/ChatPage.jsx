@@ -245,16 +245,43 @@ const ChatPage = () => {
       );
     };
 
+    const handleMessageDeleted = ({ messageId }) => {
+      if (!messageId) return;
+      const targetId = String(messageId);
+      setMessages((prev) => prev.filter((m) => String(m._id || m.id) !== targetId));
+    };
+
     socket.on('receive_message', handleReceiveMessage);
     socket.on('user_typing', handleUserTyping);
     socket.on('messages_read', handleMessagesRead);
+    socket.on('message_deleted', handleMessageDeleted);
 
     return () => {
       socket.off('receive_message', handleReceiveMessage);
       socket.off('user_typing', handleUserTyping);
       socket.off('messages_read', handleMessagesRead);
+      socket.off('message_deleted', handleMessageDeleted);
     };
   }, [socket, activeConv]);
+
+  const handleDeleteMessage = async (msgId, e) => {
+    if (e) e.stopPropagation();
+    if (!msgId) return;
+    if (!window.confirm('Delete this message permanently?')) return;
+    playClick();
+
+    const targetId = String(msgId);
+    setMessages((prev) => prev.filter((m) => String(m._id || m.id) !== targetId));
+
+    try {
+      await api.delete(`/chat/messages/${targetId}`);
+      if (socket && activeConv) {
+        socket.emit('delete_message', { messageId: targetId, conversationId: activeConv._id });
+      }
+    } catch (err) {
+      console.error('Delete message error:', err);
+    }
+  };
 
   const handleScroll = () => {
     if (!chatContainerRef.current) return;
@@ -891,7 +918,7 @@ const ChatPage = () => {
   const isRecipientOnline = checkIsOnline(partner);
 
   return (
-    <div className="fixed inset-0 z-40 w-screen h-screen bg-[#111b21] flex flex-col font-sans text-xs overflow-hidden">
+    <div data-lenis-prevent className="fixed inset-0 z-40 w-screen h-screen bg-[#111b21] flex flex-col font-sans text-xs overflow-hidden">
 
       {/* WHATSAPP WEB GREEN ACCENT HEADER STRIP */}
       <div className="h-1 bg-[#00a884] shrink-0" />
@@ -1037,7 +1064,7 @@ const ChatPage = () => {
           </div>
 
           {/* CONVERSATIONS STREAM (TOUCH & SCROLLABLE) */}
-          <div className="flex-1 overflow-y-auto divide-y divide-[#202c33]/40 p-1.5 space-y-0.5 min-h-0 overscroll-contain">
+          <div data-lenis-prevent className="flex-1 overflow-y-auto divide-y divide-[#202c33]/40 p-1.5 space-y-0.5 min-h-0 overscroll-contain">
             {filteredConversations.map((conv) => {
               const p = getPartner(conv);
               const isSelected = activeConv?._id === conv._id;
@@ -1186,6 +1213,7 @@ const ChatPage = () => {
                 <div
                   ref={chatContainerRef}
                   onScroll={handleScroll}
+                  data-lenis-prevent
                   className="absolute inset-0 overflow-y-auto p-4 space-y-3 font-mono text-xs z-10 scrollbar-thin scrollbar-thumb-[#374248] scrollbar-track-transparent"
                   style={{
                     backgroundImage: 'radial-gradient(rgba(0, 168, 132, 0.15) 0.5px, transparent 0.5px)',
@@ -1223,8 +1251,20 @@ const ChatPage = () => {
                     return (
                       <div
                         key={msg._id || msg.id || Math.random()}
-                        className={`flex items-end gap-1.5 group relative ${isMe ? 'justify-end' : 'justify-start'}`}
+                        className={`flex items-center gap-1.5 group relative ${isMe ? 'justify-end' : 'justify-start'}`}
                       >
+                        {/* HOVER DELETE BUTTON (LEFT OF SENT MESSAGE) */}
+                        {isMe && (
+                          <button
+                            type="button"
+                            onClick={(e) => handleDeleteMessage(msg._id || msg.id, e)}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full hover:bg-rose-500/20 text-[#8696a0] hover:text-rose-400 cursor-pointer shrink-0"
+                            title="Delete Message"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
+
                         <div
                           className={`max-w-md p-3.5 rounded-2xl shadow-md relative ${
                             isMe
@@ -1303,6 +1343,18 @@ const ChatPage = () => {
                             )}
                           </div>
                         </div>
+
+                        {/* HOVER DELETE BUTTON (RIGHT OF RECEIVED MESSAGE) */}
+                        {!isMe && (
+                          <button
+                            type="button"
+                            onClick={(e) => handleDeleteMessage(msg._id || msg.id, e)}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity p-1.5 rounded-full hover:bg-rose-500/20 text-[#8696a0] hover:text-rose-400 cursor-pointer shrink-0"
+                            title="Delete Message"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </button>
+                        )}
                       </div>
                     );
                   })}

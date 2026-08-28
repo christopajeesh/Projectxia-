@@ -36,11 +36,16 @@ const SmoothScroll = ({ children }) => {
     };
   }, []);
 
-  // Scroll to top on route change using Lenis
+  // Scroll to top on route change using Lenis; stop Lenis on /chat to allow native chat scrolling
   useEffect(() => {
     if (lenisRef.current) {
-      lenisRef.current.scrollTo(0, { immediate: true });
-    } else {
+      if (location.pathname === '/chat') {
+        lenisRef.current.stop();
+      } else {
+        lenisRef.current.start();
+        lenisRef.current.scrollTo(0, { immediate: true });
+      }
+    } else if (location.pathname !== '/chat') {
       window.scrollTo(0, 0);
     }
   }, [location.pathname]);

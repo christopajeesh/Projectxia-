@@ -390,3 +390,31 @@ export const deleteConversation = async (req, res) => {
     res.status(500).json({ success: false, message: error.message });
   }
 };
+
+// @desc    Delete a single message permanently
+// @route   DELETE /api/chat/messages/:id
+export const deleteSingleMessage = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (memoryStore.messages) {
+      memoryStore.messages = memoryStore.messages.filter(
+        (m) => String(m._id || m.id) !== String(id)
+      );
+    }
+
+    try {
+      await Message.deleteOne({ _id: id });
+    } catch (dbErr) {
+      console.warn('MongoDB delete message fallback:', dbErr.message);
+    }
+
+    res.json({
+      success: true,
+      message: 'Message deleted successfully.',
+      messageId: id,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};

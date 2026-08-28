@@ -104,6 +104,17 @@ export const initChatSocket = (io) => {
       io.to(String(conversationId)).emit('messages_read', { conversationId, userId });
     });
 
+    // Handle single message deletion in real-time
+    socket.on('delete_message', ({ messageId, conversationId }) => {
+      if (!messageId) return;
+      if (memoryStore.messages) {
+        memoryStore.messages = memoryStore.messages.filter((m) => String(m._id || m.id) !== String(messageId));
+      }
+      if (conversationId) {
+        io.to(String(conversationId)).emit('message_deleted', { messageId, conversationId });
+      }
+    });
+
     // Handle disconnect
     socket.on('disconnect', () => {
       if (socket.userId) {

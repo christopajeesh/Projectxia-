@@ -6,6 +6,7 @@ import {
   reactMessage,
   markMessagesRead,
   deleteConversation,
+  deleteSingleMessage,
   getAvailableUsers,
 } from '../controllers/chatController.js';
 import { protect } from '../middleware/authMiddleware.js';
@@ -17,6 +18,7 @@ router.get('/conversations', protect, getConversations);
 router.delete('/conversations/:id', protect, deleteConversation);
 router.get('/messages/:conversationId', protect, getMessages);
 router.post('/messages', protect, sendMessage);
+router.delete('/messages/:id', protect, deleteSingleMessage);
 router.post('/messages/:id/react', protect, reactMessage);
 router.put('/messages/read/:conversationId', protect, markMessagesRead);
 
