@@ -325,17 +325,31 @@ export const reactMessage = async (req, res) => {
 export const markMessagesRead = async (req, res) => {
   try {
     const { conversationId } = req.params;
-    const userId = req.user?._id || req.user?.id || 'user_001_buyer';
+    const userId = String(req.user?._id || req.user?.id || '');
+    const userEmail = String(req.user?.email || '').toLowerCase().trim();
 
     (memoryStore.messages || []).forEach((m) => {
-      if (m.conversationId === conversationId && (m.receiverId === userId || m.sender?.id !== userId)) {
+      if (m.conversationId === conversationId && (
+        String(m.receiverId) === userId ||
+        (m.receiverEmail && m.receiverEmail.toLowerCase() === userEmail) ||
+        (m.sender?.id && String(m.sender.id) !== userId)
+      )) {
         m.isRead = true;
       }
     });
 
     try {
       await Message.updateMany(
-        { conversationId, isRead: false },
+        {
+          conversationId,
+          isRead: false,
+          $or: [
+            { receiverId: userId },
+            { receiverEmail: userEmail },
+            { 'sender.id': { $ne: userId } },
+            { 'sender.email': { $ne: userEmail } }
+          ]
+        },
         { $set: { isRead: true, readAt: new Date() } }
       );
     } catch (dbErr) {

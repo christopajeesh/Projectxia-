@@ -90,8 +90,14 @@ export const initChatSocket = (io) => {
     // WhatsApp Read Receipts (Blue Ticks trigger when recipient views conversation)
     socket.on('mark_read', ({ conversationId, userId }) => {
       if (!conversationId) return;
+      const strUser = String(userId || '').toLowerCase().trim();
       (memoryStore.messages || []).forEach((m) => {
-        if (m.conversationId === conversationId && (m.receiverId === userId || m.sender?.id !== userId)) {
+        const rId = String(m.receiverId || '').toLowerCase().trim();
+        const rEmail = String(m.receiverEmail || '').toLowerCase().trim();
+        const sId = String(m.sender?.id || m.sender?._id || '').toLowerCase().trim();
+        const sEmail = String(m.sender?.email || '').toLowerCase().trim();
+
+        if (m.conversationId === conversationId && (rId === strUser || rEmail === strUser || (sId && sId !== strUser && sEmail !== strUser))) {
           m.isRead = true;
         }
       });

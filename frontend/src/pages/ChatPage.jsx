@@ -1166,9 +1166,11 @@ const ChatPage = () => {
                     <h3 className="font-bold text-sm text-[#e9edef]">
                       {partner.name}
                     </h3>
-                    <p className="text-[10px] font-mono text-[#00a884] flex items-center gap-1">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#00a884]" />
-                      <span>{isTyping ? `${typingUser} is typing...` : isRecipientOnline ? 'online' : 'online'}</span>
+                    <p className="text-[10px] font-mono flex items-center gap-1">
+                      <span className={`w-1.5 h-1.5 rounded-full ${isRecipientOnline ? 'bg-[#00a884]' : 'bg-[#8696a0]'}`} />
+                      <span className={isRecipientOnline ? 'text-[#00a884]' : 'text-[#8696a0]'}>
+                        {isTyping ? `${typingUser} is typing...` : isRecipientOnline ? 'online' : 'offline'}
+                      </span>
                     </p>
                   </div>
                 </div>
@@ -1221,7 +1223,7 @@ const ChatPage = () => {
                 <div
                   ref={chatContainerRef}
                   onScroll={handleScroll}
-                  className="absolute inset-0 overflow-y-auto p-4 space-y-3 font-mono text-xs z-10 overscroll-contain"
+                  className="absolute inset-0 overflow-y-auto p-4 space-y-3 font-mono text-xs z-10 overscroll-contain scroll-smooth"
                   style={{
                     WebkitOverflowScrolling: 'touch',
                     touchAction: 'pan-y',
