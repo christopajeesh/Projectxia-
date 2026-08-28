@@ -33,6 +33,7 @@ import {
   User as UserIcon,
   Plus,
   MessageSquare,
+  ChevronDown,
 } from 'lucide-react';
 import { useSound } from '../context/SoundContext';
 import { useAuth } from '../context/AuthContext';
@@ -173,6 +174,11 @@ const ChatPage = () => {
   const [isSending, setIsSending] = useState(false);
   const [activeFilter, setActiveFilter] = useState('All');
 
+  // Smart Scroll Management
+  const chatContainerRef = useRef(null);
+  const shouldAutoScrollRef = useRef(true);
+  const [showScrollBottomButton, setShowScrollBottomButton] = useState(false);
+
   // New Chat User Picker Modal
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [availableUsers, setAvailableUsers] = useState([]);
@@ -197,6 +203,7 @@ const ChatPage = () => {
 
   useEffect(() => {
     if (activeConv) {
+      shouldAutoScrollRef.current = true;
       fetchMessages(activeConv._id);
       if (socket) {
         socket.emit('join_conversation', activeConv._id);
@@ -223,7 +230,9 @@ const ChatPage = () => {
       }
 
       playSuccess();
-      setTimeout(scrollToBottom, 100);
+      if (shouldAutoScrollRef.current) {
+        setTimeout(() => scrollToBottom(true), 100);
+      }
     };
 
     const handleUserTyping = ({ userName, isTyping: typingState }) => {
@@ -248,8 +257,26 @@ const ChatPage = () => {
     };
   }, [socket, activeConv]);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  const handleScroll = () => {
+    if (!chatContainerRef.current) return;
+    const { scrollTop, scrollHeight, clientHeight } = chatContainerRef.current;
+    const isAtBottom = scrollHeight - scrollTop - clientHeight < 120;
+    shouldAutoScrollRef.current = isAtBottom;
+    setShowScrollBottomButton(!isAtBottom);
+  };
+
+  const scrollToBottom = (force = false) => {
+    if (force || shouldAutoScrollRef.current) {
+      if (chatContainerRef.current) {
+        chatContainerRef.current.scrollTo({
+          top: chatContainerRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
+      } else {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }
+      setShowScrollBottomButton(false);
+    }
   };
 
   const getUserKey = () => {
@@ -304,7 +331,6 @@ const ChatPage = () => {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed)) {
-          // Filter out old fake mock conversation IDs
           cachedConvs = parsed.filter((c) => c && c._id && !String(c._id).startsWith('conv_default_'));
         }
       }
@@ -407,14 +433,13 @@ const ChatPage = () => {
 
       setMessages(mergedMsgs);
       try { localStorage.setItem(`px_msgs_${userKey}_${convId}`, JSON.stringify(mergedMsgs)); } catch (e) {}
-      setTimeout(scrollToBottom, 100);
+      setTimeout(() => scrollToBottom(true), 100);
     } catch (e) {
       setMessages(cachedMsgs);
-      setTimeout(scrollToBottom, 100);
+      setTimeout(() => scrollToBottom(true), 100);
     }
   };
 
-  // Fetch registered users for starting a new chat
   const handleOpenNewChatModal = async () => {
     playClick();
     setShowNewChatModal(true);
@@ -469,6 +494,7 @@ const ChatPage = () => {
       setConversations((prev) => [existing, ...prev]);
     }
 
+    shouldAutoScrollRef.current = true;
     setActiveConv(existing);
     fetchMessages(existing._id);
   };
@@ -541,7 +567,8 @@ const ChatPage = () => {
     };
 
     setMessages((prev) => [...prev, optimisticMsg]);
-    setTimeout(scrollToBottom, 50);
+    shouldAutoScrollRef.current = true;
+    setTimeout(() => scrollToBottom(true), 50);
 
     const payload = {
       conversationId: activeConv._id,
@@ -580,7 +607,7 @@ const ChatPage = () => {
           senderEmail: currentUserEmail,
         });
       }
-      setTimeout(scrollToBottom, 100);
+      setTimeout(() => scrollToBottom(true), 100);
     } catch (err) {
       console.error('Send error:', err);
     } finally {
@@ -588,7 +615,6 @@ const ChatPage = () => {
     }
   };
 
-  // Toggle reaction on message
   const handleReactMessage = async (msgId, emoji) => {
     playClick();
     const currentUserId = String(user?._id || user?.id || 'user_guest');
@@ -759,7 +785,8 @@ const ChatPage = () => {
         };
 
         setMessages((prev) => [...prev, optimisticMsg]);
-        setTimeout(scrollToBottom, 50);
+        shouldAutoScrollRef.current = true;
+        setTimeout(() => scrollToBottom(true), 50);
 
         const payload = {
           conversationId: activeConv._id,
@@ -790,7 +817,7 @@ const ChatPage = () => {
             });
           }
           playSuccess();
-          setTimeout(scrollToBottom, 100);
+          setTimeout(() => scrollToBottom(true), 100);
         } catch (e) {
           console.error('Voice send error:', e);
         }
@@ -880,7 +907,7 @@ const ChatPage = () => {
   });
 
   return (
-    <div className="fixed inset-0 z-40 w-screen h-screen bg-[#111b21] flex flex-col font-sans text-xs overflow-hidden select-none">
+    <div className="fixed inset-0 z-40 w-screen h-screen bg-[#111b21] flex flex-col font-sans text-xs overflow-hidden">
 
       {/* WHATSAPP WEB GREEN ACCENT HEADER STRIP */}
       <div className="h-1 bg-[#00a884] shrink-0" />
@@ -1166,8 +1193,10 @@ const ChatPage = () => {
                 </div>
               </div>
 
-              {/* MESSAGES STREAM WITH WHATSAPP DOODLE PATTERN & SMOOTH SCROLL */}
+              {/* MESSAGES STREAM WITH WHATSAPP DOODLE PATTERN & SMART UNBLOCKED SCROLL */}
               <div
+                ref={chatContainerRef}
+                onScroll={handleScroll}
                 className="flex-1 overflow-y-auto p-4 space-y-3 font-mono text-xs relative min-h-0"
                 style={{
                   backgroundImage: 'radial-gradient(#00a884 0.4px, transparent 0.4px)',
@@ -1325,6 +1354,22 @@ const ChatPage = () => {
 
                 <div ref={messagesEndRef} />
               </div>
+
+              {/* FLOATING SCROLL TO BOTTOM BUTTON */}
+              {showScrollBottomButton && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    playClick();
+                    shouldAutoScrollRef.current = true;
+                    scrollToBottom(true);
+                  }}
+                  className="absolute right-6 bottom-20 z-30 w-10 h-10 rounded-full bg-[#202c33] border border-[#374248] text-[#00a884] flex items-center justify-center shadow-2xl hover:bg-[#2a3942] transition-transform hover:scale-110 cursor-pointer"
+                  title="Scroll to latest messages"
+                >
+                  <ChevronDown className="w-5 h-5" />
+                </button>
+              )}
 
               {/* ATTACHMENT PREVIEW STRIP */}
               {attachmentFile && (
