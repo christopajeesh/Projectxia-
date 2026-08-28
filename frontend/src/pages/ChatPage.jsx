@@ -1181,7 +1181,7 @@ const ChatPage = () => {
               </div>
 
               {/* MESSAGES CONTAINER WITH ABSOLUTE BOUNDED SCROLL VIEWPORT */}
-              <div className="flex-1 relative w-full h-full min-h-0 bg-[#0b141a] overflow-hidden">
+              <div className="flex-1 relative w-full min-h-0 bg-[#0b141a] overflow-hidden">
                 {/* STATIC WALLPAPER PATTERN LAYER */}
                 <div
                   className="absolute inset-0 pointer-events-none opacity-40 z-0"
