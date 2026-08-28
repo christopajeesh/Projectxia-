@@ -179,6 +179,10 @@ const ChatPage = () => {
   const shouldAutoScrollRef = useRef(true);
   const [showScrollBottomButton, setShowScrollBottomButton] = useState(false);
 
+  // Touch Swipe Gesture Refs
+  const touchStartXRef = useRef(0);
+  const touchStartYRef = useRef(0);
+
   // New Chat User Picker Modal
   const [showNewChatModal, setShowNewChatModal] = useState(false);
   const [availableUsers, setAvailableUsers] = useState([]);
@@ -275,6 +279,26 @@ const ChatPage = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
       }
       setShowScrollBottomButton(false);
+    }
+  };
+
+  // TOUCH SWIPE BACK GESTURE HANDLERS
+  const handleTouchStart = (e) => {
+    if (e.touches && e.touches[0]) {
+      touchStartXRef.current = e.touches[0].clientX;
+      touchStartYRef.current = e.touches[0].clientY;
+    }
+  };
+
+  const handleTouchEnd = (e) => {
+    if (e.changedTouches && e.changedTouches[0]) {
+      const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
+      const deltaY = e.changedTouches[0].clientY - touchStartYRef.current;
+      // If user swiped right starting near left screen edge (< 100px)
+      if (deltaX > 80 && Math.abs(deltaY) < 60 && touchStartXRef.current < 100) {
+        playClick();
+        setActiveConv(null);
+      }
     }
   };
 
@@ -614,10 +638,8 @@ const ChatPage = () => {
     }
   };
 
-
-
   // ============================================================
-  // WHATSAPP VOICE RECORDING ENGINE WITH REAL-TIME SPECTRUM
+  // WHATSAPP VOICE RECORDING ENGINE WITH THROTTLED SPECTRUM
   // ============================================================
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
@@ -669,11 +691,16 @@ const ChatPage = () => {
         analyserRef.current = analyser;
 
         const dataArray = new Uint8Array(analyser.frequencyBinCount);
+        let lastUpdateTime = 0;
         const updateLevels = () => {
           if (analyserRef.current) {
-            analyserRef.current.getByteFrequencyData(dataArray);
-            const levels = Array.from(dataArray.slice(0, 12)).map((v) => Math.max(15, Math.min(100, (v / 255) * 100)));
-            setAudioLevels(levels);
+            const now = Date.now();
+            if (now - lastUpdateTime > 120) {
+              lastUpdateTime = now;
+              analyserRef.current.getByteFrequencyData(dataArray);
+              const levels = Array.from(dataArray.slice(0, 12)).map((v) => Math.max(15, Math.min(100, (v / 255) * 100)));
+              setAudioLevels(levels);
+            }
             animFrameRef.current = requestAnimationFrame(updateLevels);
           }
         };
@@ -1027,8 +1054,14 @@ const ChatPage = () => {
             </div>
           </div>
 
-          {/* CONVERSATIONS STREAM */}
-          <div className="flex-1 overflow-y-auto divide-y divide-[#202c33]/40 p-1.5 space-y-0.5 min-h-0">
+          {/* CONVERSATIONS STREAM (GPU ACCELERATED & TOUCH SCROLLABLE) */}
+          <div
+            className="flex-1 overflow-y-auto divide-y divide-[#202c33]/40 p-1.5 space-y-0.5 min-h-0 overscroll-contain"
+            style={{
+              WebkitOverflowScrolling: 'touch',
+              touchAction: 'pan-y',
+            }}
+          >
             {filteredConversations.map((conv) => {
               const p = getPartner(conv);
               const isSelected = activeConv?._id === conv._id;
@@ -1101,9 +1134,13 @@ const ChatPage = () => {
         </div>
 
         {/* ============================================================ */}
-        {/* RIGHT: ACTIVE CHAT MESSAGES WINDOW */}
+        {/* RIGHT: ACTIVE CHAT MESSAGES WINDOW (WITH TOUCH SWIPE BACK) */}
         {/* ============================================================ */}
-        <div className={`flex-1 flex flex-col h-full min-h-0 bg-[#0b141a] relative ${!activeConv ? 'hidden md:flex' : 'flex'}`}>
+        <div
+          onTouchStart={handleTouchStart}
+          onTouchEnd={handleTouchEnd}
+          className={`flex-1 flex flex-col h-full min-h-0 bg-[#0b141a] relative ${!activeConv ? 'hidden md:flex' : 'flex'}`}
+        >
           {activeConv ? (
             <>
               {/* CHAT HEADER */}
@@ -1168,164 +1205,171 @@ const ChatPage = () => {
                 </div>
               </div>
 
-              {/* MESSAGES STREAM WITH WHATSAPP DOODLE PATTERN & SMART UNBLOCKED SCROLL */}
-              <div
-                ref={chatContainerRef}
-                onScroll={handleScroll}
-                className="flex-1 overflow-y-auto p-4 space-y-3 font-mono text-xs relative min-h-0"
-                style={{
-                  backgroundImage: 'radial-gradient(#00a884 0.4px, transparent 0.4px)',
-                  backgroundSize: '24px 24px',
-                  opacity: 0.96,
-                }}
-              >
-                {/* DATE STAMP DIVIDER */}
-                <div className="flex items-center justify-center my-2">
-                  <span className="bg-[#182229] text-[#8696a0] text-[10px] font-mono px-3 py-1 rounded-lg uppercase tracking-wider shadow-sm">
-                    Today
-                  </span>
-                </div>
+              {/* MESSAGES CONTAINER WITH STATIC BACKGROUND LAYER (ZERO REPAINT LAG) */}
+              <div className="flex-1 relative flex flex-col min-h-0 bg-[#0b141a]">
+                {/* STATIC WALLPAPER PATTERN LAYER */}
+                <div
+                  className="absolute inset-0 pointer-events-none opacity-40 z-0"
+                  style={{
+                    backgroundImage: 'radial-gradient(#00a884 0.5px, transparent 0.5px)',
+                    backgroundSize: '24px 24px',
+                  }}
+                />
 
-                {/* PINNED PROJECT INQUIRY BANNER */}
-                {activeConv.projectContext && (
-                  <div className="p-3.5 rounded-2xl bg-[#1f2c34]/95 border border-[#00a884]/40 flex items-center justify-between text-xs shadow-lg backdrop-blur-md mb-3">
-                    <div>
-                      <span className="text-[10px] text-[#00a884] uppercase font-bold">Inquiring About Project:</span>
-                      <p className="font-bold text-[#e9edef] font-display text-sm">{activeConv.projectContext.title}</p>
-                    </div>
-                    <span className="text-[#00a884] font-bold font-display text-base bg-[#00a884]/15 px-3 py-1 rounded-xl border border-[#00a884]/30">
-                      ₹{Number(activeConv.projectContext.price || 0).toLocaleString('en-IN')}
+                {/* LIGHTWEIGHT MESSAGES STREAM */}
+                <div
+                  ref={chatContainerRef}
+                  onScroll={handleScroll}
+                  className="flex-1 overflow-y-auto p-4 space-y-3 font-mono text-xs relative z-10 min-h-0 overscroll-contain"
+                  style={{
+                    WebkitOverflowScrolling: 'touch',
+                    touchAction: 'pan-y',
+                  }}
+                >
+                  {/* DATE STAMP DIVIDER */}
+                  <div className="flex items-center justify-center my-2">
+                    <span className="bg-[#182229] text-[#8696a0] text-[10px] font-mono px-3 py-1 rounded-lg uppercase tracking-wider shadow-sm">
+                      Today
                     </span>
                   </div>
-                )}
 
-                {/* CHAT MESSAGES STREAM */}
-                {messages.map((msg) => {
-                  const currentUid = String(user?._id || user?.id || 'user_001_buyer').trim();
-                  const msgSenderId = String(msg.sender?.id || msg.sender?._id || '').trim();
-                  const isMe = msgSenderId === currentUid || (user?.email && msg.sender?.email === user.email);
+                  {/* PINNED PROJECT INQUIRY BANNER */}
+                  {activeConv.projectContext && (
+                    <div className="p-3.5 rounded-2xl bg-[#1f2c34]/95 border border-[#00a884]/40 flex items-center justify-between text-xs shadow-lg backdrop-blur-md mb-3">
+                      <div>
+                        <span className="text-[10px] text-[#00a884] uppercase font-bold">Inquiring About Project:</span>
+                        <p className="font-bold text-[#e9edef] font-display text-sm">{activeConv.projectContext.title}</p>
+                      </div>
+                      <span className="text-[#00a884] font-bold font-display text-base bg-[#00a884]/15 px-3 py-1 rounded-xl border border-[#00a884]/30">
+                        ₹{Number(activeConv.projectContext.price || 0).toLocaleString('en-IN')}
+                      </span>
+                    </div>
+                  )}
 
-                  return (
-                    <div
-                      key={msg._id || msg.id || Math.random()}
-                      className={`flex items-end gap-1.5 group relative ${isMe ? 'justify-end' : 'justify-start'}`}
-                    >
+                  {/* CHAT MESSAGES STREAM */}
+                  {messages.map((msg) => {
+                    const currentUid = String(user?._id || user?.id || 'user_001_buyer').trim();
+                    const msgSenderId = String(msg.sender?.id || msg.sender?._id || '').trim();
+                    const isMe = msgSenderId === currentUid || (user?.email && msg.sender?.email === user.email);
+
+                    return (
                       <div
-                        className={`max-w-md p-3.5 rounded-2xl shadow-md relative ${
-                          isMe
-                            ? 'bg-[#005c4b] text-[#e9edef] rounded-tr-none'
-                            : 'bg-[#202c33] text-[#e9edef] rounded-tl-none border border-[#233138]'
-                        }`}
+                        key={msg._id || msg.id || Math.random()}
+                        className={`flex items-end gap-1.5 group relative ${isMe ? 'justify-end' : 'justify-start'}`}
                       >
-
-
-                        {/* MEDIA / IMAGE ATTACHMENT */}
-                        {msg.messageType === 'media' && msg.mediaUrl && (
-                          <div className="mb-2 rounded-xl overflow-hidden border border-black/30">
-                            <img src={msg.mediaUrl} alt="Attachment" className="max-h-60 w-full object-cover" />
-                          </div>
-                        )}
-
-                        {/* NEGOTIATION DEAL OFFER CARD */}
-                        {msg.messageType === 'deal_offer' || (msg.text && msg.text.includes('PROPOSED NEGOTIATION DEAL')) ? (
-                          <div className="space-y-2.5 p-3.5 bg-[#111b21]/90 rounded-2xl border border-[#00a884]/50 shadow-inner my-1">
-                            <div className="flex items-center gap-2 text-[#00a884] font-bold text-xs">
-                              <Handshake className="w-4.5 h-4.5 shrink-0 text-[#00a884]" />
-                              <span className="uppercase tracking-wider">PROPOSED NEGOTIATION DEAL</span>
+                        <div
+                          className={`max-w-md p-3.5 rounded-2xl shadow-md relative ${
+                            isMe
+                              ? 'bg-[#005c4b] text-[#e9edef] rounded-tr-none'
+                              : 'bg-[#202c33] text-[#e9edef] rounded-tl-none border border-[#233138]'
+                          }`}
+                        >
+                          {/* MEDIA / IMAGE ATTACHMENT */}
+                          {msg.messageType === 'media' && msg.mediaUrl && (
+                            <div className="mb-2 rounded-xl overflow-hidden border border-black/30">
+                              <img src={msg.mediaUrl} alt="Attachment" className="max-h-60 w-full object-cover" />
                             </div>
-                            <p className="text-xs text-white leading-relaxed font-mono whitespace-pre-wrap bg-[#1a2730] p-2.5 rounded-xl border border-[#263742]">
-                              {msg.text}
-                            </p>
-                            {!isMe && (
-                              <div className="flex items-center gap-2 pt-1">
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    playSuccess();
-                                    alert('🎉 Deal Offer Accepted! The agreed rate will be applied at checkout.');
-                                  }}
-                                  className="flex-1 py-2 rounded-xl bg-[#00a884] text-black font-bold text-[11px] text-center hover:bg-[#02906f] transition-all cursor-pointer shadow-md"
-                                >
-                                  Accept Deal
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    playClick();
-                                    setInputMsg(`Counter Offer: I can offer ₹${Math.round((msg.projectData?.offerPrice || 2500) * 1.1)} for this project.`);
-                                  }}
-                                  className="px-3.5 py-2 rounded-xl bg-[#202c33] text-slate-200 font-bold text-[11px] hover:text-white transition-all cursor-pointer border border-[#374248]"
-                                >
-                                  Counter
-                                </button>
+                          )}
+
+                          {/* NEGOTIATION DEAL OFFER CARD */}
+                          {msg.messageType === 'deal_offer' || (msg.text && msg.text.includes('PROPOSED NEGOTIATION DEAL')) ? (
+                            <div className="space-y-2.5 p-3.5 bg-[#111b21]/90 rounded-2xl border border-[#00a884]/50 shadow-inner my-1">
+                              <div className="flex items-center gap-2 text-[#00a884] font-bold text-xs">
+                                <Handshake className="w-4.5 h-4.5 shrink-0 text-[#00a884]" />
+                                <span className="uppercase tracking-wider">PROPOSED NEGOTIATION DEAL</span>
                               </div>
+                              <p className="text-xs text-white leading-relaxed font-mono whitespace-pre-wrap bg-[#1a2730] p-2.5 rounded-xl border border-[#263742]">
+                                {msg.text}
+                              </p>
+                              {!isMe && (
+                                <div className="flex items-center gap-2 pt-1">
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      playSuccess();
+                                      alert('🎉 Deal Offer Accepted! The agreed rate will be applied at checkout.');
+                                    }}
+                                    className="flex-1 py-2 rounded-xl bg-[#00a884] text-black font-bold text-[11px] text-center hover:bg-[#02906f] transition-all cursor-pointer shadow-md"
+                                  >
+                                    Accept Deal
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      playClick();
+                                      setInputMsg(`Counter Offer: I can offer ₹${Math.round((msg.projectData?.offerPrice || 2500) * 1.1)} for this project.`);
+                                    }}
+                                    className="px-3.5 py-2 rounded-xl bg-[#202c33] text-slate-200 font-bold text-[11px] hover:text-white transition-all cursor-pointer border border-[#374248]"
+                                  >
+                                    Counter
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          ) : msg.messageType === 'voice' ? (
+                            <WhatsAppVoicePlayer
+                              mediaUrl={msg.mediaUrl}
+                              audioDuration={msg.audioDuration}
+                              isMe={isMe}
+                            />
+                          ) : (
+                            <p className="leading-relaxed whitespace-pre-wrap text-xs">{msg.text}</p>
+                          )}
+
+                          {/* WHATSAPP READ RECEIPTS & TIMESTAMP */}
+                          <div className="flex items-center justify-end gap-1 mt-1 text-[9px] text-[#8696a0]">
+                            <span>
+                              {new Date(msg.createdAt || Date.now()).toLocaleTimeString([], {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                              })}
+                            </span>
+                            {isMe && (
+                              msg.isRead ? (
+                                <CheckCheck className="w-3.5 h-3.5 text-[#53bdeb]" title="Read by recipient (Double Blue Ticks)" />
+                              ) : isRecipientOnline ? (
+                                <CheckCheck className="w-3.5 h-3.5 text-[#8696a0]" title="Delivered to recipient (Double Grey Ticks)" />
+                              ) : (
+                                <Check className="w-3.5 h-3.5 text-[#8696a0]" title="Sent (Single Grey Tick - Recipient Offline)" />
+                              )
                             )}
                           </div>
-                        ) : msg.messageType === 'voice' ? (
-                          <WhatsAppVoicePlayer
-                            mediaUrl={msg.mediaUrl}
-                            audioDuration={msg.audioDuration}
-                            isMe={isMe}
-                          />
-                        ) : (
-                          <p className="leading-relaxed whitespace-pre-wrap text-xs">{msg.text}</p>
-                        )}
-
-
-
-                        {/* WHATSAPP READ RECEIPTS & TIMESTAMP */}
-                        <div className="flex items-center justify-end gap-1 mt-1 text-[9px] text-[#8696a0]">
-                          <span>
-                            {new Date(msg.createdAt || Date.now()).toLocaleTimeString([], {
-                              hour: '2-digit',
-                              minute: '2-digit',
-                            })}
-                          </span>
-                          {isMe && (
-                            msg.isRead ? (
-                              <CheckCheck className="w-3.5 h-3.5 text-[#53bdeb]" title="Read by recipient (Double Blue Ticks)" />
-                            ) : isRecipientOnline ? (
-                              <CheckCheck className="w-3.5 h-3.5 text-[#8696a0]" title="Delivered to recipient (Double Grey Ticks)" />
-                            ) : (
-                              <Check className="w-3.5 h-3.5 text-[#8696a0]" title="Sent (Single Grey Tick - Recipient Offline)" />
-                            )
-                          )}
                         </div>
                       </div>
+                    );
+                  })}
+
+                  {/* REALTIME TYPING INDICATOR */}
+                  {isTyping && (
+                    <div className="flex items-center gap-2 p-2 rounded-xl bg-[#202c33]/80 w-fit text-[11px] text-[#00a884] font-bold animate-pulse">
+                      <span className="w-2 h-2 rounded-full bg-[#00a884]" />
+                      <span>{typingUser} is typing...</span>
                     </div>
-                  );
-                })}
+                  )}
 
-                {/* REALTIME TYPING INDICATOR */}
-                {isTyping && (
-                  <div className="flex items-center gap-2 p-2 rounded-xl bg-[#202c33]/80 w-fit text-[11px] text-[#00a884] font-bold animate-pulse">
-                    <span className="w-2 h-2 rounded-full bg-[#00a884]" />
-                    <span>{typingUser} is typing...</span>
-                  </div>
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* FLOATING SCROLL TO BOTTOM BUTTON */}
+                {showScrollBottomButton && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      playClick();
+                      shouldAutoScrollRef.current = true;
+                      scrollToBottom(true);
+                    }}
+                    className="absolute right-6 bottom-20 z-30 w-10 h-10 rounded-full bg-[#202c33] border border-[#374248] text-[#00a884] flex items-center justify-center shadow-2xl hover:bg-[#2a3942] transition-transform hover:scale-110 cursor-pointer"
+                    title="Scroll to latest messages"
+                  >
+                    <ChevronDown className="w-5 h-5" />
+                  </button>
                 )}
-
-                <div ref={messagesEndRef} />
               </div>
-
-              {/* FLOATING SCROLL TO BOTTOM BUTTON */}
-              {showScrollBottomButton && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    playClick();
-                    shouldAutoScrollRef.current = true;
-                    scrollToBottom(true);
-                  }}
-                  className="absolute right-6 bottom-20 z-30 w-10 h-10 rounded-full bg-[#202c33] border border-[#374248] text-[#00a884] flex items-center justify-center shadow-2xl hover:bg-[#2a3942] transition-transform hover:scale-110 cursor-pointer"
-                  title="Scroll to latest messages"
-                >
-                  <ChevronDown className="w-5 h-5" />
-                </button>
-              )}
 
               {/* ATTACHMENT PREVIEW STRIP */}
               {attachmentFile && (
-                <div className="px-4 py-2 bg-[#111b21] border-t border-[#202c33] flex items-center justify-between text-xs shrink-0">
+                <div className="px-4 py-2 bg-[#111b21] border-t border-[#202c33] flex items-center justify-between text-xs shrink-0 relative z-20">
                   <div className="flex items-center gap-2">
                     <ImageIcon className="w-4 h-4 text-[#00a884]" />
                     <span className="text-white truncate max-w-xs">{attachmentFile.name}</span>
@@ -1341,7 +1385,7 @@ const ChatPage = () => {
 
               {/* QUICK EMOJI BAR */}
               {showEmojiPicker && (
-                <div className="px-4 py-2 bg-[#111b21] border-t border-[#202c33] flex items-center gap-2 overflow-x-auto shrink-0">
+                <div className="px-4 py-2 bg-[#111b21] border-t border-[#202c33] flex items-center gap-2 overflow-x-auto shrink-0 relative z-20">
                   {quickEmojis.map((emoji) => (
                     <button
                       key={emoji}
