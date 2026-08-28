@@ -1180,15 +1180,18 @@ const ChatPage = () => {
                 </div>
               </div>
 
-              {/* MESSAGES CONTAINER (DIRECT FLEX-1 SCROLL STREAM MATCHING SIDEBAR) */}
-              <div className="flex-1 relative w-full min-h-0 bg-[#0b141a] overflow-hidden flex flex-col">
+              {/* MESSAGES CONTAINER WITH ABSOLUTE BOUNDED SCROLL VIEWPORT */}
+              <div className="flex-1 relative w-full min-h-0 bg-[#0b141a]">
+                {/* ABSOLUTE INSET-0 GUARANTEED BOUNDED SCROLL ENGINE */}
                 <div
                   ref={chatContainerRef}
                   onScroll={handleScroll}
-                  className="flex-1 min-h-0 w-full overflow-y-auto p-4 space-y-3 font-mono text-xs z-10 scrollbar-thin scrollbar-thumb-[#374248] scrollbar-track-transparent"
+                  className="absolute inset-0 overflow-y-auto p-4 space-y-3 font-mono text-xs z-10 scrollbar-thin scrollbar-thumb-[#374248] scrollbar-track-transparent"
                   style={{
                     backgroundImage: 'radial-gradient(rgba(0, 168, 132, 0.15) 0.5px, transparent 0.5px)',
                     backgroundSize: '24px 24px',
+                    overscrollBehavior: 'contain',
+                    WebkitOverflowScrolling: 'touch',
                   }}
                 >
                   {/* DATE STAMP DIVIDER */}
