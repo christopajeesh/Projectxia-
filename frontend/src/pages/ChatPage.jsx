@@ -294,7 +294,6 @@ const ChatPage = () => {
     if (e.changedTouches && e.changedTouches[0]) {
       const deltaX = e.changedTouches[0].clientX - touchStartXRef.current;
       const deltaY = e.changedTouches[0].clientY - touchStartYRef.current;
-      // If user swiped right starting near left screen edge (< 100px)
       if (deltaX > 80 && Math.abs(deltaY) < 60 && touchStartXRef.current < 100) {
         playClick();
         setActiveConv(null);
@@ -901,10 +900,12 @@ const ChatPage = () => {
   });
 
   const partner = activeConv ? getPartner(activeConv) : getPartner(null);
-  const partnerId = String(partner?.userId || partner?.id || '').toLowerCase();
-  const partnerEmail = String(partner?.email || '').toLowerCase();
+  const partnerId = String(partner?.userId || partner?.id || partner?._id || '').toLowerCase().trim();
+  const partnerEmail = String(partner?.email || '').toLowerCase().trim();
+
   const isRecipientOnline = Array.isArray(onlineUsers) && onlineUsers.some((u) => {
-    const strU = String(u).toLowerCase();
+    if (!u) return false;
+    const strU = String(u).toLowerCase().trim();
     return (partnerId && strU === partnerId) || (partnerEmail && strU === partnerEmail);
   });
 
@@ -1054,7 +1055,7 @@ const ChatPage = () => {
             </div>
           </div>
 
-          {/* CONVERSATIONS STREAM (GPU ACCELERATED & TOUCH SCROLLABLE) */}
+          {/* CONVERSATIONS STREAM (TOUCH & SCROLLABLE) */}
           <div
             className="flex-1 overflow-y-auto divide-y divide-[#202c33]/40 p-1.5 space-y-0.5 min-h-0 overscroll-contain"
             style={{
@@ -1134,7 +1135,7 @@ const ChatPage = () => {
         </div>
 
         {/* ============================================================ */}
-        {/* RIGHT: ACTIVE CHAT MESSAGES WINDOW (WITH TOUCH SWIPE BACK) */}
+        {/* RIGHT: ACTIVE CHAT MESSAGES WINDOW */}
         {/* ============================================================ */}
         <div
           onTouchStart={handleTouchStart}
@@ -1205,8 +1206,8 @@ const ChatPage = () => {
                 </div>
               </div>
 
-              {/* MESSAGES CONTAINER WITH STATIC BACKGROUND LAYER (ZERO REPAINT LAG) */}
-              <div className="flex-1 relative flex flex-col min-h-0 bg-[#0b141a]">
+              {/* MESSAGES CONTAINER WITH ABSOLUTE BOUNDED SCROLL VIEWPORT */}
+              <div className="flex-1 relative w-full h-full min-h-0 bg-[#0b141a] overflow-hidden">
                 {/* STATIC WALLPAPER PATTERN LAYER */}
                 <div
                   className="absolute inset-0 pointer-events-none opacity-40 z-0"
@@ -1216,11 +1217,11 @@ const ChatPage = () => {
                   }}
                 />
 
-                {/* LIGHTWEIGHT MESSAGES STREAM */}
+                {/* LIGHTWEIGHT ABSOLUTE BOUNDED MESSAGES STREAM */}
                 <div
                   ref={chatContainerRef}
                   onScroll={handleScroll}
-                  className="flex-1 overflow-y-auto p-4 space-y-3 font-mono text-xs relative z-10 min-h-0 overscroll-contain"
+                  className="absolute inset-0 overflow-y-auto p-4 space-y-3 font-mono text-xs z-10 overscroll-contain"
                   style={{
                     WebkitOverflowScrolling: 'touch',
                     touchAction: 'pan-y',
@@ -1359,7 +1360,7 @@ const ChatPage = () => {
                       shouldAutoScrollRef.current = true;
                       scrollToBottom(true);
                     }}
-                    className="absolute right-6 bottom-20 z-30 w-10 h-10 rounded-full bg-[#202c33] border border-[#374248] text-[#00a884] flex items-center justify-center shadow-2xl hover:bg-[#2a3942] transition-transform hover:scale-110 cursor-pointer"
+                    className="absolute right-6 bottom-6 z-30 w-10 h-10 rounded-full bg-[#202c33] border border-[#374248] text-[#00a884] flex items-center justify-center shadow-2xl hover:bg-[#2a3942] transition-transform hover:scale-110 cursor-pointer"
                     title="Scroll to latest messages"
                   >
                     <ChevronDown className="w-5 h-5" />
