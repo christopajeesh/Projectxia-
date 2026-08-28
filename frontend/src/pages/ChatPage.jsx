@@ -699,12 +699,12 @@ const ChatPage = () => {
       let recorder;
       try {
         if (typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported) {
-          if (MediaRecorder.isTypeSupported('audio/mp4')) {
-            recorder = new MediaRecorder(stream, { mimeType: 'audio/mp4' });
-          } else if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
+          if (MediaRecorder.isTypeSupported('audio/webm;codecs=opus')) {
             recorder = new MediaRecorder(stream, { mimeType: 'audio/webm;codecs=opus' });
           } else if (MediaRecorder.isTypeSupported('audio/webm')) {
             recorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+          } else if (MediaRecorder.isTypeSupported('audio/mp4')) {
+            recorder = new MediaRecorder(stream, { mimeType: 'audio/mp4' });
           } else {
             recorder = new MediaRecorder(stream);
           }
@@ -789,39 +789,6 @@ const ChatPage = () => {
     audioChunksRef.current = [];
   };
 
-  const generateSyntheticVoiceNote = () => {
-    return new Promise((resolve) => {
-      try {
-        const AudioCtx = window.AudioContext || window.webkitAudioContext;
-        if (!AudioCtx) return resolve('');
-        const ctx = new AudioCtx();
-        const osc = ctx.createOscillator();
-        const dest = ctx.createMediaStreamDestination();
-        osc.frequency.value = 440;
-        osc.connect(dest);
-        const rec = new MediaRecorder(dest.stream);
-        const chunks = [];
-        rec.ondataavailable = (e) => {
-          if (e.data && e.data.size > 0) chunks.push(e.data);
-        };
-        rec.onstop = () => {
-          const blob = new Blob(chunks, { type: 'audio/webm' });
-          const r = new FileReader();
-          r.onloadend = () => resolve(r.result);
-          r.readAsDataURL(blob);
-        };
-        rec.start();
-        osc.start();
-        setTimeout(() => {
-          osc.stop();
-          rec.stop();
-        }, 500);
-      } catch (e) {
-        resolve('');
-      }
-    });
-  };
-
   const stopAndSendRecording = async () => {
     playClick();
     cleanupAudioContext();
@@ -834,7 +801,7 @@ const ChatPage = () => {
     const recorder = mediaRecorderRef.current;
 
     const createAndSendVoiceNote = async (base64Audio) => {
-      if (!activeConv) return;
+      if (!activeConv || !base64Audio) return;
       const currentUserId = String(user?._id || user?.id || 'user_guest');
       const currentUserEmail = String(user?.email || '').toLowerCase();
       const tempId = `temp_voice_${Date.now()}`;
@@ -909,29 +876,28 @@ const ChatPage = () => {
       }
     };
 
-    if (recorder && recorder.state !== 'inactive') {
-      recorder.onstop = () => {
-        const mimeType = recorder.mimeType || 'audio/webm';
+    const processAudioChunks = () => {
+      if (audioChunksRef.current && audioChunksRef.current.length > 0) {
+        const mimeType = recorder?.mimeType || 'audio/webm';
         const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         if (audioBlob.size > 0) {
           const reader = new FileReader();
           reader.onloadend = () => createAndSendVoiceNote(reader.result);
           reader.readAsDataURL(audioBlob);
-        } else {
-          generateSyntheticVoiceNote().then((base64) => createAndSendVoiceNote(base64));
         }
-        if (recorder.stream) {
+      }
+      if (recorder && recorder.stream) {
+        try {
           recorder.stream.getTracks().forEach((track) => track.stop());
-        }
-      };
+        } catch (e) {}
+      }
+    };
+
+    if (recorder && recorder.state !== 'inactive') {
+      recorder.onstop = processAudioChunks;
       recorder.stop();
-    } else if (audioChunksRef.current && audioChunksRef.current.length > 0) {
-      const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-      const reader = new FileReader();
-      reader.onloadend = () => createAndSendVoiceNote(reader.result);
-      reader.readAsDataURL(audioBlob);
     } else {
-      generateSyntheticVoiceNote().then((base64) => createAndSendVoiceNote(base64));
+      processAudioChunks();
     }
   };
 
