@@ -12,7 +12,8 @@ export const initChatSocket = (io) => {
         const uid = String(user.id || user._id || user.email);
         const email = String(user.email || '').toLowerCase().trim();
 
-        onlineUsers.set(uid, socket.id);
+        if (uid) onlineUsers.set(uid, socket.id);
+        if (email) onlineUsers.set(email, socket.id);
         socket.userId = uid;
         socket.userEmail = email;
         socket.userName = user.name || 'Verified User';

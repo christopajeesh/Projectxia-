@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Shield, Lock, Terminal, Cpu, CheckCircle2, Heart, Award } from 'lucide-react';
 import TermsModal from './TermsModal';
 
 const Footer = () => {
+  const location = useLocation();
   const [showTerms, setShowTerms] = useState(false);
+
+  if (location.pathname === '/chat') return null;
 
   return (
     <footer className="relative border-t border-white/10 bg-[#030303] overflow-hidden font-sans">
