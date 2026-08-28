@@ -679,17 +679,21 @@ const ChatPage = () => {
       playClick();
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert('Voice note recording is not supported in this browser. Please use Chrome, Safari, or Edge.');
         return;
       }
 
-      const stream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        },
-      });
+      let stream;
+      try {
+        stream = await navigator.mediaDevices.getUserMedia({
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+          },
+        });
+      } catch (streamErr) {
+        // Fallback for browsers/devices that reject constraint objects
+        stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      }
 
       audioChunksRef.current = [];
 
@@ -748,8 +752,7 @@ const ChatPage = () => {
         setRecordingTime((prev) => prev + 1);
       }, 1000);
     } catch (err) {
-      console.error('Microphone error:', err);
-      alert('Microphone permission required! Please tap Allow when your browser asks for microphone access.');
+      console.error('Microphone access blocked or denied:', err);
     }
   };
 
