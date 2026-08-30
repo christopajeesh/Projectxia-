@@ -51,7 +51,7 @@ export const getAdminMetrics = async (req, res) => {
     let totalProjects = 0;
     let verifiedCreators = 0;
     let totalAgencyLeads = 0;
-    let totalIntrusionsBlocked = 842;
+    let totalIntrusionsBlocked = 0;
     let auditLogs = [];
     let agencyLeads = [];
 
@@ -63,7 +63,7 @@ export const getAdminMetrics = async (req, res) => {
       });
       totalAgencyLeads = await AgencyLead.countDocuments();
       const blockedCount = await AuditLog.countDocuments({ threatLevel: 'CRITICAL_BLOCKED' });
-      totalIntrusionsBlocked += blockedCount;
+      totalIntrusionsBlocked = blockedCount;
       auditLogs = await AuditLog.find().sort({ createdAt: -1 }).limit(100);
       agencyLeads = await AgencyLead.find().sort({ createdAt: -1 }).limit(50);
     } catch (dbErr) {
@@ -92,7 +92,7 @@ export const getAdminMetrics = async (req, res) => {
         totalVolumeINR,
         totalAgencyLeads,
         superAdminEmail: 'theprojectxia@gmail.com',
-        activeSocketNodes: 14,
+        activeSocketNodes: 1,
         systemHealth: '100% SECURE & OPERATIONAL',
         complianceShield: 'INDIA CYBER DECREE 2026 ACTIVE',
       },

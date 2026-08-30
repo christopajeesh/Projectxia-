@@ -198,7 +198,7 @@ export const getDashboardStats = async (req, res) => {
         totalSaved: savedProjects.length,
         totalPurchased: purchasedProjects.length,
         reputationScore: user?.reputationScore || 98,
-        activeChats: (memoryStore.conversations || []).length || 1,
+        activeChats: (memoryStore.conversations || []).length || 0,
         kycStatus: user?.verificationLevel || 'Tier 1 - KYC Verified',
       },
       uploadedProjects: userUploaded || [],

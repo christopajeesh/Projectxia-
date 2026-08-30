@@ -142,7 +142,7 @@ const CustomDevModal = ({ isOpen, onClose }) => {
                     <input
                       type="text"
                       required
-                      placeholder="e.g. Rohan Sharma"
+                      placeholder="Enter your full name"
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                       className="w-full bg-black/80 border border-slate-700 focus:border-purple-400 rounded-xl px-3 py-2 text-white focus:outline-none"

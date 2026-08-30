@@ -91,24 +91,20 @@ const UploadProjectPage = () => {
   const videoInputRef = useRef(null);
 
   // Uploaded media states
-  const [uploadedScreenshots, setUploadedScreenshots] = useState([
-    'https://images.unsplash.com/photo-1550751827-4bd374c3f58b?w=1000&auto=format&fit=crop&q=80',
-  ]);
-  const [uploadedVideoUrl, setUploadedVideoUrl] = useState(
-    'https://assets.mixkit.co/videos/preview/mixkit-digital-animation-of-screens-with-charts-and-data-31911-large.mp4'
-  );
+  const [uploadedScreenshots, setUploadedScreenshots] = useState([]);
+  const [uploadedVideoUrl, setUploadedVideoUrl] = useState('');
   const [videoFileName, setVideoFileName] = useState('');
 
   const [formData, setFormData] = useState({
     title: '',
     tagline: '',
     description: '',
-    category: 'AI & Data Science (AI / ML)',
+    category: 'Computer Science (CSE / IT)',
     projectType: 'Hardware + Software',
-    price: '2999',
-    techStack: 'PyTorch, Python 3.10, FastAPI, React',
-    githubUrl: 'https://github.com/projectxia',
-    documentation: '# Project Runbook\n\n```bash\nnpm install\nnpm run dev\n```',
+    price: '',
+    techStack: '',
+    githubUrl: '',
+    documentation: '',
   });
 
   const categories = [

@@ -1,21 +1,7 @@
 import crypto from 'crypto';
 
 export const licenseStore = {
-  issuedLicenses: [
-    {
-      licenseKey: 'XIA-LIC-A98B2C-2026',
-      orderId: 'XIA-ORD-98234',
-      projectId: 'proj_001_retina_ai',
-      projectTitle: 'DiabeticRetina-AI: Deep CNN Retinopathy Node',
-      buyerName: 'Rohan Sharma',
-      buyerEmail: 'rohan.buyer@projectxia.io',
-      buyerInstitution: 'IIT Bombay / Capstone Innovation Group',
-      licenseType: 'Commercial Full Rights + IEEE Academic License',
-      sha256Stamp: '9f86d081884c7d659a2feaa0c55ad015a3bf4f1b2b0b822cd15d6c15b0f00a08',
-      issuedAt: new Date(Date.now() - 1000 * 60 * 60 * 24 * 2),
-      isVerified: true,
-    },
-  ],
+  issuedLicenses: [],
 };
 
 // @desc    Generate 15-Minute Expiring Secure Download Token
