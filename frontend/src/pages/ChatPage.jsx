@@ -239,10 +239,19 @@ const ChatPage = () => {
       setTypingUser(userName || 'Seller');
     };
 
-    const handleMessagesRead = ({ conversationId }) => {
-      setMessages((prev) =>
-        prev.map((m) => ({ ...m, isRead: true }))
-      );
+    const handleMessagesRead = ({ conversationId, readerId, readerEmail }) => {
+      const myId = String(user?._id || user?.id || '').toLowerCase().trim();
+      const myEmail = String(user?.email || '').toLowerCase().trim();
+      const rId = String(readerId || '').toLowerCase().trim();
+      const rEmail = String(readerEmail || '').toLowerCase().trim();
+
+      const isReadByOther = (rId && rId !== myId) || (rEmail && rEmail !== myEmail) || (!readerId && !readerEmail);
+
+      if (isReadByOther) {
+        setMessages((prev) =>
+          prev.map((m) => ({ ...m, isRead: true }))
+        );
+      }
     };
 
     const handleMessageDeleted = ({ messageId }) => {

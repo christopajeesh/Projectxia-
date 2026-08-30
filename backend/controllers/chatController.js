@@ -329,11 +329,10 @@ export const markMessagesRead = async (req, res) => {
     const userEmail = String(req.user?.email || '').toLowerCase().trim();
 
     (memoryStore.messages || []).forEach((m) => {
-      if (m.conversationId === conversationId && (
-        String(m.receiverId) === userId ||
-        (m.receiverEmail && m.receiverEmail.toLowerCase() === userEmail) ||
-        (m.sender?.id && String(m.sender.id) !== userId)
-      )) {
+      const sId = String(m.sender?.id || m.sender?._id || '').toLowerCase().trim();
+      const sEmail = String(m.sender?.email || '').toLowerCase().trim();
+
+      if (m.conversationId === conversationId && sId !== userId && sEmail !== userEmail) {
         m.isRead = true;
       }
     });
@@ -343,12 +342,8 @@ export const markMessagesRead = async (req, res) => {
         {
           conversationId,
           isRead: false,
-          $or: [
-            { receiverId: userId },
-            { receiverEmail: userEmail },
-            { 'sender.id': { $ne: userId } },
-            { 'sender.email': { $ne: userEmail } }
-          ]
+          'sender.id': { $ne: userId },
+          'sender.email': { $ne: userEmail }
         },
         { $set: { isRead: true, readAt: new Date() } }
       );

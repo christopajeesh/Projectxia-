@@ -88,20 +88,20 @@ export const initChatSocket = (io) => {
     });
 
     // WhatsApp Read Receipts (Blue Ticks trigger when recipient views conversation)
-    socket.on('mark_read', ({ conversationId, userId }) => {
+    socket.on('mark_read', ({ conversationId, userId, userEmail }) => {
       if (!conversationId) return;
-      const strUser = String(userId || '').toLowerCase().trim();
+      const strUser = String(userId || socket.userId || '').toLowerCase().trim();
+      const strEmail = String(userEmail || socket.userEmail || '').toLowerCase().trim();
+
       (memoryStore.messages || []).forEach((m) => {
-        const rId = String(m.receiverId || '').toLowerCase().trim();
-        const rEmail = String(m.receiverEmail || '').toLowerCase().trim();
         const sId = String(m.sender?.id || m.sender?._id || '').toLowerCase().trim();
         const sEmail = String(m.sender?.email || '').toLowerCase().trim();
 
-        if (m.conversationId === conversationId && (rId === strUser || rEmail === strUser || (sId && sId !== strUser && sEmail !== strUser))) {
+        if (m.conversationId === conversationId && (sId !== strUser && sEmail !== strEmail)) {
           m.isRead = true;
         }
       });
-      io.to(String(conversationId)).emit('messages_read', { conversationId, userId });
+      io.to(String(conversationId)).emit('messages_read', { conversationId, readerId: strUser, readerEmail: strEmail });
     });
 
     // Handle single message deletion in real-time
