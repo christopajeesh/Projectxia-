@@ -63,14 +63,14 @@ const Navbar = () => {
       protected: true,
     },
     {
-      name: 'Build Custom Software',
+      name: 'Custom Software Projects',
       subtitle: 'Hire Our Dev Team',
       isSpecialAction: true,
       icon: Lightbulb,
       accentColor: 'amber',
       badge: 'DEV TEAM',
       forWhom: 'For Custom Requirements',
-      description: 'Need a custom app, thesis project, or AI tool built from scratch? Request the ProjectXia engineering team with a guaranteed 12-hour callback.',
+      description: 'We turn your ideas into production-ready custom software projects with our engineering team.',
       protected: false,
     },
     {
@@ -216,7 +216,7 @@ const Navbar = () => {
               <span>Plagiarism Check</span>
             </button>
 
-            {/* Tab 4: Build Custom Software */}
+            {/* Tab 4: Custom Software Projects */}
             <button
               type="button"
               onClick={() => {
@@ -226,6 +226,7 @@ const Navbar = () => {
               className="px-3.5 py-1.5 rounded-full transition-all cursor-pointer flex items-center gap-1.5 text-xs font-medium bg-white/[0.03] hover:bg-white/10 border border-white/10 text-neutral-200 hover:text-white"
             >
               <Lightbulb className="w-3.5 h-3.5 text-amber-400 animate-pulse" />
+              <span>Custom Software Projects</span>
             </button>
           </nav>
 
@@ -438,7 +439,7 @@ const Navbar = () => {
 
             <div className="pt-3 flex items-center justify-between border-t border-slate-800">
               <span className="text-[11px] text-slate-400">
-                Need help deciding? Click <strong>Build Custom</strong> to talk to our engineers.
+                Need help deciding? Click <strong>Custom Software Projects</strong> to talk to our engineers.
               </span>
               <button
                 onClick={() => setShowGuideModal(false)}

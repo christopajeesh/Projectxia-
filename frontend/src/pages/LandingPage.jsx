@@ -374,7 +374,7 @@ const LandingPage = () => {
                 </p>
               </div>
 
-              {/* 4. Build Custom Card (Vivid Gold & Amber) */}
+              {/* 4. Custom Software Projects Card (Vivid Gold & Amber) */}
               <div
                 onClick={() => {
                   playSuccess();
@@ -392,10 +392,10 @@ const LandingPage = () => {
                   </span>
                 </div>
                 <h3 className="font-display font-black text-xl text-white group-hover:text-amber-300 transition-colors relative z-10 mb-1.5 drop-shadow-md">
-                  4. Build Custom
+                  4. Custom Software Projects
                 </h3>
                 <p className="text-xs sm:text-sm text-white font-bold leading-relaxed relative z-10">
-                  Hire our in-house engineering team with guaranteed 12-hour callback.
+                  We turn your ideas into production-ready custom software projects.
                 </p>
               </div>
             </div>

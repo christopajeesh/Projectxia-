@@ -25,78 +25,35 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import confetti from 'canvas-confetti';
 
-// Strict Validator for Real Phone Number, Email, and Information
+// Standard Validator for Full Name, Phone No, and Email
 const validateClientInput = (name, phone, email, requirements) => {
-  // 1. Name Check
+  // 1. Full Name Check
   const trimmedName = String(name || '').trim();
-  if (trimmedName.length < 2) {
-    return 'Please enter your genuine full name.';
-  }
-  if (/^[^a-zA-Z\s]+$/.test(trimmedName) || /^(asdf|qwerty|test|xyz|abc|user|unknown)$/i.test(trimmedName)) {
-    return 'Please enter a genuine name (not random letters).';
+  if (trimmedName.length < 1) {
+    return 'Please enter your full name.';
   }
 
-  // 2. Phone / WhatsApp Number Check
+  // 2. Phone No Check
   const rawPhone = String(phone || '').replace(/[^0-9]/g, '');
-  if (!rawPhone || rawPhone.length < 10 || rawPhone.length > 15) {
-    return 'Please enter a valid 10-digit mobile or WhatsApp number.';
-  }
-
-  const isIndian10 = rawPhone.length === 10;
-  const isIndian12 = rawPhone.length === 12 && rawPhone.startsWith('91');
-  const standard10 = isIndian12 ? rawPhone.slice(2) : (isIndian10 ? rawPhone : null);
-
-  if (standard10 && !/^[6-9]\d{9}$/.test(standard10)) {
-    return 'Indian mobile numbers must start with 6, 7, 8, or 9 and have 10 digits.';
-  }
-
-  // Anti-Dummy / Anti-Repeated Number Checks
-  const fakeSequences = [
-    '0000000000', '1111111111', '2222222222', '3333333333', '4444444444',
-    '5555555555', '6666666666', '7777777777', '8888888888', '9999999999',
-    '1234567890', '0987654321', '9876543210', '0123456789', '1212121212',
-    '9898989898', '9090909090', '7878787878', '9999900000', '1234512345'
-  ];
-
-  if (fakeSequences.some(seq => rawPhone.includes(seq))) {
-    return 'Please provide your genuine, active phone number (test numbers like 1234567890 are blocked).';
-  }
-
-  const uniqueDigits = new Set(rawPhone.split('')).size;
-  if (uniqueDigits < 4) {
-    return 'Please enter a real phone number with active digits.';
+  if (!rawPhone || rawPhone.length < 7) {
+    return 'Please enter a valid phone number.';
   }
 
   // 3. Email Check
   const trimmedEmail = String(email || '').trim().toLowerCase();
   if (!trimmedEmail) {
-    return 'Please enter your active email ID so our engineering team can send project blueprints.';
+    return 'Please enter your email address.';
   }
 
-  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(trimmedEmail)) {
-    return 'Please enter a valid email address (e.g. name@gmail.com).';
+    return 'Please enter a valid email address.';
   }
 
-  const [localPart, domainPart] = trimmedEmail.split('@');
-  if (!localPart || localPart.length < 3) {
-    return 'Email username is too short. Please enter your real email.';
-  }
-
-  const disposableDomains = [
-    'tempmail.com', 'mailinator.com', '10minutemail.com', 'guerrillamail.com',
-    'throwawaymail.com', 'yopmail.com', 'fakeinbox.com', 'trashmail.com',
-    'temp-mail.org', 'sharklasers.com', 'getairmail.com', 'dispostable.com'
-  ];
-
-  if (disposableDomains.includes(domainPart)) {
-    return 'Disposable/temp emails are not allowed. Please use your real Gmail, Outlook, or official email.';
-  }
-
-  // 4. Requirements Quality Check
+  // 4. Requirements Check
   const trimmedReq = String(requirements || '').trim();
-  if (trimmedReq.length < 4) {
-    return 'Please briefly describe what software/hardware you want to build (features, tech, or goals).';
+  if (trimmedReq.length < 2) {
+    return 'Please describe your project requirements.';
   }
 
   return null;
@@ -110,7 +67,7 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
   const [submittedResult, setSubmittedResult] = useState(null);
   const [clientError, setClientError] = useState('');
 
-  // Clean Form State
+  // Blank initial form state
   const [formData, setFormData] = useState({
     name: user?.name || '',
     email: user?.email || '',
@@ -124,13 +81,18 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
   });
 
   React.useEffect(() => {
-    if (isOpen && user) {
-      setFormData((prev) => ({
-        ...prev,
-        name: prev.name || user.name || '',
-        email: prev.email || user.email || '',
-        mobile: prev.mobile || user.mobile || '',
-      }));
+    if (isOpen) {
+      setFormData({
+        name: user?.name || '',
+        email: user?.email || '',
+        mobile: user?.mobile || '',
+        projectTitle: '',
+        requirements: '',
+        department: 'Computer Science (CSE / IT)',
+        targetDeadline: '2-3 Weeks (Standard)',
+        budgetRange: '₹15,000 - ₹30,000',
+        preferredContact: 'WHATSAPP_AND_CALL',
+      });
     }
   }, [isOpen, user]);
 
@@ -353,14 +315,14 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
                   <div>
                     <label className="text-slate-200 block mb-1.5 font-bold text-xs flex items-center gap-1">
                       <User className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Your Full Name *</span>
+                      <span>Full Name *</span>
                     </label>
                     <input
                       type="text"
                       required
                       value={formData.name}
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      placeholder="e.g. Alex Johnson"
+                      placeholder="Full Name"
                       className="w-full bg-gray-900/90 border border-slate-700 focus:border-cyan-400 rounded-xl px-3.5 py-2.5 text-white placeholder:text-slate-500 focus:outline-none transition-all"
                     />
                   </div>
@@ -368,14 +330,14 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
                   <div>
                     <label className="text-slate-200 block mb-1.5 font-bold text-xs flex items-center gap-1">
                       <Phone className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Mobile Contact Number *</span>
+                      <span>Phone No *</span>
                     </label>
                     <input
                       type="tel"
                       required
                       value={formData.mobile}
                       onChange={(e) => setFormData({ ...formData, mobile: e.target.value })}
-                      placeholder="e.g. 9876543210"
+                      placeholder="Phone No"
                       className="w-full bg-gray-900/90 border border-slate-700 focus:border-cyan-400 rounded-xl px-3.5 py-2.5 text-white placeholder:text-slate-500 focus:outline-none transition-all"
                     />
                   </div>
@@ -385,14 +347,14 @@ const CustomSoftwareRequestModal = ({ isOpen, onClose, onInquirySubmitted }) => 
                   <div>
                     <label className="text-slate-200 block mb-1.5 font-bold text-xs flex items-center gap-1">
                       <Mail className="w-3.5 h-3.5 text-cyan-400" />
-                      <span>Email Address *</span>
+                      <span>Email *</span>
                     </label>
                     <input
                       type="email"
                       required
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                      placeholder="e.g. alex@gmail.com"
+                      placeholder="Email ID"
                       className="w-full bg-gray-900/90 border border-slate-700 focus:border-cyan-400 rounded-xl px-3.5 py-2.5 text-white placeholder:text-slate-500 focus:outline-none transition-all"
                     />
                   </div>

@@ -34,64 +34,31 @@ export const submitCustomInquiry = async (req, res) => {
       ndaSigned = true,
     } = req.body || {};
 
-    // Server-Side Anti-Fake / Anti-Spam Validation
+    // Standard Server-Side Validation
     const trimmedName = String(clientName || '').trim();
-    if (trimmedName && (trimmedName.length < 2 || /^(asdf|qwerty|test|xyz|abc|user|unknown)$/i.test(trimmedName))) {
+    if (!trimmedName) {
       return res.status(400).json({
         success: false,
-        message: 'Please provide a genuine full name.',
+        message: 'Please enter your full name.',
       });
     }
 
     // Validate Phone Number
     const rawPhone = String(clientMobile || '').replace(/[^0-9]/g, '');
-    if (!rawPhone || rawPhone.length < 10 || rawPhone.length > 15) {
+    if (!rawPhone || rawPhone.length < 7) {
       return res.status(400).json({
         success: false,
-        message: 'Please enter a valid 10-digit mobile or WhatsApp number.',
-      });
-    }
-
-    const fakeSequences = [
-      '0000000000', '1111111111', '2222222222', '3333333333', '4444444444',
-      '5555555555', '6666666666', '7777777777', '8888888888', '9999999999',
-      '1234567890', '0987654321', '9876543210', '0123456789', '1212121212',
-      '9898989898', '9090909090', '7878787878', '9999900000', '1234512345'
-    ];
-    if (fakeSequences.some(seq => rawPhone.includes(seq)) || new Set(rawPhone.split('')).size < 4) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please provide an active, genuine phone number (dummy/test numbers are blocked).',
+        message: 'Please enter a valid phone number.',
       });
     }
 
     // Validate Email Address
     const trimmedEmail = String(clientEmail || '').trim().toLowerCase();
-    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!trimmedEmail || !emailRegex.test(trimmedEmail)) {
       return res.status(400).json({
         success: false,
-        message: 'Please enter a valid email address (e.g. yourname@gmail.com).',
-      });
-    }
-
-    const [localPart, domainPart] = trimmedEmail.split('@');
-    if (!localPart || localPart.length < 3) {
-      return res.status(400).json({
-        success: false,
-        message: 'Please enter a valid personal or university email address.',
-      });
-    }
-
-    const disposableDomains = [
-      'tempmail.com', 'mailinator.com', '10minutemail.com', 'guerrillamail.com',
-      'throwawaymail.com', 'yopmail.com', 'fakeinbox.com', 'trashmail.com',
-      'temp-mail.org', 'sharklasers.com', 'getairmail.com', 'dispostable.com'
-    ];
-    if (disposableDomains.includes(domainPart)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Temporary/disposable email addresses are not accepted. Please use your genuine email.',
+        message: 'Please enter a valid email address.',
       });
     }
 
